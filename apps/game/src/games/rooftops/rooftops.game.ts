@@ -8,6 +8,7 @@ export const rooftops: IGameDefinition = {
   name: "Glassline",
   // The iOS version's page in the site's catalogue
   siteGame: "mirrors-edge",
+  playUrl: "https://play.mooncellar.space",
   scoreOrder: "asc",
   scoreUnit: "ms",
   // The game's levels, and player levels `u<levelId>v<version>` (levelBoard)
