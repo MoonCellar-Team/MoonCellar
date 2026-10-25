@@ -79,6 +79,14 @@
     }
   }
 
+  &__play {
+    align-self: flex-start;
+
+    @include mediaMd {
+      align-self: center;
+    }
+  }
+
   &__title {
     display: flex;
     flex-direction: column;

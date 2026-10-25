@@ -28,6 +28,7 @@ export const GameDefinitionSchema = z.object({
   replayRequired: z.boolean(),
   // The game's page on the site (the API's catalogue slug), where its achievements are shown
   siteGame: z.string().nullable(),
+  playUrl: z.string().url().nullable(),
   achievements: z.number().int().nonnegative(),
 });
 export type IGameDefinitionInfo = z.infer<typeof GameDefinitionSchema>;

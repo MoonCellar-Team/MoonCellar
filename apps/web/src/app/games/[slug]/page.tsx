@@ -1,5 +1,8 @@
 import { GamePage } from "@/src/lib/pages/GamePage";
-import { getPortGameAchievements } from "@/src/lib/entities/port-achievement/api/port-achievement.loaders";
+import {
+  getPortGameAchievements,
+  getSitePort,
+} from "@/src/lib/entities/port-achievement/api/port-achievement.loaders";
 import { commentsAPI, gamesApi } from "@/src/lib/shared/api";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -56,6 +59,10 @@ const getReviews = cache(async (gameId: string) =>
 // The MoonCellar Team port of this game, if there is one: the Achievements block opens its achievements
 const getPortAchievements = cache(async (slug: string) =>
   getPortGameAchievements(slug).catch(() => undefined)
+);
+
+const getPort = cache(async (slug: string) =>
+  getSitePort(slug).catch(() => undefined)
 );
 
 export async function generateMetadata({
@@ -129,11 +136,12 @@ const GamePageIndex = async ({ params }: { params: any }) => {
     notFound();
   }
 
-  const [stats, reviews, related, portAchievements] = await Promise.all([
+  const [stats, reviews, related, portAchievements, port] = await Promise.all([
     getStats(game._id),
     getReviews(game._id),
     getRelated(game._id),
     getPortAchievements(game.slug),
+    getPort(game.slug),
   ]);
 
   return (
@@ -152,6 +160,7 @@ const GamePageIndex = async ({ params }: { params: any }) => {
         reviews={reviews}
         related={related}
         portAchievements={portAchievements}
+        port={port}
       />
     </>
   );
