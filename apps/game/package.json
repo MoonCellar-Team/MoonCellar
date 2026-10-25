@@ -20,6 +20,7 @@
     "@nestjs/mongoose": "^11.0.4",
     "@nestjs/platform-express": "^11.1.28",
     "@nestjs/swagger": "11.4.2",
+    "@nestjs/throttler": "^6.7.1",
     "@willsoto/nestjs-prometheus": "^6.1.0",
     "express": "^5.2.1",
     "mongoose": "8.24.1",

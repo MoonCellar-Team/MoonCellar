@@ -33,3 +33,6 @@ account }` once — the code is deleted after that. An expired code answers 410,
   game off at its next check. The game service (`apps/game`) asks this endpoint instead of
   holding the JWT key itself, and `apps/game` repeats the device sign-in under `/account/*`
   ([game-service.md](game-service.md)), so a game needs only `game.mooncellar.space`.
+- The device sign-in and introspection routes have their own, stricter rate limits on both hosts,
+  and the game service never asks about a token that is not a game JWT; the numbers are in
+  [rate-limits.md](rate-limits.md).

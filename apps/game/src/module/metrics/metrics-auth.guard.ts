@@ -4,6 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
+import { isBearerToken } from "../../shared/bearer-token";
 
 @Injectable()
 export class MetricsAuthGuard implements CanActivate {
@@ -12,7 +13,7 @@ export class MetricsAuthGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const header: string | undefined = req.headers?.authorization;
 
-    if (!token || header !== `Bearer ${token}`) {
+    if (!isBearerToken(header, token)) {
       throw new UnauthorizedException("A valid metrics token is required");
     }
 

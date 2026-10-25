@@ -15,6 +15,7 @@ import {
   ApiOperation,
   ApiTags,
 } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 import {
   GameAccountDto,
   GameDeviceCodeDto,
@@ -24,6 +25,10 @@ import {
 } from "../../shared/zod/dto/game.dto";
 import { AccountService } from "./account.service";
 import { GameTokenGuard, type IGameRequest } from "./game-token.guard";
+import {
+  DEVICE_POLL_THROTTLE,
+  DEVICE_SIGN_IN_THROTTLE,
+} from "../../shared/throttle";
 
 @ApiTags("Account")
 @Controller("account")
@@ -31,6 +36,7 @@ export class AccountController {
   constructor(private readonly accounts: AccountService) {}
 
   @Post("device")
+  @Throttle(DEVICE_SIGN_IN_THROTTLE)
   @ApiOperation({
     summary: "Start signing in: a code to confirm at mooncellar.space/link",
   })
@@ -41,6 +47,7 @@ export class AccountController {
   }
 
   @Post("device/token")
+  @Throttle(DEVICE_POLL_THROTTLE)
   @ApiOperation({
     summary: "Poll the sign-in: pending until confirmed, then the game token",
   })

@@ -1,9 +1,12 @@
+import { createHash, timingSafeEqual } from "node:crypto";
 import {
   type CanActivate,
   type ExecutionContext,
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
+
+const digest = (value: string) => createHash("sha256").update(value).digest();
 
 @Injectable()
 export class MetricsAuthGuard implements CanActivate {
@@ -12,7 +15,10 @@ export class MetricsAuthGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const header: string | undefined = req.headers?.authorization;
 
-    if (!token || header !== `Bearer ${token}`) {
+    if (
+      !token ||
+      !timingSafeEqual(digest(header ?? ""), digest(`Bearer ${token}`))
+    ) {
       throw new UnauthorizedException("A valid metrics token is required");
     }
 

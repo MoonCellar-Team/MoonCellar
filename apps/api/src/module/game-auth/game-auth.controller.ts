@@ -18,6 +18,7 @@ import {
   ApiOperation,
   ApiTags,
 } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 import {
   GameDeviceApproveRequestDto,
   GameDeviceCodeDto,
@@ -31,6 +32,11 @@ import {
 } from "../../shared/zod/dto/game-auth.dto";
 import type { IAuthorizedRequest } from "../comments/types/community.type";
 import { GameAuthService } from "./game-auth.service";
+import {
+  DEVICE_POLL_THROTTLE,
+  DEVICE_SIGN_IN_THROTTLE,
+  INTROSPECT_THROTTLE,
+} from "../../shared/throttle";
 
 @ApiTags("Game sign-in")
 @Controller("auth/game")
@@ -38,6 +44,7 @@ export class GameAuthController {
   constructor(private readonly gameAuth: GameAuthService) {}
 
   @Post("device")
+  @Throttle(DEVICE_SIGN_IN_THROTTLE)
   @ApiOperation({
     summary: "Start signing in a game device: a code to confirm on the site",
   })
@@ -48,6 +55,7 @@ export class GameAuthController {
   }
 
   @Post("device/token")
+  @Throttle(DEVICE_POLL_THROTTLE)
   @ApiOperation({
     summary: "Poll a device code: pending until confirmed, then the game token",
   })
@@ -58,6 +66,7 @@ export class GameAuthController {
   }
 
   @Get("device/:userCode")
+  @Throttle(DEVICE_SIGN_IN_THROTTLE)
   @ApiOperation({ summary: "The device waiting for this code" })
   @ApiOkResponse({ type: GameDeviceLinkDto })
   @ApiCookieAuth()
@@ -67,6 +76,7 @@ export class GameAuthController {
   }
 
   @Post("device/approve")
+  @Throttle(DEVICE_SIGN_IN_THROTTLE)
   @ApiOperation({ summary: "Confirm a device code with the signed-in account" })
   @ApiOkResponse({ type: GameDeviceLinkDto })
   @ApiCookieAuth()
@@ -102,6 +112,7 @@ export class GameAuthController {
   }
 
   @Post("token/introspect")
+  @Throttle(INTROSPECT_THROTTLE)
   @ApiOperation({ summary: "Whether a game token is active, and whose it is" })
   @ApiOkResponse({ type: GameTokenIntrospectionDto })
   @HttpCode(HttpStatus.OK)

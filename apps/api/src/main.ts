@@ -13,7 +13,7 @@ import { SocketIoAdapter } from "./shared/socket-io.adapter";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.set("trust proxy", true);
+  app.set("trust proxy", 1);
 
   app.useStaticAssets(`${rootDir}/uploads/photos`);
   app.use(cookieParser());

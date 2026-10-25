@@ -29,7 +29,7 @@ export class GameTokenGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException("Sign in to MoonCellar in the game");
     }
-    const account = await this.accounts.accountOf(token);
+    const account = await this.accounts.accountOf(token, request.ip ?? "");
     if (!account) {
       throw new UnauthorizedException(
         "This game is signed out. Sign in to MoonCellar again"

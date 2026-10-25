@@ -201,10 +201,12 @@ they connect directly (plan G4 of the port). Messages are JSON text frames, shap
 | `{ type: "leave" }`, or disconnects | `{ type: "left" }` to the host when the guest leaves; `{ type: "closed" }` to the guest when the host does |
 
 `peer` is `{ name, address, port }`: the address the server saw the player connect from
-(`X-Forwarded-For` behind nginx) and the port that player announced. A game token
+(the last `X-Forwarded-For` entry, the one nginx appended) and the port that player announced. A game token
 (`Authorization: Bearer` or `?token=`) makes `name` the MoonCellar user name, otherwise it is
 `Player`. A room holds two players; mistakes answer `{ type: "error", message }`. The server pings
 every 30 seconds and drops a socket that misses a pong; nginx keeps an idle socket for 120 seconds.
+One address may hold 8 sockets; the next one gets `{ type: "error", message }` and is closed with
+code 1013 ([rate-limits.md](rate-limits.md)).
 
 ### TURN relay
 
