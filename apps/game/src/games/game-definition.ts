@@ -24,6 +24,7 @@ export type IGameDefinition = {
   name: string;
   // The slug of the game's page on mooncellar.space (the API's catalogue), if the site has it
   siteGame?: string;
+  playUrl?: string;
   scoreOrder: "asc" | "desc";
   scoreUnit: "ms" | "points";
   board: RegExp;

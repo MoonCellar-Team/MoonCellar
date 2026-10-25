@@ -28,8 +28,10 @@ landing page — there are about 10 000 of them.
 - The game service (`apps/game`), also in parallel: `getPortGameAchievements` — the MoonCellar Team
   port whose `siteGame` (in its `GET /games`) is this page, with every achievement, or `undefined`.
   It reaches the service with its own axios client (`portAchievementsApi`): no cookies, no toasts.
+  `getSitePort` reads the same `GET /games` for the port itself, whatever its achievements, so the
+  hero can offer its browser version (`playUrl`).
   The viewer's own states load in the browser once the port's modal opens.
-- The page receives `game`, `stats`, `reviews`, `related`, `portAchievements` as props and renders
+- The page receives `game`, `stats`, `reviews`, `related`, `portAchievements`, `port` as props and renders
   them directly.
   Widgets below may run their own client queries (reviews paging, discussion), but the
   first render needs none.
@@ -40,7 +42,8 @@ landing page — there are about 10 000 of them.
 ## Composition
 
 1. `BGImage` — background derived from the game (deterministically, not at random).
-2. `widgets/game/GameHero` — cover, name (`h1`), stats, controls, and the "Suggest an edit" link
+2. `widgets/game/GameHero` — cover, name (`h1`), stats, controls, a "Play <port> in the browser"
+   accent `Button` under the rating when the port has a `playUrl` (a new tab), and the "Suggest an edit" link
    to `/requests` in the banner's top-right corner, so it shows even when `GameDetails` has no rows.
    Under the name, `entities/game/ui/GameFacts` (shared with the Gauntlet winner): single facts
    (year, type, perspectives, status) are one line of catalogue links; a status with a tone from

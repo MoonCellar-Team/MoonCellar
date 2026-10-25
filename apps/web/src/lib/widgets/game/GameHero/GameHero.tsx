@@ -10,7 +10,12 @@ import { Badge } from "@/src/lib/shared/ui/Badge";
 import { GameCard } from "@/src/lib/widgets/game/GameCard";
 import { GameRating } from "@/src/lib/features/game/ui/GameRating";
 import { SvgCrown } from "@/src/lib/shared/ui/svg/SvgCrown";
-import { IGameResponse, IGameStats } from "@mooncellar/schemas";
+import {
+  IGameDefinitionInfo,
+  IGameResponse,
+  IGameStats,
+} from "@mooncellar/schemas";
+import { Button, ButtonColor } from "@/src/lib/shared/ui/Button";
 import { GameStatsCounters } from "@/src/lib/entities/game/ui/GameStatsCounters";
 import { useRoyalGames } from "@/src/lib/entities/royal/model/useRoyalGames";
 import { useHideAdult } from "@/src/lib/shared/hooks/useHideAdult";
@@ -22,9 +27,10 @@ import { GameFacts } from "@/src/lib/entities/game/ui/GameFacts";
 interface IGameHeroProps {
   game: IGameResponse;
   stats?: IGameStats;
+  port?: IGameDefinitionInfo;
 }
 
-export const GameHero: FC<IGameHeroProps> = ({ game, stats }) => {
+export const GameHero: FC<IGameHeroProps> = ({ game, stats, port }) => {
   const { royalGames } = useRoyalGames();
   const hideMedia = useHideAdult() && isAdultGame(game);
 
@@ -103,6 +109,18 @@ export const GameHero: FC<IGameHeroProps> = ({ game, stats }) => {
           <GameFacts game={game} isCenteredOnMobile />
 
           <GameRating game={game} />
+
+          {!!port?.playUrl && (
+            <Button
+              href={port.playUrl}
+              target="_blank"
+              rel="noopener"
+              color={ButtonColor.ACCENT}
+              className={styles.hero__play}
+            >
+              Play {port.name} in the browser
+            </Button>
+          )}
         </div>
 
         <GameStatsCounters

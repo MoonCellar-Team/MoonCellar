@@ -4,6 +4,7 @@ import { FC } from "react";
 import styles from "./GamePage.module.scss";
 import { BGImage } from "@/src/lib/shared/ui/BGImage";
 import {
+  IGameDefinitionInfo,
   IGameResponse,
   IGameStats,
   IRelatedGamesResponse,
@@ -32,6 +33,7 @@ interface IGamePageProps {
   reviews?: IReviewsResponse;
   related?: IRelatedGamesResponse;
   portAchievements?: IPortGameAchievements;
+  port?: IGameDefinitionInfo;
 }
 
 export const GamePage: FC<IGamePageProps> = ({
@@ -40,13 +42,14 @@ export const GamePage: FC<IGamePageProps> = ({
   reviews,
   related,
   portAchievements,
+  port,
 }) => {
   const hideMedia = useHideAdult() && isAdultGame(game);
 
   return (
     <div className={styles.page}>
       <BGImage game={game} />
-      <GameHero game={game} stats={stats} />
+      <GameHero game={game} stats={stats} port={port} />
       <div className={styles.page__overview}>
         <div className={styles.page__stack}>
           <GameOverview game={game} />

@@ -19,7 +19,7 @@ port of a rooftop-running game from the decompilation project.
 | `GET`  | `/account/me`                                       | Game token. The account the game is signed in with: `{ id, userName, avatar }`                                                                                                                                                                                                       |
 | `GET`  | `/account/friends`                                  | Game token. MoonCellar followings and followers, `[{ id, userName, avatar }]` by name                                                                                                                                                                                                |
 | `POST` | `/account/sign-out`                                 | Game token. Revokes the token; the device disappears from the site's Settings → Game devices                                                                                                                                                                                         |
-| `GET`  | `/games`                                            | The registered games: `[{ slug, name, scoreOrder, scoreUnit, replayRequired, siteGame, achievements }]` — `siteGame`: the slug of the game's page on the site (or `null`), `achievements`: how many it has                                                                                                                                                                                                      |
+| `GET`  | `/games`                                            | The registered games: `[{ slug, name, scoreOrder, scoreUnit, replayRequired, siteGame, playUrl, achievements }]` — `siteGame`: the slug of the game's page on the site (or `null`), `playUrl`: the port in the browser (or `null`), `achievements`: how many it has                                                                                                                                                                                                      |
 | `GET`  | `/games/:game/leaderboards/:board`                  | A leaderboard, best score first (`scoreOrder` of the game): `{ game, board, total, entries }`, paged by `limit` (1–100, default 20) and `offset`; 404 for an unknown game or a board the game does not have                                                                          |
 | `PUT`  | `/games/:game/leaderboards/:board`                  | Game token. Submits `{ score, replay? }` (replay — the game's own recording, base64, up to 256 KiB); the game's replay check runs (see "Replay checks"), and the player's entry is replaced only by a better score: `{ improved, entry }`; a score that does not hold up answers 422 |
 | `GET`  | `/games/:game/leaderboards/entries/:entryId/replay` | The replay of an entry: `{ entryId, game, board, userId, displayName, score, replay }`; 404 when it has none                                                                                                                                                                         |
@@ -160,7 +160,10 @@ project's `docs/achievements.md`): `format`, `game`, and per achievement a `key`
   stays; `current` changes only through `$max`. Two first reports at once meet the unique index,
   and the second one updates instead.
 - **On the site.** A game's `siteGame` (in `GET /games`) is the slug of its page on
-  mooncellar.space: that page counts the port's achievements in its Achievements block, in a row
+  mooncellar.space; with a `playUrl` the page's hero shows "Play <name> in the browser", which
+  opens the port in a new tab (a browser build is served from `play.mooncellar.space`, see
+  `docs/deploy-env.md`). That
+  page also counts the port's achievements in its Achievements block, in a row
   named after the port (its `name`), which
   opens a modal with all of them and the viewer's own states. Every game card of that page's game
   carries the moon mark in its bottom-right rail, which opens the same modal and loads the
@@ -177,7 +180,8 @@ project's `docs/achievements.md`): `format`, `game`, and per achievement a `key`
 1. Pick a slug (`[a-z][a-z0-9-]`, up to 32 characters) and add `src/games/<slug>/<slug>.game.ts`
    with an `IGameDefinition`: `name` (the port's own name, which the site shows — `Glassline` for
    `rooftops`), `siteGame` (the slug of the game's page on the site, where its
-   achievements are shown), `scoreOrder` (`asc` when lower is better, as with times),
+   achievements are shown), `playUrl` (the port built for the browser, if there is one — the page
+   shows a Play button), `scoreOrder` (`asc` when lower is better, as with times),
    `scoreUnit` (`ms` or `points`), `board` — a regular expression of the board ids the game
    uses — and `replay` (`required`, `maxBytes`, an optional `check`).
 2. Register it in `GAMES` in `src/games/games.ts`. Nothing else changes: the routes, the

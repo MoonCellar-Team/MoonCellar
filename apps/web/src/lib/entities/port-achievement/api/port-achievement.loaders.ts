@@ -1,3 +1,4 @@
+import type { IGameDefinitionInfo } from "@mooncellar/schemas";
 import { portAchievementsApi } from "@/src/lib/shared/api";
 import { IPortGameAchievements } from "../model/port-achievement.type";
 
@@ -16,4 +17,12 @@ export const getPortGameAchievements = async (
   const { data } = await portAchievementsApi.getAchievements(game.slug);
 
   return { ...data, port: game };
+};
+
+export const getSitePort = async (
+  siteGame: string
+): Promise<IGameDefinitionInfo | undefined> => {
+  const { data: games } = await portAchievementsApi.getGames();
+
+  return games.find((item) => item.siteGame === siteGame);
 };

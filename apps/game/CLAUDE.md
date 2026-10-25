@@ -86,8 +86,9 @@ does and how to run it is in [`docs/game-service.md`](../../docs/game-service.md
   the address handed to the other player. One socket hosts one room, which caps rooms too.
 - **Every client message goes through `GameSignalClientMessageSchema.safeParse`**; a bad one
   answers `{ type: "error" }` and never closes the socket.
-- **nginx needs its own `location = /signal` with the upgrade headers** for `game.mooncellar.space`;
-  the plain `location /` sends `Connection: ""` and the handshake fails.
+- **nginx needs its own `location = /signal` with the upgrade headers** for `game.mooncellar.space`,
+  and `location = /game-api/signal` for `play.mooncellar.space` (the port in the browser reaches the
+  service on its own origin); the plain `location /` sends `Connection: ""` and the handshake fails.
 - **TURN credentials ride on `hosted`, `joined` and `peer`** (`signal-turn.ts`): coturn REST
   credentials bound to the room code, only when both `TURN_SECRET` and `TURN_URLS` are set. The
   secret never leaves the server; it must match coturn's in `infra/.env`.
