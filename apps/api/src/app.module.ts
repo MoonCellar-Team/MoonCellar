@@ -18,7 +18,9 @@ import { GamesModule } from "./module/games/games.module";
 import { CommentsModule } from "./module/comments/comments.module";
 import { CollectionsModule } from "./module/collections/collections.module";
 import { NotificationsModule } from "./module/notifications/notifications.module";
-import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from "@nestjs/core";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { THROTTLER_OPTIONS } from "./shared/throttle";
 import { ErrorResponseFilter } from "./shared/error-response.filter";
 import { ZodValidationPipe } from "nestjs-zod";
 import { AdminModule } from "./module/admin/admin.module";
@@ -35,6 +37,7 @@ import { CacheModule } from "@nestjs/cache-manager";
     ConfigModule.forRoot(),
     LoggerModule.forRootAsync(pinoConfig),
     MetricsModule,
+    ThrottlerModule.forRoot(THROTTLER_OPTIONS),
     ...(process.env.DISABLE_CRONS === "true" ? [] : [ScheduleModule.forRoot()]),
     MongooseModule.forRoot(process.env.MONGO_CONNECTION_STRING, {
       dbName: "games",
@@ -64,6 +67,10 @@ import { CacheModule } from "@nestjs/cache-manager";
     }),
   ],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     {
       provide: APP_FILTER,
       useClass: ErrorResponseFilter,

@@ -80,6 +80,18 @@ an instance of Module)`. Use a default import; tsc reports the call as `TS2349`.
   `GameAuthService.introspect`, never by verifying the signature alone, or signing a device out
   on the site would not stop it.
 
+## Rate limits
+
+- **A request without `X-Forwarded-For` is one of our own containers and is never limited; never
+  send a server-side caller through nginx.** The global `ThrottlerGuard` skips it (`skipIf` in
+  `shared/throttle.ts`) because the web server (`INTERNAL_API_URL`), the game service (`API_URL`) and
+  Prometheus call `mooncellar-backend:3228` directly. Pointed at `https://api.mooncellar.space`
+  instead, all server-side rendering would share one address and get `429` under crawler load.
+- **`trust proxy` stays `1`, never `true`.** nginx appends the real address to whatever
+  `X-Forwarded-For` the client sent, and `true` makes `req.ip` the first entry: a forged header
+  escaped every limit. The limits, what they count and how to make a route stricter
+  (`@Throttle(SIGN_IN_THROTTLE)`) are in [`docs/rate-limits.md`](../../docs/rate-limits.md).
+
 ## Sockets
 
 - **Pin `@nestjs/websockets` and `@nestjs/platform-socket.io` to the major of `@nestjs/core`.**

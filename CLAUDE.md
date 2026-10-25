@@ -206,6 +206,10 @@ This project uses **bun** exclusively. Using `npm` is forbidden.
   `Connection` and reads for 15 s, so WebSockets never connect and every long-polling GET ends as a
   504 that the browser shows as a CORS error on `socket.io/?EIO=4&transport=polling`, followed by
   `400` on the next POST. Details in `docs/sockets.md`.
+- **Every `location` in that file that proxies to the API or the game service keeps
+  `include proxy_params`.** It sets `X-Forwarded-For`, and both apps treat a request without it as
+  a call from inside the stack that is never rate-limited (`docs/rate-limits.md`), so a location
+  without it would be an unlimited door from the internet.
 - **Every `server` block in that file whose app takes uploads sets `client_max_body_size` above
   the app's own largest limit** — `api.mooncellar.space` and `game.mooncellar.space` take `8m`
   (the editor's images are 5 MiB, `COMMENT_IMAGE_MAX_BYTES`). nginx's default of 1 MB answers 413

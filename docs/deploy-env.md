@@ -243,7 +243,7 @@ Two keys were set in production but referenced nowhere in the code — `NEXT_PUB
 | Variable | Secret | Description |
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | no | Public API URL used from the browser — `https://api.mooncellar.space` in production, `http://localhost:3228` in dev |
-| `INTERNAL_API_URL` | no | API URL used from server components and route handlers — `http://mooncellar-backend:3228`, the container name on the `mooncellar` network. Separate from the public one, and it must be set: the fallback points at the host gateway, where nothing listens |
+| `INTERNAL_API_URL` | no | API URL used from server components and route handlers — `http://mooncellar-backend:3228`, the container name on the `mooncellar` network. Separate from the public one, and it must be set: the fallback points at the host gateway, where nothing listens. Never the public `https://api.mooncellar.space`: requests through nginx are rate-limited per address, and every server-side render would share the server's one ([rate-limits.md](rate-limits.md)) |
 | `NEXT_PUBLIC_GAME_URL` | no | Public URL of the game service (`apps/game`), for the achievements of the MoonCellar Team ports on game pages and profiles; defaults to `https://game.mooncellar.space` |
 | `INTERNAL_GAME_URL` | no | The game service from server components — `http://mooncellar-game:3229` on the `mooncellar` network; unset, the server goes through the public URL |
 | `NEXT_PUBLIC_FRONT_URL` | no | Public URL of the site. Canonical links, sitemap and Open Graph URLs are built from it — a wrong value here is an SEO incident, not a cosmetic bug |
@@ -308,7 +308,7 @@ deployed whenever `apps/game/**`, `packages/**`, `package.json` or `bun.lock` ch
 |---|---|---|
 | `MONGO_CONNECTION_STRING` | **yes** | The compose MongoDB with credentials — `mongodb://<MONGO_ROOT_USERNAME>:<MONGO_ROOT_PASSWORD>@mongodb:27017/?authSource=admin`. The service picks its own `game` database; the path part of the URI is ignored |
 | `PORT` | no | `3229`; the deploy publishes the same port to `127.0.0.1` for nginx |
-| `API_URL` | no | `http://mooncellar-backend:3228` — the API container in the `mooncellar` network. Game sign-in and token checks go through it ([game-sign-in.md](game-sign-in.md)); without it `/account/*` and submitting a time answer 503, reading leaderboards still works |
+| `API_URL` | no | `http://mooncellar-backend:3228` — the API container in the `mooncellar` network. Game sign-in and token checks go through it ([game-sign-in.md](game-sign-in.md)); without it `/account/*` and submitting a time answer 503, reading leaderboards still works. Keep it the container address, not the public host, or the API rate-limits the whole game service as one client ([rate-limits.md](rate-limits.md)) |
 | `LOKI_HOST` | no | `http://loki:3100`. Logs carry the label `app=mooncellar-game` |
 | `PROMETHEUS_ENABLED` | no | `true` / `false` — default process metrics on `/metrics` |
 | `METRICS_TOKEN` | **yes** | Bearer token guarding `/metrics`. Must equal `METRICS_TOKEN` of `HOST_ENV_INFRA`: Prometheus scrapes the job `mooncellar-game` with the same credentials file as the API |

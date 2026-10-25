@@ -12,12 +12,14 @@ import {
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 import type { Request, Response } from "express";
 import { UserProfileService } from "../user/services/user-profile.service";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
 import { SignUpDto } from "./dto/signup.dto";
 import { JwtRefreshGuard } from "./jwt-refresh.guard";
+import { SIGN_IN_THROTTLE, SIGN_UP_THROTTLE } from "../../shared/throttle";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -29,6 +31,7 @@ export class AuthController {
   ) {}
 
   @Post("/signup")
+  @Throttle(SIGN_UP_THROTTLE)
   @ApiOperation({ summary: "User registration" })
   @ApiResponse({
     status: 201,
@@ -57,6 +60,7 @@ export class AuthController {
   }
 
   @Post("/login")
+  @Throttle(SIGN_IN_THROTTLE)
   @ApiOperation({ summary: "User auth" })
   @ApiResponse({
     status: 200,

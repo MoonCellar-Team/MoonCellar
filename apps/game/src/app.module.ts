@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
-import { APP_FILTER, APP_PIPE } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_PIPE } from "@nestjs/core";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { ConfigModule } from "@nestjs/config";
 import { MongooseModule } from "@nestjs/mongoose";
 import { LoggerModule } from "nestjs-pino";
@@ -16,12 +17,14 @@ import { MetricsModule } from "./module/metrics/metrics.module";
 import { SignalModule } from "./module/signal/signal.module";
 import { StorageModule } from "./module/storage/storage.module";
 import { ErrorResponseFilter } from "./shared/error-response.filter";
+import { THROTTLER_OPTIONS } from "./shared/throttle";
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     LoggerModule.forRootAsync(pinoConfig),
     MetricsModule,
+    ThrottlerModule.forRoot(THROTTLER_OPTIONS),
     MongooseModule.forRoot(process.env.MONGO_CONNECTION_STRING, {
       dbName: "game",
     }),
@@ -36,6 +39,7 @@ import { ErrorResponseFilter } from "./shared/error-response.filter";
     SignalModule,
   ],
   providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_FILTER, useClass: ErrorResponseFilter },
     { provide: APP_PIPE, useClass: ZodValidationPipe },
   ],

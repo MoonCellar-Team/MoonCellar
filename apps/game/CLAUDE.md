@@ -15,6 +15,10 @@ does and how to run it is in [`docs/game-service.md`](../../docs/game-service.md
 - **Its data lives in the `game` database of the stack's MongoDB** (`dbName` in `app.module.ts`),
   never in the API's `games` database: the connection string is the same, the database is not.
 
+- **Rate limits follow the API's rules** ([`apps/api/CLAUDE.md`](../api/CLAUDE.md), "Rate
+  limits"): `trust proxy` is `1`, a request without `X-Forwarded-For` comes from inside the stack and
+  is not limited, and the numbers are in [`docs/rate-limits.md`](../../docs/rate-limits.md).
+
 ## Contracts
 
 - **Every request and response shape is a Zod schema in `packages/schemas/src/game.schema.ts`**,
@@ -50,6 +54,11 @@ does and how to run it is in [`docs/game-service.md`](../../docs/game-service.md
   (`POST /auth/game/token/introspect`, [`docs/game-sign-in.md`](../../docs/game-sign-in.md)) and
   keeps the answer for 30 seconds. It holds no JWT key, and a device signed out on the site loses
   access within that window.
+- **A made-up token must never cost an API call.** `accountOf(token, address)` answers a token
+  that is not a game JWT without asking, lets one address cause `INTROSPECT_MISSES` (30) uncached
+  checks a minute, and its caches drop their oldest entry when full instead of being cleared: a
+  clear let 10,000 junk tokens push every player's cached answer out at once. Details in
+  [`docs/rate-limits.md`](../../docs/rate-limits.md).
 - **`/account/*` proxies the API's device sign-in**, so a game talks to one host only.
 - **An endpoint that acts for a player uses `GameTokenGuard`**, which puts the account on
   `request.account`; the player's name is taken from it, never from the request body.
@@ -71,6 +80,10 @@ does and how to run it is in [`docs/game-service.md`](../../docs/game-service.md
   socket.io**: the game ports speak raw WebSocket frames through libcurl. `SignalGateway` attaches
   it at bootstrap and destroys any other upgrade request. Rooms live in memory
   (`SignalService`), so the service must stay a single instance while it holds them.
+- **`/signal` takes at most `SIGNAL_SOCKETS_PER_ADDRESS` (8) sockets per address, and the address
+  is the last `X-Forwarded-For` entry (`clientAddress`), never the first.** nginx appends the real
+  address after whatever the client sent, so the first entry let a client dodge the cap and choose
+  the address handed to the other player. One socket hosts one room, which caps rooms too.
 - **Every client message goes through `GameSignalClientMessageSchema.safeParse`**; a bad one
   answers `{ type: "error" }` and never closes the socket.
 - **nginx needs its own `location = /signal` with the upgrade headers** for `game.mooncellar.space`;
