@@ -124,6 +124,7 @@ export class StorageService {
       game: game.slug,
       bucket,
       revision: state?.revision ?? 0,
+      createdAt: state?.createdAt?.toISOString() ?? null,
       usedBytes: state?.usedBytes ?? 0,
       maxBytes: limits.maxBytes,
       maxFileBytes: limits.maxFileBytes,

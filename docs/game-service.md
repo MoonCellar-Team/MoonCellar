@@ -36,7 +36,7 @@ port of a rooftop-running game from the decompilation project.
 | `POST` | `/games/:game/levels/:levelId/report`               | Game token. `{ reason }`; three players reporting a level hide it: `{ reported, hidden }`                                                                                                                                                                                            |
 | `GET`  | `/games/:game/levels/reported`                      | `MODERATION_TOKEN`. Reported and hidden levels with their reports                                                                                                                                                                                                                    |
 | `PUT`  | `/games/:game/levels/:levelId/moderation`           | `MODERATION_TOKEN`. `{ hidden }`; showing a level again clears its reports                                                                                                                                                                                                           |
-| `GET`  | `/games/:game/storage/:bucket`                      | Game token. The player's files in a storage bucket of the game, without data: `{ game, bucket, revision, usedBytes, maxBytes, maxFileBytes, maxFiles, files: [{ path, size, sha256, updatedAt }] }`; 404 for a bucket the game does not have (see "Cloud storage") |
+| `GET`  | `/games/:game/storage/:bucket`                      | Game token. The player's files in a storage bucket of the game, without data: `{ game, bucket, revision, createdAt, usedBytes, maxBytes, maxFileBytes, maxFiles, files: [{ path, size, sha256, updatedAt }] }`; 404 for a bucket the game does not have (see "Cloud storage") |
 | `GET`  | `/games/:game/storage/:bucket/file?path=`           | Game token. The file as raw bytes (`application/octet-stream`), with `X-Content-SHA256` and `Last-Modified` |
 | `PUT`  | `/games/:game/storage/:bucket/file?path=&revision=` | Game token. Writes the file from a raw `application/octet-stream` body (up to 8 MiB): `{ revision, usedBytes, file }`; with `revision`, 409 unless the bucket is still at it; 422 past the bucket's limits |
 | `DELETE` | `/games/:game/storage/:bucket/file?path=&revision=` | Game token. Deletes the file: `{ revision, usedBytes, file: null }` |
@@ -117,7 +117,10 @@ The service stores a file as it is
 (`storage_files`, one document per file, `data` with `select: false`) under the player's id, and
 never reads it. A bucket's `revision` (`storage_buckets`) grows with every write and delete, so
 a game can tell whether anything changed since it last looked, and can make a write conditional
-with `revision`. Paths are up to four segments of `[A-Za-z0-9._-]`, never `.` or `..`.
+with `revision`. The list also carries the bucket's `createdAt` (`null` before its first write): a
+bucket that was removed and started again gets a new one, while its `revision` counts from zero, so
+a game that remembers both can tell a storage reset on the server from files deleted on another
+computer. Paths are up to four segments of `[A-Za-z0-9._-]`, never `.` or `..`.
 
 Files travel as raw bytes, not base64 in JSON: `main.ts` takes `application/octet-stream`
 bodies up to `GAME_STORAGE_MAX_FILE_BYTES` (8 MiB) and keeps JSON at 512 KiB. nginx lets

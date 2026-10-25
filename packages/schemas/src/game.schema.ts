@@ -370,6 +370,7 @@ export const GameStorageListSchema = z.object({
   game: z.string(),
   bucket: z.string(),
   revision: z.number().int().nonnegative(),
+  createdAt: z.string().nullable(),
   usedBytes: z.number().int().nonnegative(),
   maxBytes: z.number().int().positive(),
   maxFileBytes: z.number().int().positive(),
