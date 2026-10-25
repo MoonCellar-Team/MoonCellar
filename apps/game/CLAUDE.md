@@ -135,4 +135,7 @@ does and how to run it is in [`docs/game-service.md`](../../docs/game-service.md
 - **`revision` of `storage_buckets` grows with every write and delete**, and a write or delete
   with `revision` answers 409 when the bucket moved on; the ports rely on it to tell a change
   made on another computer from their own.
+- **The list's `createdAt` is the `storage_buckets` document's own, never reset or rewritten**:
+  the ports compare it with the one they saw last to notice a bucket that was removed and started
+  again, and keep their files instead of treating the missing ones as deleted elsewhere.
 
