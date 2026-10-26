@@ -35,7 +35,7 @@
     "interweave": "^13.1.1",
     "jwt-decode": "catalog:",
     "maxmind": "^5.0.6",
-    "next": "^16.3.0-preview.6",
+    "next": "^16.4.3",
     "query-string": "^9.4.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -53,19 +53,19 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@storybook/nextjs-vite": "^10.6.1",
+    "@storybook/nextjs-vite": "^10.6.3",
     "@tanstack/eslint-plugin-query": "^5.101.4",
     "@types/node": "catalog:",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "eslint": "catalog:",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.4.3",
     "eslint-config-prettier": "catalog:",
     "eslint-plugin-prettier": "catalog:",
     "interweave-ssr": "^2.0.0",
     "playwright-core": "^1.62.1",
-    "storybook": "^10.6.1",
+    "storybook": "^10.6.3",
     "typescript": "catalog:",
-    "vite": "^8.3.1"
+    "vite": "^8.3.5"
   }
 }

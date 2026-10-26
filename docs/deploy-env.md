@@ -193,12 +193,18 @@ file on the server, the next infra deploy overwrites it.
   `No 'Access-Control-Allow-Origin' header` and axios a Network Error instead of the real status.
 - The deploy user must be able to run `certbot`, `nginx` and `systemctl`, which in practice means
   `root`.
-- **`play.mooncellar.space` serves a game port built for the browser**, from static files in
-  `/opt/mooncellar/play/current` (a link to
-  `/opt/mooncellar/play/releases/<tag>`, the newest three are kept). The files are not in this
-  repository: the manual workflow **Play** (`.github/workflows/play.yml`, input `tag`) downloads the
-  `glassline-web*.zip` asset of that Glassline release, unpacks it there and switches the link, so
-  a rollback is the same workflow with an older tag. The block sends `Cross-Origin-Opener-Policy`
+- **`play.mooncellar.space` serves game ports built for the browser, one folder per game**:
+  `play.mooncellar.space/glassline/` is `/opt/mooncellar/play/sites/glassline`, a link to
+  `/opt/mooncellar/play/glassline/releases/<release>` (the newest three are kept); a folder without
+  the trailing slash redirects to it, and the root is a 404. `.wasm` files go out as
+  `application/wasm`, which the host's `mime.types` lacks: with another type browsers refuse to
+  compile the module while it downloads and fall back to a slower path. The files are not in this repository:
+  the manual workflow **Play** (`.github/workflows/play.yml`, inputs `game`, default `glassline`,
+  and `tag` or `preview`) unpacks a build there and switches the link, so a rollback is the same
+  workflow with an older tag. `tag` downloads the `glassline-web*.zip` asset of that Glassline
+  release; `preview` takes the `.zip` of a draft release of this repository with that tag, to put a
+  build online before its release (drafts are visible only to the team, and the job's token reads
+  them with `contents: write`). The block sends `Cross-Origin-Opener-Policy`
   and `Cross-Origin-Embedder-Policy` on every response (wasm threads need a cross-origin isolated
   page) and proxies `/game-api/` to the game service, `/game-api/signal` with the upgrade
   headers: the page reaches the service on its own origin, so the service's CORS stays as it is.

@@ -3,16 +3,28 @@ name: Play
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: Glassline release whose browser build goes to play.mooncellar.space
+      game:
+        description: Folder of play.mooncellar.space the build goes to (play.mooncellar.space/<game>/)
         required: true
+        default: glassline
+      tag:
+        description: Glassline release whose browser build goes there
+        required: false
+      preview:
+        description: Instead of a release, the tag of a draft release of this repository with a browser build (.zip)
+        required: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     env:
+      GAME: ${{ inputs.game }}
       TAG: ${{ inputs.tag }}
+      PREVIEW: ${{ inputs.preview }}
 
     steps:
       - name: Download the browser build
@@ -20,15 +32,26 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -e
-          [[ "$TAG" =~ ^[0-9A-Za-z._-]+$ ]]
-          gh release download "$TAG" -R MoonCellar-Team/Glassline -p 'glassline-web*.zip' -O play.zip
+          [[ "$GAME" =~ ^[a-z0-9-]+$ ]]
+          if [ -n "$TAG" ] && [ -z "$PREVIEW" ]; then
+            [[ "$TAG" =~ ^[0-9A-Za-z._-]+$ ]]
+            gh release download "$TAG" -R MoonCellar-Team/Glassline -p 'glassline-web*.zip' -O play.zip
+            echo "RELEASE=$TAG" >> "$GITHUB_ENV"
+          elif [ -n "$PREVIEW" ] && [ -z "$TAG" ]; then
+            [[ "$PREVIEW" =~ ^[0-9A-Za-z._-]+$ ]]
+            gh release download "$PREVIEW" -R "$GITHUB_REPOSITORY" -p '*.zip' -O play.zip
+            echo "RELEASE=$PREVIEW-$(date -u +%Y%m%d%H%M%S)" >> "$GITHUB_ENV"
+          else
+            echo "Give either tag or preview" >&2
+            exit 1
+          fi
           mkdir play
           unzip -q play.zip -d play
           test -f play/index.html
           tar -czf play.tar.gz -C play .
 
       - name: Copy to server
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
@@ -37,21 +60,21 @@ jobs:
           target: "/tmp/"
 
       - name: Publish
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: TAG
+          envs: GAME,RELEASE
           script: |
             set -e
             DIR=/opt/mooncellar/play
-            mkdir -p "$DIR/releases"
-            rm -rf "$DIR/releases/$TAG"
-            mkdir "$DIR/releases/$TAG"
-            tar -xzf /tmp/play.tar.gz -C "$DIR/releases/$TAG"
+            mkdir -p "$DIR/$GAME/releases" "$DIR/sites"
+            rm -rf "$DIR/$GAME/releases/$RELEASE"
+            mkdir "$DIR/$GAME/releases/$RELEASE"
+            tar -xzf /tmp/play.tar.gz -C "$DIR/$GAME/releases/$RELEASE"
             rm -f /tmp/play.tar.gz
-            chmod -R a+rX "$DIR/releases/$TAG"
-            ln -sfn "$DIR/releases/$TAG" "$DIR/current.new"
-            mv -T "$DIR/current.new" "$DIR/current"
-            ls -1dt "$DIR/releases"/* | tail -n +4 | xargs -r rm -rf
+            chmod -R a+rX "$DIR/$GAME/releases/$RELEASE"
+            ln -sfn "$DIR/$GAME/releases/$RELEASE" "$DIR/sites/$GAME.new"
+            mv -T "$DIR/sites/$GAME.new" "$DIR/sites/$GAME"
+            ls -1dt "$DIR/$GAME/releases"/* | tail -n +4 | xargs -r rm -rf
