@@ -196,7 +196,9 @@ file on the server, the next infra deploy overwrites it.
 - **`play.mooncellar.space` serves game ports built for the browser, one folder per game**:
   `play.mooncellar.space/glassline/` is `/opt/mooncellar/play/sites/glassline`, a link to
   `/opt/mooncellar/play/glassline/releases/<release>` (the newest three are kept); a folder without
-  the trailing slash redirects to it, and the root is a 404. The files are not in this repository:
+  the trailing slash redirects to it, and the root is a 404. `.wasm` files go out as
+  `application/wasm`, which the host's `mime.types` lacks: with another type browsers refuse to
+  compile the module while it downloads and fall back to a slower path. The files are not in this repository:
   the manual workflow **Play** (`.github/workflows/play.yml`, inputs `game`, default `glassline`,
   and `tag` or `preview`) unpacks a build there and switches the link, so a rollback is the same
   workflow with an older tag. `tag` downloads the `glassline-web*.zip` asset of that Glassline
