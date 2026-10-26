@@ -26,7 +26,7 @@ jobs:
       BUILD_TOOLS_VERSION: "36.1.0"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
       - name: Check tag matches appVersion
         if: github.event_name == 'push'
@@ -38,13 +38,13 @@ jobs:
           fi
 
       - name: Use JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Use Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
         with:
           bun-version: "1.3.12"
 
@@ -75,7 +75,7 @@ jobs:
           sha256sum mooncellar.apk | tee mooncellar.apk.sha256
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: mooncellar-apk
           path: |
