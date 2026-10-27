@@ -161,8 +161,7 @@ project's `docs/achievements.md`): `format`, `game`, and per achievement a `key`
   and the second one updates instead.
 - **On the site.** A game's `siteGame` (in `GET /games`) is the slug of its page on
   mooncellar.space; with a `playUrl` the page's hero shows `Play <name> in the browser`, which
-  opens the port in a new tab (a browser build is served from `play.mooncellar.space`, see
-  `docs/deploy-env.md`). That
+  opens the port in a new tab (`rooftops`: `play.mooncellar.space/glassline/`, see `docs/deploy-env.md`). That
   page also counts the port's achievements in its Achievements block, in a row
   named after the port (its `name`), which
   opens a modal with all of them and the viewer's own states. Every game card of that page's game
