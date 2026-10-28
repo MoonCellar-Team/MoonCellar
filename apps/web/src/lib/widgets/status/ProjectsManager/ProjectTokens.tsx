@@ -86,16 +86,13 @@ export const ProjectTokens: FC<IProjectTokensProps> = ({ slug, onClose }) => {
               content:
                 revoking === token.id ? (
                   <Button
-                    compact
                     color={ButtonColor.RED}
                     onClick={() => revoke({ slug, id: token.id })}
                   >
                     Sure?
                   </Button>
                 ) : (
-                  <Button compact onClick={() => setRevoking(token.id)}>
-                    Revoke
-                  </Button>
+                  <Button onClick={() => setRevoking(token.id)}>Revoke</Button>
                 ),
             },
           }))}

@@ -7,7 +7,7 @@ block — `PlanBlock` or `DecompBlock` (`widgets/status`).
 
 - `/<slug>` and `/<slug>/<block>` on the status host — `src/app/status/(gated)/[slug]/page.tsx` and
   `[slug]/[block]/page.tsx`, inside the gated layout. A missing or unknown `block` falls back to the
-  project's first block (`decomp` before `plan`, the order of `PROJECT_BLOCKS`).
+  project's saved `defaultBlock` when enabled, then its first enabled block.
 
 ## Data
 
@@ -37,5 +37,7 @@ Its loading state is `StatusProjectSkeleton.tsx`.
 
 - **Tab links are host paths (`/<slug>/<block>`), never `/status/...`.** The host rewrite adds the
   segment; a link with it is excluded from the rewrite and lands on the real route only by accident.
+- **`/<slug>` uses `project.defaultBlock`;** keep it in sync with the project settings form and API
+  so the project list opens the configured page.
 - An unknown slug renders the page-shaped `EmptyState`, not `notFound()`: the projects come from a
   client query, after the server response.

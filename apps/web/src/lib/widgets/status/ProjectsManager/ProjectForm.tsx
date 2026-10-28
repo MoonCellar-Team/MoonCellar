@@ -7,7 +7,7 @@ import {
 } from "@mooncellar/schemas";
 import { PROJECT_BLOCK_TITLES } from "@/src/lib/entities/project/model";
 import { Button, ButtonColor } from "@/src/lib/shared/ui/Button";
-import { TextField, ToggleField } from "@/src/lib/shared/ui/Fields";
+import { EnumField, TextField, ToggleField } from "@/src/lib/shared/ui/Fields";
 import { toSlug } from "@/src/lib/shared/utils/slug.utils";
 import styles from "./ProjectsManager.module.scss";
 
@@ -15,6 +15,7 @@ export interface IProjectFormValues {
   name: string;
   slug: string;
   blocks: IProjectBlock[];
+  defaultBlock: IProjectBlock;
 }
 
 interface IProjectFormProps {
@@ -44,7 +45,15 @@ export const ProjectForm: FC<IProjectFormProps> = ({
   const [blocks, setBlocks] = useState<IProjectBlock[]>(
     project?.blocks ?? defaults?.blocks ?? ["plan"]
   );
-  const parsed = CreateProjectRequestSchema.safeParse({ name, slug, blocks });
+  const [defaultBlock, setDefaultBlock] = useState<IProjectBlock>(
+    project?.defaultBlock ?? defaults?.defaultBlock ?? blocks[0]
+  );
+  const parsed = CreateProjectRequestSchema.safeParse({
+    name,
+    slug,
+    blocks,
+    defaultBlock,
+  });
   const slugError =
     slug && !parsed.success
       ? parsed.error.issues.find((issue) => issue.path[0] === "slug")?.message
@@ -55,10 +64,13 @@ export const ProjectForm: FC<IProjectFormProps> = ({
     if (!isSlugEdited) setSlug(toSlug(value));
   };
 
-  const toggleBlock = (block: IProjectBlock, isOn: boolean) =>
-    setBlocks((current) =>
-      isOn ? [...current, block] : current.filter((value) => value !== block)
-    );
+  const toggleBlock = (block: IProjectBlock, isOn: boolean) => {
+    const next = isOn
+      ? [...blocks, block]
+      : blocks.filter((value) => value !== block);
+    setBlocks(next);
+    if (!next.includes(defaultBlock)) setDefaultBlock(next[0] ?? "plan");
+  };
 
   return (
     <div className={styles.form}>
@@ -86,6 +98,17 @@ export const ProjectForm: FC<IProjectFormProps> = ({
           />
         ))}
       </div>
+      <EnumField
+        label="Default page"
+        value={PROJECT_BLOCK_TITLES[defaultBlock]}
+        options={blocks.map((block) => PROJECT_BLOCK_TITLES[block])}
+        onChange={(value) => {
+          const selected = PROJECT_BLOCKS.find(
+            (block) => PROJECT_BLOCK_TITLES[block] === value
+          );
+          if (selected) setDefaultBlock(selected);
+        }}
+      />
       {project && (
         <p className={styles.hint}>
           Turning a block off deletes what the project uploaded for it.
@@ -101,7 +124,13 @@ export const ProjectForm: FC<IProjectFormProps> = ({
           color={ButtonColor.ACCENT}
           disabled={!parsed.success || isPending}
           isLoading={isPending}
-          onClick={() => parsed.success && onSubmit(parsed.data)}
+          onClick={() =>
+            parsed.success &&
+            onSubmit({
+              ...parsed.data,
+              defaultBlock: parsed.data.defaultBlock ?? defaultBlock,
+            })
+          }
         >
           {submitText}
         </Button>

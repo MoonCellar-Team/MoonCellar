@@ -14,14 +14,14 @@ progress of a decompilation, or both. Each project uploads its own data; the hub
 
 ## Pages
 
-| Path | What it shows |
-| --- | --- |
-| `/login` | Sign in |
-| `/` | Opens the first project, or "No projects yet" |
-| `/<project>` and `/<project>/<block>` | The project with a tab per block; "⋯" — edit, tokens, delete |
-| `/manage` | Add a project, change its blocks, manage its tokens, delete |
-| `/connect` | Allow a connect command to get a token |
-| `/hub-connector.zip` | The hub connector: a static file, built with the web app |
+| Path                                  | What it shows                                                                        |
+| ------------------------------------- | ------------------------------------------------------------------------------------ |
+| `/login`                              | Sign in                                                                              |
+| `/`                                   | Opens the first project, or "No projects yet"                                        |
+| `/<project>` and `/<project>/<block>` | The project's default page, or the selected block; "⋯" — edit, tokens, delete        |
+| `/manage`                             | Add a project, choose its default page, change its blocks, manage its tokens, delete |
+| `/connect`                            | Allow a connect command to get a token                                               |
+| `/hub-connector.zip`                  | The hub connector: a static file, built with the web app                             |
 
 They live in `apps/web` (`src/app/status`, the pages `Status*` and `widgets/status`) and are answered
 only for a host starting with `status.`; on `mooncellar.space` the same routes are a 404. How the
@@ -39,11 +39,13 @@ projects → New project does the same by hand. A repository that has none of th
 A project has a name, an address (`slug`: lowercase letters, digits and dashes; `login`, `manage`,
 `status`, `api`, `images`, `img` and `connect` are taken by the hub) and one or more blocks. A block is a type the hub
 knows how to draw; a new project is data, a new block type is code.
+Choose the default page from the project's enabled blocks in its settings. Opening `/<project>` uses
+that choice; an explicit `/<project>/<block>` link always opens the selected block.
 
-| Block | Schema (`@mooncellar/schemas`) | Shows |
-| --- | --- | --- |
-| `decomp` — Decompilation | `DecompBlockSchema` | Totals, categories, areas, a map with one cell per function (hover or tap: name, address, size, state, file), files, feed |
-| `plan` — Plan | `PlanBlockSchema` | Totals, tasks by section with state, owner and what a task waits for; editable |
+| Block                    | Schema (`@mooncellar/schemas`) | Shows                                                                                                                     |
+| ------------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `decomp` — Decompilation | `DecompBlockSchema`            | Totals, categories, areas, a map with one cell per function (hover or tap: name, address, size, state, file), files, feed |
+| `plan` — Plan            | `PlanBlockSchema`              | Totals, tasks by section with state, owner and what a task waits for; editable                                            |
 
 The map's tooltip needs to know what each cell is, which would make the block ten times larger and
 slower to refresh every minute. So a project uploads it beside the block, once per merge, as
@@ -51,8 +53,9 @@ slower to refresh every minute. So a project uploads it beside the block, once p
 order — address, size, file as an index into `units`, name); the page reads it once, on the map's first
 hover. Without it the tooltip shows only the state. It goes away with the block.
 
-The menu shows each project's progress from its first block: functions done for `decomp`, tasks done
-for `plan`. An upload older than a day turns the "Updated" line yellow.
+The project menu shows progress for every enabled block, then the age of the latest upload. It shows
+functions done for `decomp` and tasks done for `plan`. An upload older than a day turns the "Updated"
+line yellow.
 
 ## The plan lives in the hub
 
@@ -94,18 +97,22 @@ Agents in this repository have two commands in `.claude/commands/`: `/hub` conne
 `hub-connect.ts mooncellar`, the user presses "Allow") and gives the link; `/task [id]` lists the free
 tasks or takes one, does it in a branch, opens a PR and, once it is merged, marks the task done.
 
+Codex has the same workflows as `$hub [machine name]` and `$task [id]`, in
+`.agents/skills/hub/` and `.agents/skills/task/`. Both agents use the same project binding
+and machine token; see [Codex setup](codex.md).
+
 ## The hub connector
 
 Any repository can work with the hub the way this one does, without copying anything from
 MoonCellar: **Manage projects → Hub connector → Download** gives `hub-connector.zip`, which is
 unpacked at the root of that repository:
 
-| In the archive | What it is |
-| --- | --- |
-| `.claude/commands/hub-init.md` | `/hub-init`: sets the repository up once |
-| `.claude/hub/tasks.mjs`, `hub-connect.mjs` | `scripts/tasks.ts` and `scripts/hub-connect.ts`, bundled for Node 18+ (Bun runs them too) |
-| `.claude/hub/templates/` | `hub.md`, `task.md` and `plan-section.md`, with `{{…}}` for what differs between repositories |
-| `.claude/hub/README.md`, `version` | What the connector is; a hash of its files |
+| In the archive                             | What it is                                                                                    |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `.claude/commands/hub-init.md`             | `/hub-init`: sets the repository up once                                                      |
+| `.claude/hub/tasks.mjs`, `hub-connect.mjs` | `scripts/tasks.ts` and `scripts/hub-connect.ts`, bundled for Node 18+ (Bun runs them too)     |
+| `.claude/hub/templates/`                   | `hub.md`, `task.md` and `plan-section.md`, with `{{…}}` for what differs between repositories |
+| `.claude/hub/README.md`, `version`         | What the connector is; a hash of its files                                                    |
 
 `/hub-init` asks for the project (a new one, or one already here) and runs
 `hub-connect.mjs <slug> --save --title … --blocks …`: an admin presses "Create and allow" (or
@@ -162,29 +169,29 @@ is gone now): read and change it on the site or with `bun scripts/tasks.ts`.
 
 ## API
 
-| Method and path | Who | What |
-| --- | --- | --- |
-| `GET /projects` | admin | Every project with its uploads |
-| `POST /projects` | admin | Create (no tokens yet) |
-| `GET /projects/:slug` | admin | One project |
-| `PATCH /projects/:slug` | admin | Rename, change blocks (a dropped block loses its upload) |
-| `DELETE /projects/:slug` | admin | Delete with everything uploaded, the plan and its history |
-| `POST /projects/:slug/tokens` | admin | Add a named token; the answer carries it once |
-| `DELETE /projects/:slug/tokens/:id` | admin | Revoke one token |
-| `POST /projects/:slug/connect` | admin | A one-time code for a connect command |
-| `POST /projects/:slug/tokens/exchange` | anyone with a code | Exchange the code for a token |
-| `GET /projects/:slug/data/:block` | admin | The block as uploaded |
-| `PUT /projects/:slug/data/decomp/functions` | token | What the map's cells are (`DecompFunctionsSchema`) |
-| `GET /projects/:slug/data/decomp/functions` | admin | The same, for the map's tooltip |
-| `GET /projects/:slug/plan` | admin or token | The plan with every task's state |
-| `PUT /projects/:slug/plan` | admin or token | Import a whole plan into an empty one |
-| `POST /projects/:slug/plan/sections` | admin or token | Add a section |
-| `PATCH`, `DELETE /projects/:slug/plan/sections/:id` | admin or token; delete — admin | Rename; delete an empty section |
-| `POST /projects/:slug/plan/tasks` | admin or token | Add a task |
-| `PATCH`, `DELETE /projects/:slug/plan/tasks/:id` | admin or token; delete — admin | Edit; delete |
-| `POST /projects/:slug/plan/tasks/:id/<take, release, done, reopen>` | admin or token | Change the state (`as`, `note`, `force`) |
-| `GET /projects/:slug/plan/events?task=<id>` | admin or token | Recent changes, of the plan or of one task |
-| `PUT /projects/:slug/data/:block` | project token | Upload a block |
+| Method and path                                                     | Who                            | What                                                      |
+| ------------------------------------------------------------------- | ------------------------------ | --------------------------------------------------------- |
+| `GET /projects`                                                     | admin                          | Every project with its uploads                            |
+| `POST /projects`                                                    | admin                          | Create (no tokens yet)                                    |
+| `GET /projects/:slug`                                               | admin                          | One project                                               |
+| `PATCH /projects/:slug`                                             | admin                          | Rename, change blocks (a dropped block loses its upload)  |
+| `DELETE /projects/:slug`                                            | admin                          | Delete with everything uploaded, the plan and its history |
+| `POST /projects/:slug/tokens`                                       | admin                          | Add a named token; the answer carries it once             |
+| `DELETE /projects/:slug/tokens/:id`                                 | admin                          | Revoke one token                                          |
+| `POST /projects/:slug/connect`                                      | admin                          | A one-time code for a connect command                     |
+| `POST /projects/:slug/tokens/exchange`                              | anyone with a code             | Exchange the code for a token                             |
+| `GET /projects/:slug/data/:block`                                   | admin                          | The block as uploaded                                     |
+| `PUT /projects/:slug/data/decomp/functions`                         | token                          | What the map's cells are (`DecompFunctionsSchema`)        |
+| `GET /projects/:slug/data/decomp/functions`                         | admin                          | The same, for the map's tooltip                           |
+| `GET /projects/:slug/plan`                                          | admin or token                 | The plan with every task's state                          |
+| `PUT /projects/:slug/plan`                                          | admin or token                 | Import a whole plan into an empty one                     |
+| `POST /projects/:slug/plan/sections`                                | admin or token                 | Add a section                                             |
+| `PATCH`, `DELETE /projects/:slug/plan/sections/:id`                 | admin or token; delete — admin | Rename; delete an empty section                           |
+| `POST /projects/:slug/plan/tasks`                                   | admin or token                 | Add a task                                                |
+| `PATCH`, `DELETE /projects/:slug/plan/tasks/:id`                    | admin or token; delete — admin | Edit; delete                                              |
+| `POST /projects/:slug/plan/tasks/:id/<take, release, done, reopen>` | admin or token                 | Change the state (`as`, `note`, `force`)                  |
+| `GET /projects/:slug/plan/events?task=<id>`                         | admin or token                 | Recent changes, of the plan or of one task                |
+| `PUT /projects/:slug/data/:block`                                   | project token                  | Upload a block                                            |
 
 ## Trying it locally
 

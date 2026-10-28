@@ -139,6 +139,10 @@ This project uses **bun** exclusively. Using `npm` is forbidden.
   comes from `.claude/status-hub.json`, never from a default.
 - The agent commands live in `.claude/commands/` (`/hub`, `/task`). A command that changes how work
   is done (branches, PRs, checks) is updated together with `CONTRIBUTING.md` and this file.
+- **Codex uses the same instructions through `AGENTS.md` and the `CLAUDE.md` fallback in
+  `.codex/config.toml`.** Its `$hub` and `$task` skills in `.agents/skills/` mirror the Claude
+  commands; keep both workflows consistent. Shared MCP changes update both `.mcp.json` and
+  `.codex/config.toml`. Setup and Claude-specific migration limits are in `docs/codex.md`.
 
 ## Skills
 

@@ -144,6 +144,9 @@ an instance of Module)`. Use a default import; tsc reports the call as `TS2349`.
   (`@Header("Content-Type", "application/json")`). The menu's progress comes from `uploads` on the
   project, written with each upload by `getProjectBlockProgress`, so listing projects never reads a
   block.
+- **`defaultBlock` must be one of the project's enabled blocks.** Older project documents have no
+  value, so `toProject` exposes their first enabled block until settings save a new value; do not add a
+  schema default that would change how existing projects open.
 - **A plan is one `projectplans` document per project, and every task change is one
   `findOneAndUpdate` that matches the task by `$elemMatch` on its id _and_ the owner and done flag read
   just before.** Two people taking the same task at once: the second update matches nothing and answers

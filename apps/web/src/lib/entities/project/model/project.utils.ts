@@ -25,11 +25,16 @@ export const formatPercent = (done: number, total: number) =>
   total ? `${((100 * done) / total).toFixed(1)}%` : "0%";
 
 export const getProjectSummary = (project: IProject) => {
-  const upload = getProjectUpload(project, project.blocks[0]);
-  if (!upload) return "Nothing uploaded yet";
-  const progress =
-    upload.block === "decomp"
-      ? `${formatPercent(upload.done, upload.total)} decompiled`
-      : `${upload.done} of ${upload.total} done`;
-  return `${progress} · ${commonUtils.getHumanDate(getLastUpload(project)!.updatedAt)}`;
+  const progress = project.blocks.flatMap((block) => {
+    const upload = getProjectUpload(project, block);
+    if (!upload) return [];
+    return [
+      block === "decomp"
+        ? `${formatPercent(upload.done, upload.total)} decompiled`
+        : `${upload.done} of ${upload.total} done`,
+    ];
+  });
+  const lastUpload = getLastUpload(project);
+  if (!lastUpload) return "Nothing uploaded yet";
+  return `${progress.join(" · ")} · ${commonUtils.getHumanDate(lastUpload.updatedAt)}`;
 };

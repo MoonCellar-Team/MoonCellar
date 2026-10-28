@@ -44,6 +44,8 @@ export class Project {
   name: string;
   @Prop({ type: [String], required: true })
   blocks: IProjectBlock[];
+  @Prop({ type: String, enum: ["decomp", "plan"] })
+  defaultBlock?: IProjectBlock;
   @Prop({ type: [ProjectTokenSchema], default: [] })
   tokens: ProjectToken[];
   @Prop({ type: String, select: false })

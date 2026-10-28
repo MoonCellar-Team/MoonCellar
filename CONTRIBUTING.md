@@ -67,3 +67,8 @@ easier to review as its own commit inside the same pull request than mixed into 
 Repository-wide conventions that reviewers will check are collected in
 [`CLAUDE.md`](CLAUDE.md) — the monorepo rules, the shared `@mooncellar/schemas` package, and the
 constraints that are not visible from the code that breaks when they are violated.
+
+Codex reads the same rules through [`AGENTS.md`](AGENTS.md) and the project's
+`.codex/config.toml`. Its `$hub` and `$task` skills mirror Claude Code's `/hub` and `/task`
+commands; see [Codex setup](docs/codex.md). Keep the two workflows consistent when changing
+branches, pull requests or checks.

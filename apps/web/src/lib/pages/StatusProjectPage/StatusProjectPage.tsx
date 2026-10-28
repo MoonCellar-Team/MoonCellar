@@ -53,7 +53,9 @@ export const StatusProjectPage: FC<IStatusProjectPageProps> = ({
     project &&
     (isBlock(block) && project.blocks.includes(block)
       ? block
-      : project.blocks[0]);
+      : project.blocks.includes(project.defaultBlock)
+        ? project.defaultBlock
+        : project.blocks[0]);
   const upload =
     project && active ? getProjectUpload(project, active) : undefined;
   const isPlan = active === "plan";
@@ -128,7 +130,6 @@ export const StatusProjectPage: FC<IStatusProjectPageProps> = ({
                   <Button
                     ref={ref}
                     color={ButtonColor.TRANSPARENT}
-                    compact
                     isOnlyIcon
                     aria-label={`Actions for ${project.name}`}
                     onClick={toggle}

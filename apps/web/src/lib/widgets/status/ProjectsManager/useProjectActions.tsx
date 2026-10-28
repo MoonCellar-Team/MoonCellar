@@ -34,8 +34,11 @@ export const useProjectActions = () => {
           isPending={false}
           submitText="Save"
           onCancel={() => modal.close(EDIT_MODAL_ID)}
-          onSubmit={({ name, blocks }) =>
-            update({ slug: project.slug, dto: { name, blocks } }).then(() => {
+          onSubmit={({ name, blocks, defaultBlock }) =>
+            update({
+              slug: project.slug,
+              dto: { name, blocks, defaultBlock },
+            }).then(() => {
               modal.close(EDIT_MODAL_ID);
               toast.success({ description: `${name} saved` });
             })

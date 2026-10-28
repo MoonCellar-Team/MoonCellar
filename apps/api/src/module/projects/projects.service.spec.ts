@@ -50,6 +50,7 @@ const createService = (stored: Record<string, unknown> | null) => {
     slug: "mooncellar",
     name: "MoonCellar",
     blocks: ["plan"],
+    defaultBlock: "plan",
     uploads: [],
     tokens: [storedToken],
     createdAt: CREATED,
@@ -119,6 +120,7 @@ describe("ProjectsService.create", () => {
       slug: "glassline",
       name: "Glassline",
       blocks: ["plan"],
+      defaultBlock: "plan",
       uploads: [],
       tokens: [],
       createdAt: CREATED.toISOString(),
@@ -336,7 +338,11 @@ describe("ProjectsService.update", () => {
     expect(projects.findOneAndUpdate).toHaveBeenCalledWith(
       { slug: "mooncellar" },
       {
-        $set: { name: "MoonCellar", blocks: ["plan"] },
+        $set: {
+          name: "MoonCellar",
+          blocks: ["plan"],
+          defaultBlock: "plan",
+        },
         $pull: { uploads: { block: { $in: ["decomp"] } } },
       },
       { new: true }

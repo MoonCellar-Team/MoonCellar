@@ -52,6 +52,10 @@
     color: var(--color-text-primary);
   }
 
+  &_manage {
+    align-items: center;
+  }
+
   &__name {
     font-size: 14px;
     font-weight: 700;

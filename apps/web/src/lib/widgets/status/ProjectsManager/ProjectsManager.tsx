@@ -60,7 +60,6 @@ export const ProjectsManager: FC = () => {
           !isCreating && (
             <Button
               color={ButtonColor.ACCENT}
-              compact
               onClick={() => setIsCreating(true)}
             >
               <SvgPlus size="16" />
@@ -118,11 +117,10 @@ export const ProjectsManager: FC = () => {
               actions: {
                 content: (
                   <span className={styles.actions}>
-                    <Button compact onClick={() => openTokens(project.slug)}>
+                    <Button onClick={() => openTokens(project.slug)}>
                       {tokensLabel(project.tokens.length)}
                     </Button>
                     <Button
-                      compact
                       color={ButtonColor.RED}
                       onClick={() => askRemove(project)}
                     >

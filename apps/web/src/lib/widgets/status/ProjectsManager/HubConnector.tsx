@@ -12,7 +12,6 @@ export const HubConnector: FC = () => (
     titleAction={
       <Button
         color={ButtonColor.ACCENT}
-        compact
         href={HUB_CONNECTOR_PATH}
         download
         prefetch={false}

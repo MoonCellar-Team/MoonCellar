@@ -54,7 +54,6 @@ export const PlanTaskPanel: FC<IPlanTaskPanelProps> = ({ slug, taskId }) => {
       <div className={styles.details__actions}>
         {labels.take && (
           <Button
-            compact
             color={ButtonColor.ACCENT}
             disabled={isPending}
             onClick={() => run(task, "take")}
@@ -63,40 +62,27 @@ export const PlanTaskPanel: FC<IPlanTaskPanelProps> = ({ slug, taskId }) => {
           </Button>
         )}
         {labels.done && (
-          <Button
-            compact
-            disabled={isPending}
-            onClick={() => run(task, "done")}
-          >
+          <Button disabled={isPending} onClick={() => run(task, "done")}>
             {labels.done}
           </Button>
         )}
         {labels.release && (
-          <Button
-            compact
-            disabled={isPending}
-            onClick={() => run(task, "release")}
-          >
+          <Button disabled={isPending} onClick={() => run(task, "release")}>
             {labels.release}
           </Button>
         )}
         {labels.reopen && (
-          <Button
-            compact
-            disabled={isPending}
-            onClick={() => run(task, "reopen")}
-          >
+          <Button disabled={isPending} onClick={() => run(task, "reopen")}>
             {labels.reopen}
           </Button>
         )}
         <Button
-          compact
           color={ButtonColor.TRANSPARENT}
           onClick={() => edit(task, section.id)}
         >
           Edit
         </Button>
-        <Button compact color={ButtonColor.RED} onClick={() => askDelete(task)}>
+        <Button color={ButtonColor.RED} onClick={() => askDelete(task)}>
           Delete
         </Button>
       </div>

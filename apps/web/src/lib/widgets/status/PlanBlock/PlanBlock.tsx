@@ -184,10 +184,10 @@ export const PlanBlock: FC<IPlanBlockProps> = ({ slug, plan }) => {
                 onTabClick: () => setFilter(state),
               }))}
             />
-            <Button color={ButtonColor.TRANSPARENT} compact onClick={toggleAll}>
+            <Button color={ButtonColor.TRANSPARENT} onClick={toggleAll}>
               {isAllCollapsed ? "Expand all" : "Collapse all"}
             </Button>
-            <Button color={ButtonColor.ACCENT} compact onClick={addSection}>
+            <Button color={ButtonColor.ACCENT} onClick={addSection}>
               <SvgPlus size="16" />
               Section
             </Button>
@@ -272,12 +272,11 @@ export const PlanBlock: FC<IPlanBlockProps> = ({ slug, plan }) => {
                   />
                 )}
                 <div className={styles.sectionFooter}>
-                  <Button compact onClick={() => addTask(section.id)}>
+                  <Button onClick={() => addTask(section.id)}>
                     <SvgPlus size="16" />
                     Task
                   </Button>
                   <Button
-                    compact
                     color={ButtonColor.TRANSPARENT}
                     onClick={() => renameSection(section)}
                   >
@@ -285,7 +284,6 @@ export const PlanBlock: FC<IPlanBlockProps> = ({ slug, plan }) => {
                   </Button>
                   {!all?.tasks.length && (
                     <Button
-                      compact
                       color={ButtonColor.TRANSPARENT}
                       onClick={() => deleteSection(section.id)}
                     >

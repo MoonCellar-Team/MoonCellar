@@ -50,7 +50,6 @@ export const StatusShell: FC<IStatusShellProps> = ({ viewer, children }) => {
             <span>{viewer.userName}</span>
             <Button
               color={ButtonColor.TRANSPARENT}
-              compact
               onClick={() => logout(viewer.id, { href: STATUS_SIGN_IN_PATH })}
             >
               Sign out

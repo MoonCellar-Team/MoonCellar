@@ -49,6 +49,7 @@ export const ProjectSchema = z.object({
   slug: ProjectSlugSchema,
   name: z.string(),
   blocks: z.array(ProjectBlockSchema),
+  defaultBlock: ProjectBlockSchema,
   uploads: z.array(ProjectUploadSchema),
   tokens: z.array(ProjectTokenInfoSchema),
   createdAt: z.string(),
@@ -66,12 +67,14 @@ export const CreateProjectRequestSchema = z.object({
   name: z.string().trim().min(1).max(60),
   slug: ProjectSlugSchema,
   blocks: ProjectBlocksFieldSchema,
+  defaultBlock: ProjectBlockSchema.optional(),
 });
 export type ICreateProjectRequest = z.input<typeof CreateProjectRequestSchema>;
 
 export const UpdateProjectRequestSchema = z.object({
   name: z.string().trim().min(1).max(60).optional(),
   blocks: ProjectBlocksFieldSchema.optional(),
+  defaultBlock: ProjectBlockSchema.optional(),
 });
 export type IUpdateProjectRequest = z.input<typeof UpdateProjectRequestSchema>;
 

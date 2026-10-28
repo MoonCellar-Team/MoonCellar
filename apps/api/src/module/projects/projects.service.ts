@@ -69,6 +69,7 @@ type IStoredProject = Pick<
   Project,
   "slug" | "name" | "blocks" | "createdAt"
 > & {
+  defaultBlock?: IProjectBlock;
   uploads?: Project["uploads"];
   tokens?: Project["tokens"];
 };
@@ -80,6 +81,10 @@ export const toProject = (project: IStoredProject): IProject => ({
   slug: project.slug,
   name: project.name,
   blocks: project.blocks,
+  defaultBlock:
+    project.defaultBlock && project.blocks.includes(project.defaultBlock)
+      ? project.defaultBlock
+      : project.blocks[0],
   uploads: (project.uploads ?? []).map((upload) => ({
     block: upload.block,
     updatedAt: new Date(upload.updatedAt).toISOString(),
@@ -173,6 +178,12 @@ export class ProjectsService implements OnModuleInit {
   }
 
   async create(dto: ICreateProjectRequest): Promise<IProject> {
+    const defaultBlock = dto.defaultBlock ?? dto.blocks[0];
+    if (!dto.blocks.includes(defaultBlock)) {
+      throw new BadRequestException(
+        "The default page must be one of this project's enabled blocks"
+      );
+    }
     if (await this.projects.exists({ slug: dto.slug })) {
       throw new ConflictException(
         `The address "${dto.slug}" already belongs to another project`
@@ -182,6 +193,7 @@ export class ProjectsService implements OnModuleInit {
       slug: dto.slug,
       name: dto.name,
       blocks: dto.blocks,
+      defaultBlock,
       tokens: [],
       uploads: [],
     });
@@ -192,11 +204,21 @@ export class ProjectsService implements OnModuleInit {
     const project = await this.findProject(slug);
     const blocks = (dto.blocks ?? project.blocks) as IProjectBlock[];
     const dropped = project.blocks.filter((block) => !blocks.includes(block));
+    const defaultBlock =
+      dto.defaultBlock ??
+      (project.defaultBlock && blocks.includes(project.defaultBlock)
+        ? project.defaultBlock
+        : blocks[0]);
+    if (!blocks.includes(defaultBlock)) {
+      throw new BadRequestException(
+        "The default page must be one of this project's enabled blocks"
+      );
+    }
     const updated = await this.projects
       .findOneAndUpdate(
         { slug },
         {
-          $set: { name: dto.name ?? project.name, blocks },
+          $set: { name: dto.name ?? project.name, blocks, defaultBlock },
           $pull: { uploads: { block: { $in: dropped } } },
         },
         { new: true }

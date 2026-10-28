@@ -75,13 +75,11 @@ export const PlanTaskMenu: FC<IPlanTaskMenuProps> = ({
 
   return (
     <ActionsMenu
-      title={task.id}
       items={items}
       renderTrigger={({ ref, toggle }) => (
         <Button
           ref={ref}
           color={ButtonColor.TRANSPARENT}
-          compact
           isOnlyIcon
           aria-label={`Actions for ${task.id}`}
           disabled={isPending}

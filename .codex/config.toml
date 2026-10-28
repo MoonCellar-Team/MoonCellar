@@ -1,0 +1,47 @@
+project_doc_fallback_filenames = ["CLAUDE.md"]
+project_doc_max_bytes = 131072
+
+[features]
+hooks = true
+
+[mcp_servers.codegraph]
+command = "codegraph"
+args = ["serve", "--mcp"]
+enabled = true
+
+[mcp_servers.playwright]
+command = "bunx"
+args = ["@playwright/mcp@latest"]
+enabled = true
+
+[mcp_servers.mongodb]
+command = "bunx"
+args = ["mongodb-mcp-server@latest", "--readOnly"]
+enabled = true
+
+[mcp_servers.game-adder]
+command = "sh"
+args = ["-c", "cd \"$(git rev-parse --show-toplevel)\" && exec bun run --env-file=apps/api/.env apps/api/mcp/game-adder/index.ts"]
+enabled = true
+
+[mcp_servers.grafana]
+command = "docker"
+args = ["run", "--rm", "-i", "-e", "GRAFANA_URL=https://grafana.mooncellar.space", "-e", "GRAFANA_SERVICE_ACCOUNT_TOKEN", "mcp/grafana", "-t", "stdio", "-disable-write", "-disable-asserts", "-disable-athena", "-disable-clickhouse", "-disable-cloudwatch", "-disable-elasticsearch", "-disable-graphite", "-disable-influxdb", "-disable-incident", "-disable-oncall", "-disable-pyroscope", "-disable-quickwit", "-disable-snowflake", "-disable-sift"]
+enabled = true
+env_vars = ["GRAFANA_SERVICE_ACCOUNT_TOKEN"]
+
+[[hooks.PreToolUse]]
+matcher = "Bash|Grep"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "graphify hook-guard search"
+timeout = 10
+
+[[hooks.PreToolUse]]
+matcher = "Read|Glob"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "graphify hook-guard read"
+timeout = 10
