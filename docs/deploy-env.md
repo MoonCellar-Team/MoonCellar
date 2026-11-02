@@ -357,10 +357,17 @@ The full setup is in [mail.md](mail.md); the deploy order is:
 2. Publish the records the script prints: the `A` for `mail.mooncellar.space`, the DKIM `TXT`,
    SPF and DMARC. Ask the provider for the `PTR` of the host's address — the reverse zone is not
    part of the domain.
-3. Add `MAIL_DKIM_DIR` to `HOST_ENV_INFRA` and the seven `SMTP_*` keys to `HOST_ENV_API`, then
-   run **Actions → CI/CD → Run workflow** so both are picked up; a plain push picks up whichever
-   side it touched.
-4. `POST /mail/test` with an admin session, and read `Authentication-Results` in the received
+3. Nothing to add to the secrets: the deploy appends `SMTP_HOST=mail`, `SMTP_PORT=587`,
+   `SMTP_SECURE=false` and `SMTP_FROM` to `apps/api/.env` before the image build, the way it
+   appends `TURN_SECRET` to the game service, because none of them is a secret. It does that
+   **only when `HOST_ENV_API` does not set `SMTP_HOST` itself**, so a relay login
+   (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASSWORD`) put in the secret wins. `MAIL_DKIM_DIR` only
+   needs to be in `HOST_ENV_INFRA` when the key lives somewhere other than
+   `/opt/mooncellar/mail-dkim`.
+4. Run **Actions → CI/CD → Run workflow** on the merged commit, so the infra deploy starts the
+   container and the API image is rebuilt with those lines. A plain push picks up only the side
+   it touched.
+5. `POST /mail/test` with an admin session, and read `Authentication-Results` in the received
    letter: SPF, DKIM and DMARC must all read `pass`.
 
 ---

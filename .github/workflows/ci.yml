@@ -150,6 +150,9 @@ jobs:
 
           if [ "$DEPLOY_API" = "true" ]; then
             echo "${{ secrets.HOST_ENV_API }}" > apps/api/.env;
+            if ! grep -q '^SMTP_HOST=' apps/api/.env; then
+              printf 'SMTP_HOST=mail\nSMTP_PORT=587\nSMTP_SECURE=false\nSMTP_FROM="MoonCellar <noreply@mooncellar.space>"\n' >> apps/api/.env;
+            fi
             docker build \
               -f apps/api/Dockerfile \
               -t mooncellar-backend:latest \

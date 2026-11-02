@@ -28,7 +28,10 @@ an MX record without building a real inbound server behind it.
 
 ## Variables
 
-The API side (`HOST_ENV_API`, see [Deploy variables](./deploy-env)):
+The API side (see [Deploy variables](./deploy-env)). The deploy appends the four non-secret
+values to `apps/api/.env` before the image build — **only when `HOST_ENV_API` does not set
+`SMTP_HOST` itself**, so a relay configured there wins — which means production needs nothing
+in the secret unless a different sender or a relay login is wanted:
 
 | Variable                     | Default                                 | Description                                                                                                                                                                                                        |
 | ---------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
