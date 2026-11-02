@@ -7,8 +7,6 @@
   gap: var(--gap-x4);
   align-items: start;
   width: 100%;
-  max-width: var(--news-page-width);
-  margin-inline: auto;
 
   &__head {
     grid-area: head;
@@ -21,7 +19,7 @@
   &__side {
     grid-area: side;
     position: sticky;
-    top: 0;
+    top: var(--container-padding-top);
   }
 
   &__gameFilter {
