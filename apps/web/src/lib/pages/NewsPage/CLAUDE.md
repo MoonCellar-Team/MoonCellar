@@ -27,8 +27,8 @@ publication date and the game an article is about. Public.
 ## Composition
 
 1. `BGImage`.
-2. A grid capped at `--news-page-width`: a head `Box`, the list `Box`, and an `aside` of
-   `--news-sidebar-width`.
+2. A grid that fills the page container — the same width as every other page, with no cap of its
+   own: a head `Box`, the list `Box`, and an `aside` of `--news-sidebar-width`.
 3. Head `Box`: `Breadcrumbs`, `SectionTitle as="h1"` "News" with a "Write a post" button for
    admins, segmented `Tabs` All / Site news / Game articles with `counts` from the response,
    `AppliedFilters` (date and game), and below `media960` the compact filters —
@@ -41,8 +41,9 @@ publication date and the game an article is about. Public.
 
 - `NewsPageSkeleton` (`NewsPageSkeleton.tsx`, its own `"use client"` module sharing
   `NewsPage.module.scss`) is the route's `Suspense` fallback. It draws the page's own frame —
-  the `page` grid at `--news-page-width`, the head and list `Box`es and the `--news-sidebar-width`
-  archive `aside` — so the panels, columns and widths are already in place when the data arrives.
+  the `page` grid at the container's full width, the head and list `Box`es and the
+  `--news-sidebar-width` archive `aside` — so the panels, columns and widths are already in place
+  when the data arrives.
   The `aside` is drawn even though the page drops it when the archive is empty: the grid keeps
   its sidebar track either way, so the list width does not depend on it.
 - `ArticleRowSkeleton` repeats `ArticleRow`'s grid and classes: the `row__thumb` column, then the
@@ -74,3 +75,14 @@ publication date and the game an article is about. Public.
 - Dates are formatted in UTC (`formatArticleDate`), the same zone the API groups the archive
   by, so a post published near midnight sits in the month the archive counts it in, on the server
   and in every browser.
+- **The feed fills the page container and takes no cap of its own.** It used to stop at
+  `--news-page-width` (1080px) while Games, Lists and the rest used the container's 1400px, so on
+  a wide screen the list sat in a visibly narrower column. That token is `--article-page-width`
+  now and belongs to `ArticlePage` and `ArticleEditor`: the article keeps a narrower reading
+  measure, a feed does not need one.
+- **The sidebar sticks below the fixed header, not at the top of the scrollport.** The page
+  scrolls `#page-scroll` while the header is `position: fixed` over it, so `top: 0` slid the
+  archive card under the header and cut off its top. `top: var(--container-padding-top)` is the
+  container's own top padding (the header plus the gap) and follows
+  `.container_topMenu`/`.container_bare`; below `media960` the aside is `display: none`, so the
+  offset only matters on the desktop layout.

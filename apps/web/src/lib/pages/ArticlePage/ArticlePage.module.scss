@@ -8,7 +8,7 @@
   gap: var(--gap-x4);
   align-items: start;
   width: 100%;
-  max-width: var(--news-page-width);
+  max-width: var(--article-page-width);
   margin-inline: auto;
 
   &__head {
@@ -27,7 +27,7 @@
   &__side {
     grid-area: side;
     position: sticky;
-    top: 0;
+    top: var(--container-padding-top);
     min-width: 0;
 
     &:empty {
