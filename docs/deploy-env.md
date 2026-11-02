@@ -107,6 +107,7 @@ refuses to start rather than fall back to `admin`.
 | `METRICS_TOKEN` | **yes** | Bearer token Prometheus sends when scraping the API's `/metrics`. Must be byte-identical to the API's own `METRICS_TOKEN`, or every scrape is a 401 |
 | `SEARXNG_SECRET` | **yes** | SearXNG's `server.secret_key` (`openssl rand -hex 32`). `infra/searxng/settings.yml` is committed without it, so the key never lands in git |
 | `MAIL_DKIM_DIR` | no | Host directory bind-mounted as the mail container's `/etc/opendkim/keys` — `/opt/mooncellar/mail-dkim`, which is also the default, so an infra deploy whose `HOST_ENV_INFRA` has not been updated yet still starts. The DKIM private key lives there and never enters the repository; the directory must exist **before the first infra deploy**, because the mount sets `create_host_path: false` and compose refuses to start on a missing path. Generate the key with `infra/mail/generate-dkim.sh`, see [Mail](mail.md) |
+| `MAIL_RELAY_DIR` | no | Host directory bind-mounted as the mail container's `/secrets`, holding Resend's API key in a file named `password` — `/opt/mooncellar/mail-relay`, which is also the default. `create_host_path: false`, so the container refuses to start until the key exists; that is deliberate, because starting without it silently reverts to direct delivery from an address with no PTR. See [Mail](mail.md) |
 | `TURN_SECRET` | **yes** | Not here: the deploy appends it from the `TURN_SECRET` repository secret. Without it the `coturn` container only logs that the relay is off. coturn runs on the host network, so `ufw` filters it: the infra deploy opens UDP 3478 and 49160–49200 when ufw is active and `SSH_USER` may run it (root, or passwordless sudo); otherwise `ufw allow 3478/udp` and `ufw allow 49160:49200/udp` by hand, and the provider's firewall in any case |
 | `TURN_REALM` | no | Optional realm coturn announces, `game.mooncellar.space` by default |
 | `TURN_EXTERNAL_IP` | no | Optional public address of the host when it sits behind 1:1 NAT (a cloud VM whose interface has a private address); leave it empty when the public address is on the interface |
@@ -480,6 +481,8 @@ METRICS_TOKEN=
 SEARXNG_SECRET=
 # Host directory holding the DKIM private key of the mail container
 MAIL_DKIM_DIR=
+# Host directory holding Resend's API key (file `password`) for the mail relay
+MAIL_RELAY_DIR=
 ```
 
 </details>
