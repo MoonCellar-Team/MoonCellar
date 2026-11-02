@@ -16,7 +16,8 @@ The letters themselves are built in `apps/api/src/module/mail` and follow
 | Address inside the network | `mail:587`, submission. No port is published: only containers on the `mooncellar` network can reach it                                                        |
 | Sender                     | `MoonCellar <noreply@mooncellar.space>` (`SMTP_FROM`)                                                                                                         |
 | Signing                    | rspamd inside the same container, signing with the key from `MAIL_DKIM_DIR` — selector `mail`, domain `mooncellar.space`                                       |
-| Transport                  | Postfix delivers straight to the recipient's MX. The host's outbound port 25 is open, which this setup depends on — see [Outbound port 25](#outbound-port-25) |
+| Relay                      | Postfix hands every letter to Resend at `smtp.resend.com:587`, authenticated with the key in `MAIL_RELAY_DIR`; Resend delivers from its own addresses, which have the PTR and the reputation |
+| Transport                  | The host's own address has no PTR, so the container never delivers directly — see [Why the relay](#why-the-relay) |
 
 `boky/postfix` is a Postfix built for application mail: it takes messages on 587 from trusted
 networks, signs them, and delivers them. It has no user accounts, no Dovecot and no spam filter,
@@ -46,8 +47,8 @@ in the secret unless a different sender or a relay login is wanted:
 | ---------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `SMTP_HOST`                  | **none**                                | The mail container, `mail`. **Unset means the module is off**: `POST /mail/test` answers 503 and nothing else can send either. There is deliberately no default, so a laptop running `dev:api` never tries to send |
 | `SMTP_PORT`                  | `587`                                   | Submission port of the container                                                                                                                                                                                   |
-| `SMTP_SECURE`                | `false`                                 | `true` only for a relay on port 465. The container's submission port has TLS switched off, so this stays `false`                                                                                                    |
-| `SMTP_USER`, `SMTP_PASSWORD` | none                                    | Only for a relay that needs a login. The internal container allows the Docker networks (`POSTFIX_mynetworks`) and needs neither                                                                                    |
+| `SMTP_SECURE`                | `false`                                 | `true` only for a provider on port 465. The container's submission port has TLS switched off, so this stays `false`                                                                                                 |
+| `SMTP_USER`, `SMTP_PASSWORD` | none                                    | Only when the API talks to a provider directly. The internal container allows the Docker networks (`POSTFIX_mynetworks`), and the relay login is its own business — see [Why the relay](#why-the-relay)         |
 | `SMTP_FROM`                  | `MoonCellar <noreply@mooncellar.space>` | The `From` header, and the domain SPF and DMARC are checked against. **Its domain must stay `mooncellar.space`**                                                                                                   |
 | `SMTP_REPLY_TO`              | none                                    | Optional `Reply-To`. Leave it empty while nothing reads the replies                                                                                                                                                |
 
@@ -56,6 +57,7 @@ The infrastructure side (`HOST_ENV_INFRA`):
 | Variable        | Description                                                                                                                                                                                                                                                              |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `MAIL_DKIM_DIR` | Host directory bind-mounted as `/etc/opendkim/keys` — `/opt/mooncellar/mail-dkim`, which is the default in the compose file. The mount sets `create_host_path: false`, so the directory and its key must exist before the first infra deploy or compose refuses to start |
+| `MAIL_RELAY_DIR` | Host directory bind-mounted as `/secrets`, holding Resend's API key in a file named `password` — `/opt/mooncellar/mail-relay`, also the default. Same `create_host_path: false`: the container refuses to start until the key is there, which is what stops a deploy from silently reverting to direct delivery |
 
 ## The DKIM key
 
@@ -92,6 +94,8 @@ reverse record are what make a letter land in the Inbox rather than in spam.
 | `mooncellar.space`                 | `TXT` | `v=spf1 a:mail.mooncellar.space -all`              | SPF. `a:` follows the `A` record above, so moving the host means changing one record instead of two                            |
 | `mail._domainkey.mooncellar.space` | `TXT` | `v=DKIM1; k=rsa; p=…`                              | The public half of the key from the previous section. `p=` is printed by the script                                            |
 | `_dmarc.mooncellar.space`          | `TXT` | `v=DMARC1; p=quarantine; adkim=s; aspf=s; pct=100` | DMARC. Strict alignment on both, because everything is sent from `mooncellar.space` itself                                     |
+| `rsend.mooncellar.space`           | `CNAME` | `rsend-euw1.forge.rmta.net.`                     | Resend's DKIM/SPF endpoint. The **trailing dot matters**: the DNS panel rejects a CNAME value without it                    |
+| `send.mooncellar.space`            | `CNAME` | `send.forge.rmta.net.`                           | Resend's return-path domain. These two CNAMEs are the whole Resend setup — no `resend._domainkey` TXT and no MX are added |
 
 Notes that matter:
 
@@ -133,54 +137,52 @@ the receiving provider's own name. A letter that passes SPF but not DKIM means t
 `mail._domainkey` record does not match the key in `MAIL_DKIM_DIR` — the usual cause is a key
 regenerated without replacing its record.
 
-## Outbound port 25
+## Why the relay
 
-The container needs the host's outbound port 25 to reach a recipient's MX directly. It was
-checked on 2026-11-02 from the host with a TCP connect to `gmail-smtp-in.l.google.com:25`, which
-opened, so no relay through a provider is configured. Hosting providers often block that port;
-if a future host does, `RELAYHOST`, `RELAYHOST_USERNAME` and `RELAYHOST_PASSWORD` on the `mail`
-service send everything through a provider instead — and DKIM and SPF stay as they are, because
-the letter is still signed and sent as `mooncellar.space`.
+The host's address has no reverse DNS and cannot get one: the reverse zone of `201.57.31.in-addr.arpa`
+is not delegated, its parent `31.in-addr.arpa` is served by the RIRs, and the block belongs to
+`netutils.io`, so a PTR there is a request to the operator of the address and nothing on the
+machine can create it. Sending directly is not survivable without it — the same letter that Gmail
+accepted was rejected by Yahoo at `MAIL FROM` with `550 5.7.25 Forward-confirmed reverse DNS
+failed tnmpmscs`.
 
-## When the host cannot get a PTR
+So the container relays, and Resend carries the letter out:
 
-What the missing entry costs is not a theory: on 2026-11-02 the same letter that Gmail accepted
-(`250 2.0.0 OK … gsmtp`) was rejected by Yahoo at `MAIL FROM` with
-`550 5.7.25 Forward-confirmed reverse DNS failed tnmpmscs` — not spam-foldered, refused
-outright. A receiver that enforces forward-confirmed reverse DNS never gets as far as SPF, DKIM
-or DMARC.
+| Piece | Value |
+|---|---|
+| Relay | `smtp.resend.com:587`, SASL login `resend`, password read from `/secrets/password` |
+| TLS to the relay | `POSTFIX_smtp_tls_security_level: encrypt` — the credentials must not travel in the clear |
+| Key on disk | `/opt/mooncellar/mail-relay/password`, `600`, never in the repository and never in a GitHub secret |
+| Mount | `/opt/mooncellar/mail-relay` → `/secrets`, **not `/run/secrets`** — see the gotcha below |
 
-Everything above assumes the host's address has a reverse DNS entry. That entry cannot be created
-from either DNS panel: the reverse zone belongs to the operator of the address block, and on this
-host it is not even delegated — `201.57.31.in-addr.arpa` answers NXDOMAIN while its parent
-`31.in-addr.arpa` is served by the RIRs, so a PTR is a request to whoever holds the block, not a
-record anyone can add. Where that request is impossible, **relay through a transactional mail
-provider** and let its address carry the reverse DNS and the reputation.
+The letters are still signed by our own rspamd with `d=mooncellar.space; s=mail` before Resend
+receives them, and Resend adds its own signature as well; DMARC is aligned either way, and the
+`mail._domainkey` record already published stays in use.
 
-The API needs no change for that: `MailService` speaks plain SMTP, so the relay is four variables.
+**Mount the password somewhere other than `/run/secrets`.** `boky/postfix` declares
+`VOLUME /var/run/`, and `/var/run` is a symlink to `/run`, so Docker puts an anonymous volume over
+`/run` and the bind is masked: the container then dies at start with
+`/scripts/common.sh: line 216: /run/secrets/password: No such file or directory` while the host
+file is sitting right there. `/secrets` works.
 
-| Variable                     | Value                                                                          |
-| ---------------------------- | ------------------------------------------------------------------------------ |
-| `SMTP_HOST`                  | the provider's submission host, e.g. `smtp.resend.com`                         |
-| `SMTP_PORT`                  | `465` for implicit TLS, `587` for STARTTLS — whichever the provider documents  |
-| `SMTP_SECURE`                | `true` with 465, `false` with 587                                              |
-| `SMTP_USER`, `SMTP_PASSWORD` | the credentials it issues; the password is often an API key                    |
+**The root SPF is not involved in relayed letters, and that is deliberate.** Resend sends with a
+return-path on `send.mooncellar.space`, so SPF is evaluated against that name and its own record.
+Do not add `include:amazonses.com` to `mooncellar.space` "to make it match": it would authorise
+every Amazon SES customer to pass SPF as this domain, which is exactly the hole strict DMARC
+alignment exists to close.
 
-They go into `HOST_ENV_API`. The deploy appends its own defaults only when `SMTP_HOST` is absent,
-so a relay configured in the secret wins and the workflow stays untouched.
+## Outbound ports
 
-Two records change with a relay, and both are needed for DMARC to keep passing:
+The container now needs outbound `587` to `smtp.resend.com` and nothing else. Its direct-delivery
+path is still there and would need outbound `25`, which the host does allow — that check was run
+on 2026-11-02 with a TCP connect to `gmail-smtp-in.l.google.com:25`, and it opened. Resend being
+down only fills the local Postfix queue; the letters are retried, not lost, and the spool survives
+a `docker compose up` on the service because compose keeps the container's volumes.
 
-- **The provider's DKIM records.** A relay signs with `d=mooncellar.space` only after the
-  selectors it gives you are published (one or more `TXT`/`CNAME` under `<selector>._domainkey`).
-  Without them it signs with its own domain, which fails DMARC alignment however good SPF looks.
-- **SPF gains its include:** `v=spf1 include:spf.<provider> -all`. Drop
-  `a:mail.mooncellar.space` once nothing is sent from this host any more.
-
-The `mail` container still runs while a relay is configured and simply sends nothing; keep it for
-the day the address gets a PTR, or drop the service. `RELAYHOST`, `RELAYHOST_USERNAME` and
-`RELAYHOST_PASSWORD` on it are the third shape: the container stays in the path and hands every
-message to the provider.
+One consequence of relaying with no inbound mail: when a delivery fails, Postfix generates a
+non-delivery report addressed to `noreply@mooncellar.space`, and Resend refuses that message
+(`550 Invalid 'from' field`, the DSN has no real sender). The report is dropped, which is the same
+outcome as before — nobody can read a bounce at an address that has no mailbox.
 
 ## Deliverability notes
 

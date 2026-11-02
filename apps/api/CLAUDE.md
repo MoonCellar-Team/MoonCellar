@@ -209,6 +209,14 @@ an instance of Module)`. Use a default import; tsc reports the call as `TS2349`.
   `self signed certificate` / `DEPTH_ZERO_SELF_SIGNED_CERT` and every send fails as a 502 while the
   container reports healthy. `POSTFIX_smtpd_tls_security_level: none` in the compose file is what
   prevents that; do not turn it back on without mounting a certificate the API can verify.
+- **Relayed letters leave through Resend, and the root SPF must not be widened for them.** Resend
+  sends with a return path on `send.mooncellar.space`, so SPF is evaluated there; adding
+  `include:amazonses.com` to `mooncellar.space` "to make it match" would let any Amazon SES
+  customer pass SPF as this domain, which is the hole strict DMARC alignment exists to close.
+- **The relay password is mounted at `/secrets`, never at `/run/secrets`.** `boky/postfix` declares
+  `VOLUME /var/run/`, `/var/run` is a symlink to `/run`, and Docker puts an anonymous volume there
+  that masks the bind — the container then dies with `/run/secrets/password: No such file or
+  directory` while the file is sitting on the host.
 - **A letter is always sent with both `html` and `text`.** The plain-text part is what a client
   without HTML shows and what several spam filters compare the HTML against; sending HTML alone
   lowers the score for no benefit.
