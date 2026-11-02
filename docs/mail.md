@@ -22,6 +22,15 @@ The letters themselves are built in `apps/api/src/module/mail` and follow
 networks, signs them, and delivers them. It has no user accounts, no Dovecot and no spam filter,
 because nothing ever connects to it from the internet.
 
+**Submission inside the network is plaintext, on purpose.** The image ships a self-signed
+certificate (`CN=localhost`), and `nodemailer` refuses it with `self signed certificate` /
+`DEPTH_ZERO_SELF_SIGNED_CERT` — the send fails and the API answers 502 on every letter, although
+the container itself is healthy. Rather than teach the API to ignore a certificate, the service
+sets `POSTFIX_smtpd_tls_security_level: none`: the port is not published, the only peers are
+containers on the `mooncellar` bridge, and the API already talks to MongoDB in plaintext over the
+same network. Outbound TLS to recipients is a different setting (`smtp_tls_security_level`, left
+at `may`) and is untouched.
+
 **The container is not a mail server for people.** It has no MX record, no mailbox and no
 inbound port, so nobody can write to `noreply@mooncellar.space`. Do not publish port 25 or add
 an MX record without building a real inbound server behind it.
@@ -37,7 +46,7 @@ in the secret unless a different sender or a relay login is wanted:
 | ---------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `SMTP_HOST`                  | **none**                                | The mail container, `mail`. **Unset means the module is off**: `POST /mail/test` answers 503 and nothing else can send either. There is deliberately no default, so a laptop running `dev:api` never tries to send |
 | `SMTP_PORT`                  | `587`                                   | Submission port of the container                                                                                                                                                                                   |
-| `SMTP_SECURE`                | `false`                                 | `true` for implicit TLS (port 465). The container speaks plain submission with `smtpd_tls_security_level=may`, so this stays `false`                                                                               |
+| `SMTP_SECURE`                | `false`                                 | `true` only for a relay on port 465. The container's submission port has TLS switched off, so this stays `false`                                                                                                    |
 | `SMTP_USER`, `SMTP_PASSWORD` | none                                    | Only for a relay that needs a login. The internal container allows the Docker networks (`POSTFIX_mynetworks`) and needs neither                                                                                    |
 | `SMTP_FROM`                  | `MoonCellar <noreply@mooncellar.space>` | The `From` header, and the domain SPF and DMARC are checked against. **Its domain must stay `mooncellar.space`**                                                                                                   |
 | `SMTP_REPLY_TO`              | none                                    | Optional `Reply-To`. Leave it empty while nothing reads the replies                                                                                                                                                |
@@ -132,6 +141,46 @@ opened, so no relay through a provider is configured. Hosting providers often bl
 if a future host does, `RELAYHOST`, `RELAYHOST_USERNAME` and `RELAYHOST_PASSWORD` on the `mail`
 service send everything through a provider instead — and DKIM and SPF stay as they are, because
 the letter is still signed and sent as `mooncellar.space`.
+
+## When the host cannot get a PTR
+
+What the missing entry costs is not a theory: on 2026-11-02 the same letter that Gmail accepted
+(`250 2.0.0 OK … gsmtp`) was rejected by Yahoo at `MAIL FROM` with
+`550 5.7.25 Forward-confirmed reverse DNS failed tnmpmscs` — not spam-foldered, refused
+outright. A receiver that enforces forward-confirmed reverse DNS never gets as far as SPF, DKIM
+or DMARC.
+
+Everything above assumes the host's address has a reverse DNS entry. That entry cannot be created
+from either DNS panel: the reverse zone belongs to the operator of the address block, and on this
+host it is not even delegated — `201.57.31.in-addr.arpa` answers NXDOMAIN while its parent
+`31.in-addr.arpa` is served by the RIRs, so a PTR is a request to whoever holds the block, not a
+record anyone can add. Where that request is impossible, **relay through a transactional mail
+provider** and let its address carry the reverse DNS and the reputation.
+
+The API needs no change for that: `MailService` speaks plain SMTP, so the relay is four variables.
+
+| Variable                     | Value                                                                          |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| `SMTP_HOST`                  | the provider's submission host, e.g. `smtp.resend.com`                         |
+| `SMTP_PORT`                  | `465` for implicit TLS, `587` for STARTTLS — whichever the provider documents  |
+| `SMTP_SECURE`                | `true` with 465, `false` with 587                                              |
+| `SMTP_USER`, `SMTP_PASSWORD` | the credentials it issues; the password is often an API key                    |
+
+They go into `HOST_ENV_API`. The deploy appends its own defaults only when `SMTP_HOST` is absent,
+so a relay configured in the secret wins and the workflow stays untouched.
+
+Two records change with a relay, and both are needed for DMARC to keep passing:
+
+- **The provider's DKIM records.** A relay signs with `d=mooncellar.space` only after the
+  selectors it gives you are published (one or more `TXT`/`CNAME` under `<selector>._domainkey`).
+  Without them it signs with its own domain, which fails DMARC alignment however good SPF looks.
+- **SPF gains its include:** `v=spf1 include:spf.<provider> -all`. Drop
+  `a:mail.mooncellar.space` once nothing is sent from this host any more.
+
+The `mail` container still runs while a relay is configured and simply sends nothing; keep it for
+the day the address gets a PTR, or drop the service. `RELAYHOST`, `RELAYHOST_USERNAME` and
+`RELAYHOST_PASSWORD` on it are the third shape: the container stays in the path and hands every
+message to the provider.
 
 ## Deliverability notes
 
