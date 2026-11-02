@@ -107,6 +107,7 @@ services:
       TZ: Europe/Moscow
       ALLOWED_SENDER_DOMAINS: mooncellar.space
       POSTFIX_myhostname: mail.mooncellar.space
+      POSTFIX_smtpd_tls_security_level: none
       DKIM_SELECTOR: mail
       MASQUERADED_DOMAINS: mooncellar.space
     volumes:

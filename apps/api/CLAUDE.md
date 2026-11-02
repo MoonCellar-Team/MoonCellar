@@ -204,6 +204,11 @@ an instance of Module)`. Use a default import; tsc reports the call as `TS2349`.
   later, and a raw name with `<` in it breaks the letter for every client; the colours are
   duplicated there because a mail client drops `<style>` and ignores CSS variables, so they cannot
   be imported from the site.
+- **The container's submission port speaks no TLS, and that is deliberate.** `boky/postfix` ships a
+  self-signed `CN=localhost` certificate, so `nodemailer` refuses the STARTTLS upgrade with
+  `self signed certificate` / `DEPTH_ZERO_SELF_SIGNED_CERT` and every send fails as a 502 while the
+  container reports healthy. `POSTFIX_smtpd_tls_security_level: none` in the compose file is what
+  prevents that; do not turn it back on without mounting a certificate the API can verify.
 - **A letter is always sent with both `html` and `text`.** The plain-text part is what a client
   without HTML shows and what several spam filters compare the HTML against; sending HTML alone
   lowers the score for no benefit.
