@@ -47,19 +47,13 @@ import {
 } from "../../../shared/remote-image";
 import { toReleaseDate } from "../../../shared/release-date";
 import { uniqueSlug } from "../../../shared/utils";
-import type Anthropic from "@anthropic-ai/sdk";
 import {
   callOpenAi,
   type IOpenAiOutput,
   openAiModel,
   outputText,
 } from "../../../shared/openai";
-import {
-  assertAiKey,
-  callClaude,
-  claudeFirst,
-  messageText,
-} from "../../../shared/claude";
+import { assertAiKey } from "../../../shared/ai";
 import { normalizeTitle } from "../utils/title-match.utils";
 import { FRONT_URL, RA_MAIN_USER_NAME } from "../../../shared/constants";
 import { VNDB_WORLDWIDE_REGION } from "../constants/vndb";
@@ -344,58 +338,6 @@ type IResearchTurn = (
   calls: { id: string; name: string; arguments: string }[];
   text: string;
 }>;
-
-const claudeTurns = ({
-  instructions,
-  input,
-  tools,
-  schema,
-}: IResearch): IResearchTurn => {
-  const messages: Anthropic.MessageParam[] = [{ role: "user", content: input }];
-
-  return async (outputs, isLastTurn) => {
-    if (outputs.length) {
-      messages.push({
-        role: "user",
-        content: outputs.map(({ id, output }) => ({
-          type: "tool_result",
-          tool_use_id: id,
-          content: output,
-        })),
-      });
-    }
-
-    const message = await callClaude({
-      system: instructions,
-      messages,
-      tools: tools.map(({ name, description, parameters }) => ({
-        name,
-        description,
-        input_schema: parameters as Anthropic.Tool.InputSchema,
-        strict: true,
-      })),
-      tool_choice: { type: isLastTurn ? "none" : "auto" },
-      output_config: { format: { type: "json_schema", schema } },
-    });
-
-    messages.push({ role: "assistant", content: message.content });
-
-    return {
-      calls: message.content.flatMap((block) =>
-        block.type === "tool_use"
-          ? [
-              {
-                id: block.id,
-                name: block.name,
-                arguments: JSON.stringify(block.input),
-              },
-            ]
-          : []
-      ),
-      text: messageText(message),
-    };
-  };
-};
 
 const openAiTurns = ({
   instructions,
@@ -867,16 +809,11 @@ export class GameAiDraftService implements OnModuleInit {
   }): Promise<T> {
     assertAiKey();
 
-    return claudeFirst(
-      "AI draft",
-      () => this.runResearch<T>(claudeTurns(research), "Claude", addStep),
-      () => this.runResearch<T>(openAiTurns(research), "OpenAI", addStep)
-    );
+    return this.runResearch<T>(openAiTurns(research), addStep);
   }
 
   private async runResearch<T>(
     nextTurn: IResearchTurn,
-    provider: string,
     addStep: (step: string) => Promise<unknown>
   ): Promise<T> {
     let outputs: IToolOutput[] = [];
@@ -889,13 +826,12 @@ export class GameAiDraftService implements OnModuleInit {
           ? "Out of research rounds, asking for the draft"
           : turn
             ? "Reading the results"
-            : `Asking ${provider}`
+            : "Asking OpenAI"
       );
       const { calls, text } = await nextTurn(outputs, isLastTurn);
 
       if (!calls.length) {
-        if (!text)
-          throw new BadGatewayException(`${provider} returned no draft`);
+        if (!text) throw new BadGatewayException("OpenAI returned no draft");
 
         return JSON.parse(text) as T;
       }
@@ -941,7 +877,7 @@ export class GameAiDraftService implements OnModuleInit {
       }
     }
 
-    throw new BadGatewayException(`${provider} did not finish the research`);
+    throw new BadGatewayException("OpenAI did not finish the research");
   }
 
   private async searchWebWithFallback(query = "") {
@@ -957,32 +893,20 @@ export class GameAiDraftService implements OnModuleInit {
       reason = (err as Error).message;
     }
 
-    if (!process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY) {
+    if (!process.env.OPENAI_API_KEY) {
       throw new Error(`SearXNG: ${reason}`);
     }
 
-    const text = await claudeFirst(
-      "AI web search",
-      async () =>
-        messageText(
-          await callClaude({
-            system: AI_SEARCH_INSTRUCTIONS,
-            messages: [{ role: "user", content: query }],
-            tools: [{ type: "web_search_20260209", name: "web_search" }],
-          })
-        ),
-      async () =>
-        outputText(
-          (
-            await callOpenAi(process.env.OPENAI_API_KEY!, {
-              model: openAiModel(),
-              instructions: AI_SEARCH_INSTRUCTIONS,
-              input: query,
-              tools: [{ type: "web_search" }],
-              tool_choice: "required",
-            })
-          ).output
-        )
+    const text = outputText(
+      (
+        await callOpenAi(process.env.OPENAI_API_KEY, {
+          model: openAiModel(),
+          instructions: AI_SEARCH_INSTRUCTIONS,
+          input: query,
+          tools: [{ type: "web_search" }],
+          tool_choice: "required",
+        })
+      ).output
     );
 
     return `${AI_SEARCH_PREFIX} (SearXNG: ${reason})\n${text.trim() || "Nothing found."}`;

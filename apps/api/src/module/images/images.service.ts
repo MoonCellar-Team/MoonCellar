@@ -20,7 +20,7 @@ import {
   type ISuggestImageElementsRequest,
   type ISuggestImageElementsResponse,
 } from "@mooncellar/schemas";
-import { assertAiKey, generateJson } from "../../shared/claude";
+import { assertAiKey, generateJson } from "../../shared/ai";
 import { S3_FOLDERS } from "../../shared/s3";
 import { FileService } from "../user/services/file-upload.service";
 import {
@@ -174,7 +174,6 @@ export class ImagesService {
     assertAiKey();
 
     const { text } = await generateJson({
-      task: "Image elements",
       instructions: ELEMENTS_INSTRUCTIONS,
       input: prompt,
       image: dataUrl,

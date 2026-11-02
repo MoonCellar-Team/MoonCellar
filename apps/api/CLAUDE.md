@@ -992,25 +992,12 @@ Module` before a single test runs. `comments.controller.spec.ts` mocks it with `
 
 ## AI providers
 
-- **Every text AI call asks Claude first and OpenAI only after it, through `claudeFirst`
-  (`shared/claude.ts`); never call `callOpenAi` alone for a new one.** Use `generateJson` for a single
-  structured answer and `claudeFirst` with both branches for anything else, as the draft research loop
-  and its web search do. Only image generation stays on OpenAI and Recraft, which Claude cannot do.
-- **Only a `ClaudeError` falls back to OpenAI.** `callClaude` throws it for a failed request, a
-  `refusal` and a `max_tokens` stop; any other error — a draft's own SearXNG abort, a bad query — is
-  rethrown as is, because OpenAI would fail the same way and spend its quota on it. A draft that fails
-  on Claude mid-research starts over on OpenAI, so the run's steps show "Asking OpenAI" after the
-  Claude ones.
-- **An `ANTHROPIC_API_KEY` created at the organization level needs `ANTHROPIC_WORKSPACE_ID`, which
-  `callClaude` sends as the `anthropic-workspace-id` header.** Without it the API answers 400 "This
-  API key is not scoped to a workspace…", which is a `ClaudeError`, so every call silently went to
-  OpenAI and the verdicts and drafts carried a `gpt-…` model while the key looked set (2026-10-22).
-  When AI answers come from OpenAI, look for "falling back to OpenAI" in the API log before
-  suspecting the key itself.
-- **A Claude JSON schema may hold at most 16 union-typed parameters (`["string", "null"]`, `anyOf`) and
-  24 optional ones across the output schema and every strict tool of a request.** Above that the API
-  answers 400 "Schema is too complex for compilation", which reads as a Claude failure and silently
-  sends every call to OpenAI. The game draft uses 7 today.
+- **Every text AI call uses OpenAI through `shared/openai.ts`.** Use `generateJson` from
+  `shared/ai.ts` for a single structured answer and `callOpenAi` for research with tools or web
+  search. `OPENAI_API_KEY` is required; `OPENAI_MODEL` defaults to `gpt-5-mini`. Check the key with
+  `assertAiKey` before starting an admin AI operation so a missing key answers 503.
+- **Image generation uses OpenAI and Recraft.** Recraft models require `RECRAFT_API_TOKEN`;
+  text generation and image element extraction use only OpenAI.
 
 ## AI drafts
 

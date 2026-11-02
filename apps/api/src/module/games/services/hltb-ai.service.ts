@@ -3,7 +3,8 @@ import { InjectModel } from "@nestjs/mongoose";
 import type { IConflictAiVerdict } from "@mooncellar/schemas";
 import { HowLongToBeatService } from "howlongtobeat-ts";
 import { Model } from "mongoose";
-import { aiModel, generateJson } from "../../../shared/claude";
+import { generateJson } from "../../../shared/ai";
+import { openAiModel } from "../../../shared/openai";
 import {
   ConflictsAiService,
   type TUndecidedConflict,
@@ -39,7 +40,7 @@ export class HltbAiService implements OnModuleInit {
     conflict: TUndecidedConflict,
     platformNames: Map<string, string>
   ): Promise<IConflictAiVerdict> {
-    const model = aiModel();
+    const model = openAiModel();
     const entry = {
       ...(conflict.externalData as HltbSearchEntry),
       id: Number(conflict.externalId),
@@ -75,7 +76,6 @@ export class HltbAiService implements OnModuleInit {
 
     const gameIds = games.map(({ _id }) => String(_id));
     const answer = await generateJson({
-      task: "hltb conflict review",
       instructions: HLTB_AI_INSTRUCTIONS,
       input: buildHltbAiInput({ entry, page, games, platformNames }),
       name: "hltb_match",

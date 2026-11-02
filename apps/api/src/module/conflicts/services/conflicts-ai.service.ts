@@ -8,7 +8,8 @@ import {
 } from "@mooncellar/schemas";
 import { Model } from "mongoose";
 import { withDbLock } from "../../../shared/cron-mutex";
-import { aiModel, assertAiKey, generateJson } from "../../../shared/claude";
+import { assertAiKey, generateJson } from "../../../shared/ai";
+import { openAiModel } from "../../../shared/openai";
 import { parsePartialDate } from "../../../shared/release-date";
 import { GameMatcherService } from "../../games/matching/game-matcher.service";
 import { Game, type GameDocument } from "../../games/schemas/game.schema";
@@ -282,8 +283,7 @@ export class ConflictsAiService {
   }
 
   private async findDuplicates(source: IConflictSource, externalId: string) {
-    const subject = (await this.conflicts.getItem(source, externalId))
-      ?.subject;
+    const subject = (await this.conflicts.getItem(source, externalId))?.subject;
 
     if (!subject) return [];
 
@@ -505,7 +505,7 @@ export class ConflictsAiService {
 
   private judgeItem(source: IConflictSource): TConflictJudge {
     return async (conflict, platformNames) => {
-      const model = aiModel();
+      const model = openAiModel();
       const item = await this.conflicts.getItem(source, conflict.externalId);
 
       if (!item?.subject) {
@@ -521,7 +521,6 @@ export class ConflictsAiService {
       }
 
       const answer = await generateJson({
-        task: `${source} conflict review`,
         instructions: conflictAiInstructions(source, item.isMultiMatch),
         input: buildConflictAiInput(item, platformNames),
         name: "conflict_match",
