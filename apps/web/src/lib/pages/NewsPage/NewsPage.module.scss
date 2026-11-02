@@ -29,6 +29,28 @@
     border-top: 1px solid var(--color-bg-primary);
   }
 
+  &__crumbs {
+    font-size: 13px;
+    line-height: 1;
+
+    @include mediaSm {
+      font-size: 16px;
+    }
+  }
+
+  &__tabs {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-x05);
+    padding: var(--padding-x05);
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-x1);
+  }
+
   &__compactFilters {
     display: none;
   }

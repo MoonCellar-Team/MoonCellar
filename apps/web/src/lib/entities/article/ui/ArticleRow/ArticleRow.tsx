@@ -71,11 +71,22 @@ export const ArticleRow: FC<IArticleRowProps> = ({ article, isPriority }) => {
 
 export const ArticleRowSkeleton: FC = () => (
   <div className={styles.row}>
-    <Skeleton aspectRatio="16 / 9" radius="var(--radius-x3)" />
+    <div className={styles.row__thumb}>
+      <Skeleton height="100%" radius="inherit" />
+    </div>
     <div className={styles.row__body}>
-      <Skeleton shape="text" width="30%" />
-      <Skeleton shape="text" width="90%" />
-      <Skeleton shape="text" count={2} />
+      <span className={styles.row__game}>
+        <Skeleton shape="text" width="var(--padding-x14)" />
+      </span>
+      <h2 className={`${styles.row__title} ${styles.row__title_skeleton}`}>
+        <Skeleton shape="text" count={2} gap="0" width="85%" />
+      </h2>
+      <p className={`${styles.row__summary} ${styles.row__summary_skeleton}`}>
+        <Skeleton shape="text" count={2} gap="0" />
+      </p>
+      <p className={styles.row__meta}>
+        <Skeleton shape="text" width="var(--padding-x25)" />
+      </p>
     </div>
   </div>
 );

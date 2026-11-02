@@ -202,7 +202,7 @@ export const NewsPage: FC<INewsPageProps> = ({
           contentStyle={{ gap: "var(--gap-x4)" }}
         >
           {isLoading ? (
-            <ul className={styles.list}>
+            <ul className={styles.list} role="status" aria-label="Loading">
               {Array.from({ length: 4 }, (_, index) => (
                 <li key={index}>
                   <ArticleRowSkeleton />
