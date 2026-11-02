@@ -123,8 +123,25 @@ page that has no image of its own; game pages use the game's cover instead.
 | Storybook (port 4222)    | `logo-icon.png` | `logo-text.png` | —               |
 | Status hub (`status.mooncellar.space`) | `logo-icon.png` | `logo-text.png`, with "Status" beside it | — |
 | Installed app (PWA and Android APK) | `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` — `logo-icon.png` placed on a square, generated, never redrawn | — | — |
+| E-mail letters (`apps/api` mail module) | — | `logo-text.png` | — |
 
 A new surface gets a row here when it ships.
+
+### E-mail
+
+A letter is the brand on a surface we do not control, so it reuses the files rather than drawing
+a new mark: `logo-text.png` at 40 px high in the header, loaded from `<FRONT_URL>/images` — the
+image the site already serves — with `alt="MoonCellar"`, which is what a client that blocks
+images shows instead.
+
+The colours are the palette values inline (`#191d24` page, `#212731` panel, `#6951ee` for the
+one action), because a mail client drops `<style>` and does not know CSS variables. Two
+substitutions are forced and both are fine: **ApercuPro cannot be served to a mail client**, so
+the letters fall back to the system sans stack, and Pentagra is not used at all — a letter has no
+display heading.
+
+Letters are built in `apps/api/src/module/mail/mail.letter.ts`; the host and DNS that carry them
+are in [Mail](./mail).
 
 The system account (`MoonCellar`, owner of the generated lists) and notifications without a person
 behind them (moderation, request decisions, wishlist releases) use `logo-icon.png` as the avatar:

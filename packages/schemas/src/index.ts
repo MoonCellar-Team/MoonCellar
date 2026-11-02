@@ -5,6 +5,7 @@ export * from "./generated-images.schema";
 export * from "./notifications.schema";
 export * from "./notifications.utils";
 export * from "./igdb-orphans.schema";
+export * from "./mail.schema";
 export * from "./site-sessions.schema";
 export * from "./comments-socket.schema";
 export * from "./activity-socket.schema";

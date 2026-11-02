@@ -106,6 +106,7 @@ refuses to start rather than fall back to `admin`.
 | `PROMETHEUS_DATA_DIR` | no | Host directory bind-mounted as `/prometheus` — `/home/admin/prometheus` on the old host. Seven days of metrics history; losing it is survivable, keeping it is one line |
 | `METRICS_TOKEN` | **yes** | Bearer token Prometheus sends when scraping the API's `/metrics`. Must be byte-identical to the API's own `METRICS_TOKEN`, or every scrape is a 401 |
 | `SEARXNG_SECRET` | **yes** | SearXNG's `server.secret_key` (`openssl rand -hex 32`). `infra/searxng/settings.yml` is committed without it, so the key never lands in git |
+| `MAIL_DKIM_DIR` | no | Host directory bind-mounted as the mail container's `/etc/opendkim/keys` — `/opt/mooncellar/mail-dkim`, which is also the default, so an infra deploy whose `HOST_ENV_INFRA` has not been updated yet still starts. The DKIM private key lives there and never enters the repository; the directory must exist **before the first infra deploy**, because the mount sets `create_host_path: false` and compose refuses to start on a missing path. Generate the key with `infra/mail/generate-dkim.sh`, see [Mail](mail.md) |
 | `TURN_SECRET` | **yes** | Not here: the deploy appends it from the `TURN_SECRET` repository secret. Without it the `coturn` container only logs that the relay is off. coturn runs on the host network, so `ufw` filters it: the infra deploy opens UDP 3478 and 49160–49200 when ufw is active and `SSH_USER` may run it (root, or passwordless sudo); otherwise `ufw allow 3478/udp` and `ufw allow 49160:49200/udp` by hand, and the provider's firewall in any case |
 | `TURN_REALM` | no | Optional realm coturn announces, `game.mooncellar.space` by default |
 | `TURN_EXTERNAL_IP` | no | Optional public address of the host when it sits behind 1:1 NAT (a cloud VM whose interface has a private address); leave it empty when the public address is on the interface |
@@ -309,6 +310,12 @@ pins the internal API address, so it stays a secret on both counts.
 | `VAPID_PRIVATE_KEY` | **yes** | Web push private key of the same pair |
 | `VAPID_SUBJECT` | no | Contact the push services see, `mailto:admin@mooncellar.space` by default |
 | `DISABLE_CRONS` | no | `true` stops every `@Cron` job. Local development only, because the local `.env` points at the production database and Space. Never set it in `HOST_ENV_API` |
+| `SMTP_HOST` | no | The mail container, `mail` ([mail.md](mail.md)). **Unset turns the mail module off** — `POST /mail/test` answers 503 and no letter is sent — which is why it has no default and is unset in local development |
+| `SMTP_PORT` | no | `587`, the container's submission port. The container publishes nothing; only the `mooncellar` network reaches it |
+| `SMTP_SECURE` | no | `false`: the container speaks plain submission and upgrades with STARTTLS when asked. `true` would expect implicit TLS on 465, which nothing listens on |
+| `SMTP_USER`, `SMTP_PASSWORD` | no | A login for a relay provider. Empty with the internal container, which allows the Docker networks and asks for no authentication |
+| `SMTP_FROM` | no | `MoonCellar <noreply@mooncellar.space>`. Its domain is what SPF and DMARC are checked against, so it must stay `mooncellar.space` |
+| `SMTP_REPLY_TO` | no | Optional `Reply-To`. Empty while nothing reads the replies |
 
 ## `HOST_ENV_GAME` — contents
 
@@ -337,6 +344,24 @@ Before the first deploy of the service:
 3. Merge: the push to `main` builds and starts `mooncellar-game`, and the infra deploy adds the
    site and the Prometheus job. `curl https://game.mooncellar.space/health` answers
    `{"status":"ok","database":"up",…}`.
+
+### The mail container
+
+`infra/docker-compose.prod.yml` starts a `mail` service — a send-only Postfix that the API
+reaches at `mail:587`. It publishes no port, so nothing about it is reachable from the internet.
+The full setup is in [mail.md](mail.md); the deploy order is:
+
+1. Create `/opt/mooncellar/mail-dkim` on the host and generate the key there
+   (`infra/mail/generate-dkim.sh mooncellar.space mail /opt/mooncellar/mail-dkim`). Compose
+   refuses to start without the directory.
+2. Publish the records the script prints: the `A` for `mail.mooncellar.space`, the DKIM `TXT`,
+   SPF and DMARC. Ask the provider for the `PTR` of the host's address — the reverse zone is not
+   part of the domain.
+3. Add `MAIL_DKIM_DIR` to `HOST_ENV_INFRA` and the seven `SMTP_*` keys to `HOST_ENV_API`, then
+   run **Actions → CI/CD → Run workflow** so both are picked up; a plain push picks up whichever
+   side it touched.
+4. `POST /mail/test` with an admin session, and read `Authentication-Results` in the received
+   letter: SPF, DKIM and DMARC must all read `pass`.
 
 ---
 
@@ -446,6 +471,8 @@ PROMETHEUS_DATA_DIR=
 METRICS_TOKEN=
 # SearXNG server.secret_key
 SEARXNG_SECRET=
+# Host directory holding the DKIM private key of the mail container
+MAIL_DKIM_DIR=
 ```
 
 </details>
@@ -499,6 +526,15 @@ IGDB_AUTO_LINK=false
 RECRAFT_API_TOKEN=
 SITE_SESSIONS_KEY=
 STEAMGRIDDB_API_KEY=
+
+# Mail — SMTP_HOST unset disables the module; `mail` is the container on the mooncellar network
+# SMTP_HOST=mail
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=
+SMTP_PASSWORD=
+SMTP_FROM=MoonCellar <noreply@mooncellar.space>
+SMTP_REPLY_TO=
 
 # game-adder MCP server — local tooling, never part of HOST_ENV_API
 API_BASE_URL=http://localhost:3228

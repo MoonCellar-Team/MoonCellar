@@ -11,6 +11,7 @@ import { ImagesModule } from "./module/images/images.module";
 import { ArticlesModule } from "./module/articles/articles.module";
 import { SitesModule } from "./module/sites/sites.module";
 import { ProjectsModule } from "./module/projects/projects.module";
+import { MailModule } from "./module/mail/mail.module";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { RetroachievementsModule } from "./module/retroach/retroach.module";
 import { SteamModule } from "./module/steam/steam.module";
@@ -61,6 +62,7 @@ import { CacheModule } from "@nestjs/cache-manager";
     RetroachievementsModule,
     SteamModule,
     ProjectsModule,
+    MailModule,
     ServeStaticModule.forRoot({
       rootPath: `/var/www/uploads/photos`,
       serveRoot: "/photos",
