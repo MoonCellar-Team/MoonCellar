@@ -99,6 +99,26 @@ services:
     networks:
       - mooncellar
 
+  mail:
+    image: docker.io/boky/postfix:5.2.1
+    container_name: mail
+    restart: always
+    environment:
+      TZ: Europe/Moscow
+      ALLOWED_SENDER_DOMAINS: mooncellar.space
+      POSTFIX_myhostname: mail.mooncellar.space
+      DKIM_SELECTOR: mail
+      MASQUERADED_DOMAINS: mooncellar.space
+    volumes:
+      - type: bind
+        source: ${MAIL_DKIM_DIR:-/opt/mooncellar/mail-dkim}
+        target: /etc/opendkim/keys
+        bind:
+          create_host_path: false
+    mem_limit: 256m
+    networks:
+      - mooncellar
+
   coturn:
     image: coturn/coturn:4.18.0
     container_name: coturn

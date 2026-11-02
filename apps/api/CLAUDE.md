@@ -192,6 +192,29 @@ an instance of Module)`. Use a default import; tsc reports the call as `TS2349`.
   bound to the public key it was made with; a second pair makes the push services answer 403, and a
   new pair orphans every stored subscription.
 
+## Mail
+
+- **`SMTP_HOST` has no default: unset means the module is off and `MailService.send` throws 503.**
+  A default of `mail` would make a local `dev:api` try to resolve a container that only exists on
+  the production network, and the failure would surface as a 500 on whatever request sent the
+  letter. The setup, the variables and the DNS records are in
+  [`docs/mail.md`](../../docs/mail.md).
+- **Every string interpolated into a letter goes through `escapeHtml` in `mail.letter.ts`, and the
+  theme values live in that one file.** A letter carries a user's name or a list title sooner or
+  later, and a raw name with `<` in it breaks the letter for every client; the colours are
+  duplicated there because a mail client drops `<style>` and ignores CSS variables, so they cannot
+  be imported from the site.
+- **A letter is always sent with both `html` and `text`.** The plain-text part is what a client
+  without HTML shows and what several spam filters compare the HTML against; sending HTML alone
+  lowers the score for no benefit.
+- **The `From` domain must stay `mooncellar.space`.** SPF and DKIM both align on it, so a sender
+  on another domain passes SPF and still fails DMARC — and DMARC failures are what put a letter
+  in spam.
+- **Never send a letter from inside a request the user waits on, unless the letter is that
+  request.** A slow or unreachable mail server must not hold the login, the save or the like
+  behind it: send after the write and log a failure instead of failing the action, as the
+  notification calls do.
+
 ## User logs
 
 - **A log stores state, never text: `playthrough` (`action`, `before`, `after`), `rating`
