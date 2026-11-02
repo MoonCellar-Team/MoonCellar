@@ -59,18 +59,16 @@ mkdir -p /opt/mooncellar/mail-dkim
 /opt/mooncellar/infra/mail/generate-dkim.sh mooncellar.space mail /opt/mooncellar/mail-dkim
 ```
 
-It writes `mooncellar.space.private` (owned by the container's `opendkim` user, mode `640`) and
-`mooncellar.space.public`, prints the `mail._domainkey` record, and **refuses to overwrite an
-existing key**. That refusal is the point: the private key and the published public key are one
-pair, and generating a second key under the same selector breaks every letter signed with the
-first until DNS catches up.
+It writes `mooncellar.space.private` and `mooncellar.space.public`, prints the `mail._domainkey`
+record, and **refuses to overwrite an existing key**. That refusal is the point: the private key
+and the published public key are one pair, and generating a second key under the same selector
+breaks every letter signed with the first until DNS catches up.
 
 **The image signs with rspamd, which imports whatever is in `/etc/opendkim/keys` when it starts**
 and copies it into its own directory, so the letters go out signed `relaxed/relaxed` as
-`d=mooncellar.space; s=mail`. The private key is still written into the OpenDKIM directory, and
-the script sets it to `640` owned by `opendkim` (uid `101`, gid `104`), because that is the shape
-the image expects if the backend is ever switched to OpenDKIM; as root-imported keys it would
-work either way, but a key the signing process cannot read fails silently — no error at send
+`d=mooncellar.space; s=mail`. The key is written into the OpenDKIM directory and set to `640`
+owned by `opendkim` (uid `101`, gid `104`), the shape the image expects if the back-end is ever
+switched to OpenDKIM. A key the signing process cannot read fails in silence — no error at send
 time, nothing in the API log, and only SPF left to carry the letter past DMARC.
 
 ## DNS
@@ -88,10 +86,11 @@ reverse record are what make a letter land in the Inbox rather than in spam.
 
 Notes that matter:
 
-- **The PTR record is set in the provider's panel for the IP, not in the zone.** The reverse zone
-  of `31.in-addr.arpa` belongs to the network's operator, so this is a support request or a
-  setting next to the VPS, not a DNS entry. It cannot be skipped: without it Gmail and Outlook
-  sort the letter into spam however good the other three records are.
+- **The PTR record is set by the operator of the address, not in the zone.** The reverse zone of
+  `31.in-addr.arpa` is delegated by RIPE, and the block `31.57.201.0/24` is registered to
+  `netutils.io`, so this is a support request or a setting next to the VPS rather than a DNS
+  entry. It cannot be skipped: without it Gmail and Outlook sort the letter into spam however
+  good the other four records are.
 - **`-all`, not `~all`.** Nothing else sends as `mooncellar.space`, so a receiver may reject
   anything that does. A relay added later must go into the same record in the same change.
 - **DMARC starts at `p=quarantine`.** Move it to `p=reject` once a week of reports shows every
@@ -137,9 +136,8 @@ the letter is still signed and sent as `mooncellar.space`.
 ## Deliverability notes
 
 - **A new IP has no reputation.** Gmail and Outlook score it neutral at best, and Outlook is
-  known to drop even a correctly signed letter from an unknown address into spam for a few weeks.
-  The leak is the sender's history: sending real letters regularly is what fixes it, not another
-  DNS record.
+  known to put even a correctly signed letter from an unknown address into spam for weeks. What
+  repairs that is history — real letters sent regularly — not another DNS record.
 - **Bounces are not received.** There is no inbound mail, so a message that cannot be delivered
   bounces into nothing. Do not promise delivery confirmation from a letter; a feature that needs
   it has to add an inbound mailbox first.
