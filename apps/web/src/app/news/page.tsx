@@ -1,10 +1,9 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
-import { NewsPage } from "@/src/lib/pages/NewsPage";
+import { NewsPage, NewsPageSkeleton } from "@/src/lib/pages/NewsPage";
 import { parseNewsQuery } from "@/src/lib/features/news/model/news-query.utils";
 import { articlesAPI } from "@/src/lib/shared/api";
 import { JsonLd } from "@/src/lib/shared/ui/JsonLd";
-import { PageSkeleton } from "@/src/lib/shared/ui/PageSkeleton";
 import { getBreadcrumbJsonLd } from "@/src/lib/shared/utils/json-ld.utils";
 
 export const metadata: Metadata = {
@@ -55,7 +54,7 @@ const NewsPageIndex = async ({
           { name: "News", path: "/news" },
         ])}
       />
-      <Suspense fallback={<PageSkeleton />}>
+      <Suspense fallback={<NewsPageSkeleton />}>
         <NewsPage
           initialParams={params}
           initialData={initialData}

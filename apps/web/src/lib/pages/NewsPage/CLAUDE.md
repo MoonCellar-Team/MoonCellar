@@ -11,7 +11,7 @@ publication date and the game an article is about. Public.
   `articlesAPI.getArchive()` in parallel and passes `initialParams`, `initialData` and
   `initialArchive`. A failed fetch passes `undefined`.
 - Static metadata: title `News`, canonical `/news`, own keywords. The route renders
-  `BreadcrumbList` JSON-LD and wraps the page in `Suspense` with `PageSkeleton`.
+  `BreadcrumbList` JSON-LD and wraps the page in `Suspense` with `NewsPageSkeleton`.
 
 ## Data
 
@@ -36,6 +36,26 @@ publication date and the game an article is about. Public.
 4. List `Box`: `ArticleRow` per post (or four `ArticleRowSkeleton`s, or `EmptyState`), then
    `Pagination` when there is more than one page.
 5. `aside` (hidden below `media960`): `Box` "Archive" with `NewsArchive` and `NewsGameFilter`.
+
+## Loading state
+
+- `NewsPageSkeleton` (`NewsPageSkeleton.tsx`, its own `"use client"` module sharing
+  `NewsPage.module.scss`) is the route's `Suspense` fallback. It draws the page's own frame —
+  the `page` grid at `--news-page-width`, the head and list `Box`es and the `--news-sidebar-width`
+  archive `aside` — so the panels, columns and widths are already in place when the data arrives.
+  The `aside` is drawn even though the page drops it when the archive is empty: the grid keeps
+  its sidebar track either way, so the list width does not depend on it.
+- `ArticleRowSkeleton` repeats `ArticleRow`'s grid and classes: the `row__thumb` column, then the
+  chip line, the two-line title, the two-line summary and the meta line in `row__body`. Change
+  the row's columns, rows or their order and change the skeleton in the same edit, or the list
+  jumps in width and shape on the swap.
+- The head is one panel with the same rows as the loaded page — crumbs, `h1`, the segmented tabs
+  row and the compact filters (below `media960`) — so both heads are the same height and the list
+  starts at the same offset. `page__crumbs`, `page__tabs`, `page__field` and
+  `row__title_skeleton`/`row__summary_skeleton` exist only for it: they give the placeholders the
+  crumbs' 13px/1 line box (16px below `mediaSm`), the tab row's 32px pills inside its padding, a
+  label + field column, and the width a `shape="text"` bar needs inside `row__body` — that column
+  is `align-items: flex-start`, so a text bar without it collapses to zero width.
 
 ## Rules and gotchas
 

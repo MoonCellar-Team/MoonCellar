@@ -82,6 +82,11 @@
     color: var(--color-text-muted);
   }
 
+  &__title_skeleton,
+  &__summary_skeleton {
+    width: 100%;
+  }
+
   &__meta {
     @include font(12px, 16px, 400);
     margin-top: var(--padding-x1);
