@@ -36,6 +36,7 @@ import {
   type IReorderCustomListRequest,
   type IReorderCustomListsRequest,
   type IUpdateCustomListRequest,
+  type IGameListsResponse,
 } from "@mooncellar/schemas";
 import { Game } from "../../games/schemas/game.schema";
 import { User } from "../../user/schemas/user.schema";
@@ -74,6 +75,7 @@ const UPDATED_PERIOD_DAYS = { week: 7, month: 30, year: 365 } as const;
 const DAY_MS = 86_400_000;
 const POPULARITY_AGE_OFFSET_DAYS = 7;
 const POPULARITY_GRAVITY = 0.8;
+const LISTS_BY_GAME_LIMIT = 8;
 
 const isDuplicateKeyError = (error: unknown) =>
   (error as { code?: number } | null)?.code === 11000;
@@ -399,6 +401,50 @@ export class CustomListsService {
       };
     } catch (err) {
       this.logger.error(err, "Failed to get custom lists");
+      throw err;
+    }
+  }
+
+  async getListsByGame(gameId: string): Promise<IGameListsResponse> {
+    const targetId = toObjectId(gameId, "game id");
+
+    try {
+      const docs = await this.listModel
+        .find({
+          isPrivate: { $ne: true },
+          "games.gameId": { $in: [targetId, gameId] },
+        })
+        .sort({ updatedAt: -1, _id: -1 })
+        .limit(LISTS_BY_GAME_LIMIT * 4)
+        .select("name slug gamesCount userId generator")
+        .lean();
+
+      if (!docs.length) return [];
+
+      const authors = await this.userModel
+        .find({ _id: { $in: docs.map((doc) => doc.userId) } })
+        .select("userName")
+        .lean();
+      const authorNames = new Map(
+        authors.map((user) => [String(user._id), user.userName])
+      );
+
+      return docs
+        .map((doc) => ({
+          name: doc.name,
+          slug: doc.slug,
+          authorName: authorNames.get(String(doc.userId)) ?? null,
+          gamesCount: doc.gamesCount ?? 0,
+          isGenerated: !!doc.generator,
+        }))
+        .sort(
+          (a, b) =>
+            Number(a.isGenerated) - Number(b.isGenerated) ||
+            b.gamesCount - a.gamesCount
+        )
+        .slice(0, LISTS_BY_GAME_LIMIT);
+    } catch (err) {
+      this.logger.error(err, `Failed to get lists holding game: ${gameId}`);
       throw err;
     }
   }

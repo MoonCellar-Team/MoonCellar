@@ -223,6 +223,35 @@ the three lists with a reason per card, `--csv <path>` writes the whole table, a
 when either list in `games.const.ts` no longer matches the database — run it after a catalogue
 change or an IGDB sync that moves the popular cards.
 
+## The MoonCellar record
+
+Every game page renders `widgets/game/GameRecord` between the characters and the details: the part
+of the card that is ours rather than IGDB's. It is built on the server and travels in the ISR
+entry, and it renders nothing when the card has no rating, no playthrough, no achievements, no
+port and no list to show.
+
+Its paragraphs come from `getGameRecordParagraphs`
+(`src/lib/shared/utils/game-record.utils.ts`), a pure builder over numbers the page already has:
+
+| Paragraph    | Source                                                                 |
+| ------------ | ---------------------------------------------------------------------- |
+| Rating       | `averageRating` / `ratingsCount` on the game                           |
+| Tracking     | `GET /games/:id/stats` — accounts per status                           |
+| Playtime     | `GET /games/:id/community` — hours logged and the newest entry         |
+| Achievements | `steamAchievements.total`, `retroachievements`, the MoonCellar port count |
+
+Two lists follow it. "The same accounts also tracked" comes from the same endpoint: the games the
+accounts of this card tracked as well, most shared first, up to six. "Lists that include it" comes
+from `GET /lists/game/:gameId`: the lists people made first, then the MoonCellar generated ones,
+up to eight. Both are links, so the block also gives crawlers a path through our own content.
+
+The blocking is measured, not assumed: `bun --env-file=apps/api/.env
+scripts/audit-game-card-text.ts` rebuilds the same facts from the database and prints the
+characters of our own text each indexable card renders. On 2026-11-03 that is 143–380 characters,
+median 258, and **none of the 31 cards reaches 600**. The record block therefore does not by
+itself make a card indexable — the 600-character bar in `INDEXABLE_GAME_SLUGS` still needs written
+editorial text on top of what our accounts produce.
+
 ## Images
 
 - `/img/image-proxy` (`src/app/img/image-proxy/route.ts`) streams remote covers. It requires

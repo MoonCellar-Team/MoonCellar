@@ -6,6 +6,7 @@ import {
   CustomListLikeResponseSchema,
   CustomListSchema,
   FilterCustomListBySlugRequestSchema,
+  GameListsResponseSchema,
   GetCustomListBySlugRequestSchema,
   GetCustomListsRequestSchema,
   GetCustomListsResponseSchema,
@@ -63,4 +64,8 @@ export class ReorderCustomListRequestDto extends createZodDto(
 
 export class ReorderCustomListsRequestDto extends createZodDto(
   ReorderCustomListsRequestSchema
+) {}
+
+export class GameListsResponseDto extends createZodDto(
+  GameListsResponseSchema
 ) {}

@@ -344,8 +344,8 @@ export const loadCards = async (db: Db): Promise<IGameCardInput[]> => {
   const listsByGame = new Map<string, number>();
 
   for (const list of lists) {
-    for (const gameId of (list.games ?? []) as unknown[]) {
-      const key = String(gameId);
+    for (const entry of (list.games ?? []) as { gameId?: unknown }[]) {
+      const key = String(entry?.gameId ?? entry);
 
       listsByGame.set(key, (listsByGame.get(key) ?? 0) + 1);
     }

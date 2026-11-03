@@ -1,7 +1,7 @@
 # GamePage
 
-The page of one game: hero, overview, ratings, media, characters, details, related games,
-reviews and discussion, release dates and multiplayer. Public, and the site's main search
+The page of one game: hero, overview, ratings, media, characters, the MoonCellar record, details,
+related games, reviews and discussion, release dates and multiplayer. Public, and the site's main search
 landing page — the catalogue holds 439 455 of them and 31 are indexable.
 
 ## Routes
@@ -29,16 +29,17 @@ landing page — the catalogue holds 439 455 of them and 31 are indexable.
 ## Data
 
 - Server, all in the route: `gamesApi.getBySlug` (via `fetchOrNull`, 404 → `null`), then in
-  parallel `gamesApi.getStats`, `commentsAPI.getReviews`, `gamesApi.getRelated` — each falls back
-  to `undefined` on error so a failing side block never breaks the page.
+  parallel `gamesApi.getStats`, `commentsAPI.getReviews`, `gamesApi.getRelated`,
+  `gamesApi.getCommunity` and `listsAPI.getByGame` — each falls back to `undefined` on error so a
+  failing side block never breaks the page.
 - The game service (`apps/game`), also in parallel: `getPortGameAchievements` — the MoonCellar Team
   port whose `siteGame` (in its `GET /games`) is this page, with every achievement, or `undefined`.
   It reaches the service with its own axios client (`portAchievementsApi`): no cookies, no toasts.
   `getSitePort` reads the same `GET /games` for the port itself, whatever its achievements, so the
   hero can offer its browser version (`playUrl`).
   The viewer's own states load in the browser once the port's modal opens.
-- The page receives `game`, `stats`, `reviews`, `related`, `portAchievements`, `port` as props and renders
-  them directly.
+- The page receives `game`, `stats`, `reviews`, `related`, `portAchievements`, `port`,
+  `community` and `lists` as props and renders them directly.
   Widgets below may run their own client queries (reviews paging, discussion), but the
   first render needs none.
 - No URL state in the route. The `#reviews` and `#discussion` hashes (notification links) open
@@ -69,13 +70,21 @@ landing page — the catalogue holds 439 455 of them and 31 are indexable.
    `GET /games`, e.g. Glassline) opens `widgets/game/GamePortAchievementsModal`, titled the same.
 4. `entities/game/ui/GameMedia` and `widgets/game/GameCharacters` (`game.characters`, ordered by role in `getGameBySlug` / `getGameById` with `sortCharactersByRole`: an admin's role, else VNDB's, else Protagonist from the description; `GET /characters?gameId=` uses the same order) — hidden for adult games
    when `useHideAdult()` is true.
-5. `entities/game/ui/GameDetails` — the remaining catalogue facts.
-6. `widgets/game/GameRelated`.
-7. `widgets/game/GameCommunity` — `features/comments/ui/GameReviews` (seeded with
+5. `widgets/game/GameRecord` — the card's own record: paragraphs built by
+   `getGameRecordParagraphs` (`shared/utils/game-record.utils.ts`) from our rating, the accounts
+   per status, the logged hours and the newest entry, Steam, RetroAchievements and the MoonCellar
+   port; then "The same accounts also tracked" (`community.alsoPlayed`) and "Lists that include
+   it" (`lists`). The builder is a pure function over numbers the page already has, and the block
+   renders nothing when it has nothing to say. [`docs/seo.md`](../../../../../docs/seo.md), "The
+   MoonCellar record", measures what it produces: 143–380 characters per indexable card on
+   2026-11-03, so it narrows but does not close the 600-character bar of the indexable list.
+6. `entities/game/ui/GameDetails` — the remaining catalogue facts.
+7. `widgets/game/GameRelated`.
+8. `widgets/game/GameCommunity` — `features/comments/ui/GameReviews` (seeded with
    `initialReviews`) and the Discussion tab, `features/comments/ui/CommentThread` with the game as
    its target.
-8. Two columns: `GameReleaseDates`, `GameMultiplayer`.
-9. `features/game/ui/GameAdminControls` — admin-only `ExpandMenu` with parse/delete/revalidate.
+9. Two columns: `GameReleaseDates`, `GameMultiplayer`.
+10. `features/game/ui/GameAdminControls` — admin-only `ExpandMenu` with parse/delete/revalidate.
 
 ## Rules and gotchas
 

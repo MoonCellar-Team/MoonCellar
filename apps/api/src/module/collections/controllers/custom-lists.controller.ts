@@ -28,6 +28,7 @@ import {
   CustomListLikeResponseDto,
   CustomListResponseDto,
   FilterCustomListBySlugRequestDto,
+  GameListsResponseDto,
   GetCustomListBySlugRequestDto,
   GetCustomListsRequestDto,
   GetCustomListsResponseDto,
@@ -104,6 +105,16 @@ export class CustomListsController {
   @UseGuards(AuthGuard("jwt"), UserIdGuard)
   async getGameCounts(@Req() request: IViewerRequest) {
     return this.lists.getGameCounts(request.user);
+  }
+
+  @Get("game/:gameId")
+  @ApiOperation({
+    summary:
+      "Public lists that hold a game: the ones people made first, then the MoonCellar ones",
+  })
+  @ApiCreatedResponse({ type: GameListsResponseDto })
+  async getListsByGame(@Param("gameId") gameId: string) {
+    return this.lists.getListsByGame(gameId);
   }
 
   @Get("liked/:userId")

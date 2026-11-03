@@ -57,6 +57,7 @@ import {
   GetGameStatsResponseDto,
   GetGamesStatsResponseDto,
 } from "../../../shared/zod/dto/game-stats.dto";
+import { GetGameCommunityResponseDto } from "../../../shared/zod/dto/game-community.dto";
 import { GamesService } from "../services/games.service";
 import { GameAiDraftService } from "../services/game-ai-draft.service";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -100,6 +101,16 @@ export class GamesController {
   @ApiCreatedResponse({ type: GetGameStatsResponseDto })
   async getGameStats(@Param("gameId") gameId: string) {
     return this.games.getGameStats(gameId);
+  }
+
+  @Get("/:gameId/community")
+  @ApiOperation({
+    summary:
+      "Get the community record of a game: logged playtime and the games its accounts tracked too",
+  })
+  @ApiCreatedResponse({ type: GetGameCommunityResponseDto })
+  async getGameCommunity(@Param("gameId") gameId: string) {
+    return this.games.getGameCommunity(gameId);
   }
 
   @Get("/by-id/:id")

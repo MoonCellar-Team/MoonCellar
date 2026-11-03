@@ -24,6 +24,8 @@ import {
   type IGameStats,
   type IGetGamesStatsResponse,
   type IRelatedGamesResponse,
+  type IGameCommunity,
+  type IGameCommunityGame,
 } from "@mooncellar/schemas";
 import { Game, type GameDocument } from "../schemas/game.schema";
 import {
@@ -57,6 +59,7 @@ const SEARCH_INDEX_TTL_MS = 10 * 60 * 1000;
 
 const SEARCH_RELEVANCE_FALLBACK_TIER = 4;
 const SEARCH_RELEVANCE_FIELD = "_searchRelevanceTier";
+const ALSO_PLAYED_LIMIT = 6;
 
 export const getSearchRelevanceTier = (query: string, name: string) => {
   if (name === query) return 0;
@@ -1233,6 +1236,134 @@ export class GamesService implements OnModuleInit {
     const [stats] = await this.getGamesStats([gameId]);
 
     return stats;
+  }
+
+  private async getAlsoPlayed(
+    gameIds: unknown[],
+    userIds: unknown[]
+  ): Promise<IGameCommunityGame[]> {
+    const userForms = new Set<unknown>();
+
+    for (const userId of userIds) {
+      const text = String(userId);
+
+      userForms.add(userId);
+      userForms.add(text);
+
+      if (mongoose.isValidObjectId(text)) {
+        userForms.add(new mongoose.Types.ObjectId(text));
+      }
+    }
+
+    const rows = await this.playthroughs.aggregate<{
+      gameId: mongoose.Types.ObjectId;
+      accounts: number;
+      name: string;
+      slug: string;
+      cover?: string;
+    }>([
+      {
+        $match: {
+          userId: { $in: [...userForms] },
+          gameId: { $nin: gameIds },
+          category: { $ne: "wishlist" },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $convert: {
+              input: "$gameId",
+              to: "objectId",
+              onError: null,
+              onNull: null,
+            },
+          },
+          accounts: { $addToSet: "$userId" },
+        },
+      },
+      { $match: { _id: { $ne: null } } },
+      { $project: { accounts: { $size: "$accounts" } } },
+      { $sort: { accounts: -1, _id: 1 } },
+      { $limit: ALSO_PLAYED_LIMIT },
+      {
+        $lookup: {
+          from: "games",
+          localField: "_id",
+          foreignField: "_id",
+          as: "game",
+        },
+      },
+      { $unwind: "$game" },
+      {
+        $project: {
+          _id: 0,
+          accounts: 1,
+          gameId: "$game._id",
+          name: "$game.name",
+          slug: "$game.slug",
+          cover: "$game.cover",
+        },
+      },
+    ]);
+
+    return rows.map((row) => ({
+      _id: String(row.gameId),
+      name: row.name,
+      slug: row.slug,
+      cover: row.cover ?? "",
+      accounts: row.accounts,
+    }));
+  }
+
+  async getGameCommunity(gameId: string): Promise<IGameCommunity> {
+    if (!mongoose.isValidObjectId(gameId)) {
+      throw new BadRequestException(`Invalid game id: ${gameId}`);
+    }
+
+    const gameIds = [new mongoose.Types.ObjectId(gameId), gameId];
+
+    const [playtimeRow, trackedIds] = await Promise.all([
+      this.playthroughs
+        .aggregate<{
+          accounts: unknown[];
+          hours: number;
+          lastLoggedAt: string | null;
+        }>([
+          { $match: { gameId: { $in: gameIds } } },
+          {
+            $group: {
+              _id: null,
+              accounts: { $addToSet: "$userId" },
+              hours: {
+                $sum: {
+                  $cond: [{ $gt: [{ $ifNull: ["$time", 0] }, 0] }, "$time", 0],
+                },
+              },
+              lastLoggedAt: { $max: "$createdAt" },
+            },
+          },
+        ])
+        .then(([row]) => row),
+      this.playthroughs.distinct("userId", {
+        gameId: { $in: gameIds },
+        category: { $ne: "wishlist" },
+      }),
+    ]);
+
+    const alsoPlayed = trackedIds.length
+      ? await this.getAlsoPlayed(gameIds, trackedIds)
+      : [];
+
+    return {
+      gameId,
+      playtime: {
+        accounts: playtimeRow?.accounts.length ?? 0,
+        hours: Math.round(playtimeRow?.hours ?? 0),
+        lastLoggedAt: playtimeRow?.lastLoggedAt ?? null,
+      },
+      alsoPlayed,
+    };
   }
 
   async getRelatedGames(gameId: string): Promise<IRelatedGamesResponse> {
