@@ -75,7 +75,10 @@ landing page — the catalogue holds 439 455 of them and 31 are indexable.
    then paragraphs built by `getGameRecordParagraphs` (`shared/utils/game-record.utils.ts`) from
    our rating, the accounts per status, the logged hours and the newest entry, Steam,
    RetroAchievements and the MoonCellar port; then "The same accounts also tracked"
-   (`community.alsoPlayed`) and "Lists that include it" (`lists`). The builder is a pure function
+   (`community.alsoPlayed`) and "Collections and lists that include it" (`lists`). A generated
+   collection links to `/collections/<slug>` and a player's list to its profile URL — the same
+   `getListHref` branch `ListCard` uses, so one card never sends a reader to two addresses. The
+   builder is a pure function
    over data the page already has, and the block renders nothing when it has nothing to say.
    [`docs/seo.md`](../../../../../docs/seo.md), "The MoonCellar record", measures what it
    produces: 604–910 characters per indexable card on 2026-11-03, every card above the

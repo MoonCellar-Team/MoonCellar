@@ -25,6 +25,7 @@ export const accentColorRGB = "105,81,238";
 export const links = [
   { name: "Home", link: "/" },
   { name: "Games", link: "/games" },
+  { name: "Collections", link: "/collections" },
   { name: "Gauntlet", link: "/gauntlet" },
   { name: "News", link: "/news" },
 ];

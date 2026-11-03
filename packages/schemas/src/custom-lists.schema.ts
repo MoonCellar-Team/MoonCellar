@@ -68,6 +68,12 @@ export const CustomListSchema = z.object({
   source: CustomListSourceSchema.optional().describe(
     "Imported from an account; the games follow it and the list goes when it is unlinked"
   ),
+  isGenerated: z
+    .boolean()
+    .optional()
+    .describe(
+      "Built by MoonCellar from its own data; it lives at /collections/<slug>, not on a profile"
+    ),
   likesCount: z.number().describe("Likes from other players"),
   isLiked: z
     .boolean()

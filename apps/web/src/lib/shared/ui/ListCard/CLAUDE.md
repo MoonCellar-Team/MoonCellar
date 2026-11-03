@@ -53,6 +53,9 @@ import { ListCard } from "@/src/lib/shared/ui/ListCard";
 - The href comes from `getListHref` in `shared/utils/links.utils`. Never move such a helper back
   into the component file: a route that imports only the helper pulls in the whole module, and
   once the card had a hook every route failed as a server component.
+- A generated list (`list.isGenerated`) links to `/collections/<slug>`, a player's list to
+  `/user/<name>/lists/<slug>`. The branch lives in `getListHref`, so this card, the search modal
+  and the profile all point at the collection page without a second card.
 - The `/lists` grid's column counts must divide `CUSTOM_LISTS_PAGE_SIZE` (24), and its
   `@container` thresholds copy `--list-card-min-width`/`--gap-x4`; change both together.
 - The tile's hover ring is drawn on an `::after` overlay because the `fill` images paint above an

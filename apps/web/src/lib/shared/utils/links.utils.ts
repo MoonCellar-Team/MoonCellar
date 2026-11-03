@@ -11,8 +11,14 @@ export const getProfileTab = (pathname: string, userName: string) => {
     : null;
 };
 
-export const getListHref = (list: Pick<ICustomList, "slug" | "author">) =>
-  `/user/${list.author?.userName ?? ""}/lists/${list.slug}`;
+export const getCollectionHref = (slug: string) => `/collections/${slug}`;
+
+export const getListHref = (
+  list: Pick<ICustomList, "slug" | "author" | "isGenerated">
+) =>
+  list.isGenerated
+    ? getCollectionHref(list.slug)
+    : `/user/${list.author?.userName ?? ""}/lists/${list.slug}`;
 
 export interface IGameLink {
   url: string;

@@ -23,10 +23,12 @@ Each route adds its own metadata on top:
 | `/games/genre/[slug]`            | `<Genre> Games`                             | `/games/genre/<slug>`            | description carries the game count; `robots: { index: false, follow: true }` when the genre has fewer than 100 games                                                                                                                                                                                                       |
 | `/games/platform/[slug]`         | `<Platform> Games`                          | `/games/platform/<slug>`         | same shape as the genre hub, count fetched with a `take: 1` query                                                                                                                                                                                                                                                          |
 | `/gauntlet`                      | `Gauntlet`                                  | `/gauntlet`                      | own `keywords`                                                                                                                                                                                                                                                                                                             |
+| `/collections`                   | `Collections`                               | `/collections`                   | own `keywords`; a generated list on a profile URL 308s here instead of duplicating the ranking                                                                                                                                                                                                                             |
+| `/collections/[slug]`            | collection name                             | `/collections/<slug>`            | description from the generated text, `openGraph` with the first cover through `/img/image-proxy` (200×266), else `og-default.png`                                                                                                                                                                                          |
 | `/user/[name]`                   | `Profile: <name>`                           | `/user/<name>`                   | description from the user's own bio when set                                                                                                                                                                                                                                                                               |
 | `/user/[name]/[tab]`             | `<Tab label>: <name>`                       | `/user/<name>/<tab>`             | one route per `profileTabs` entry; `robots: { index: false, follow: false }` on `settings`; an unknown tab is a 404 from the page component                                                                                                                                                                                |
 | `/user/[name]/favourites/[kind]` | `<Tab label>: <name>`                       | `/user/<name>/favourites/<kind>` | `games` or `characters`; the former `/favorites` and `/characters` tabs `permanentRedirect` here                                                                                                                                                                                                                           |
-| `/user/[name]/lists/[slug]`      | `<List> — a list by <author>`               | `/user/<name>/lists/<slug>`      | description from the list's own text or its game count; `robots: { index: false, follow: false }` for a private list                                                                                                                                                                                                       |
+| `/user/[name]/lists/[slug]`      | `<List> — a list by <author>`               | `/user/<name>/lists/<slug>`      | description from the list's own text or its game count; `robots: { index: false, follow: false }` for a private list; a generated list answers a 308 to `/collections/<slug>`                                                                                                                                              |
 | `/lists`                         | `Lists`                                     | `/lists`                         | own `keywords`                                                                                                                                                                                                                                                                                                             |
 | `/news`                          | `News`                                      | `/news`                          | own `keywords`; the archive and game filters (`?year`, `?month`, `?game`, `?type`) keep the same canonical                                                                                                                                                                                                                 |
 | `/news/[slug]`                   | post title                                  | `/news/<slug>`                   | description from the post summary, `og:type` `article` with `publishedTime`/`modifiedTime`, `og:image` from the post image, else the game cover, else `og-default.png`                                                                                                                                                     |
@@ -55,9 +57,11 @@ The hubs resolve their slug against the full genre or platform list, which is no
 list loaded and does not contain it. The three game blocks below the lookup fall back to an
 empty list on error, so one failing query does not take the hub down.
 
-Two routes answer with a permanent redirect (308) instead of a duplicate page: the legacy
-`/user/<name>?list=<tab>` goes to `/user/<name>/<tab>` with the rest of the query kept, and a
-list opened by an outdated slug goes to its current `/user/<name>/lists/<slug>`.
+Three routes answer with a permanent redirect (308) instead of a duplicate page: the legacy
+`/user/<name>?list=<tab>` goes to `/user/<name>/<tab>` with the rest of the query kept, a
+list opened by an outdated slug goes to its current `/user/<name>/lists/<slug>`, and a
+generated list (`isGenerated`, owned by the `MoonCellar` account) goes to its collection at
+`/collections/<slug>` — the ranking has one address, not two.
 
 No route segment has its own `error.tsx`: every error reaches `src/app/error.tsx`, which renders
 `ErrorPage`, never `NotFoundPage`.
@@ -77,31 +81,36 @@ Everything a crawler needs is in the server response.
 - The catalogue grid is CSS (`repeat(auto-fill, …)` in `GamesCards.module.scss`), so all 60 game
   links exist in the HTML without any DOM measurement. `react-virtualized` is used only by the
   dropdown list component.
-- The game page, both hubs and the homepage fetch their data in the server component and render
-  it directly.
+- The game page, both hubs, a collection and the homepage fetch their data in the server
+  component and render it directly.
+- A collection page loads every game it ranks in one `POST /games/by-ids` and renders the whole
+  grid without `limit`, so the grid is `auto-fill` and all 100 cards are in the HTML; the rank
+  comes from the list's stored `position`.
 
 `<h1>` per page: the homepage banner title, `Games` on the catalogue, `Lists`, `Gauntlet`, the
-game name on a game page, the hub title on both hubs, the user name on a profile, the list name
-on a list page, the Requests heading, and the 404 and error pages. The catalogue, `Lists`, the
-list page and the Gauntlet render theirs through `SectionTitle as="h1"`.
+game name on a game page, the hub title on both hubs, the collection name on a collection page,
+the user name on a profile, the list name on a list page, the Requests heading, and the 404 and
+error pages. The catalogue, `Lists`, the list page and the Gauntlet render theirs through
+`SectionTitle as="h1"`; the hubs and a collection use its `display` variant.
 
 Visible breadcrumbs (`src/lib/shared/ui/Breadcrumbs`) appear on the game page, the catalogue,
-both hubs, the Gauntlet, `Lists`, list pages, `Requests` and user profiles.
+both hubs, the Gauntlet, `Lists`, list pages, `Requests`, user profiles and both collection
+pages.
 
 ## Structured data
 
 `src/lib/shared/ui/JsonLd` renders a `<script type="application/ld+json">` with `<` escaped;
 the builders live in `src/lib/shared/utils/json-ld.utils.ts`.
 
-| Type                       | Where                                                              | Contents                                                                            |
-| -------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| `WebSite` + `SearchAction` | root layout, every page                                            | search endpoint `/games?search={search_term_string}`                                |
-| `VideoGame`                | game page                                                          | name, url, description, cover, genres, `datePublished` from `first_release`         |
-| `AggregateRating`          | inside `VideoGame`                                                 | only when the game has at least 10 MoonCellar ratings; scale 1–10                   |
-| `Review`                   | inside `VideoGame`                                                 | the loaded reviews that have a rating, an author and text and are not spoilers      |
-| `BreadcrumbList`           | game page, catalogue, both hubs, Gauntlet, `Lists`, `News`, a post | the same trail as the visible breadcrumbs                                           |
-| `Article`                  | a post (`/news/[slug]`)                                            | headline, summary, dates, author, image, and the game as `about` for a game article |
-| `ItemList`                 | catalogue, both hubs                                               | the games rendered on the page, with position, url and name                         |
+| Type                       | Where                                                                                     | Contents                                                                            |
+| -------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `WebSite` + `SearchAction` | root layout, every page                                                                   | search endpoint `/games?search={search_term_string}`                                |
+| `VideoGame`                | game page                                                                                 | name, url, description, cover, genres, `datePublished` from `first_release`         |
+| `AggregateRating`          | inside `VideoGame`                                                                        | only when the game has at least 10 MoonCellar ratings; scale 1–10                   |
+| `Review`                   | inside `VideoGame`                                                                        | the loaded reviews that have a rating, an author and text and are not spoilers      |
+| `BreadcrumbList`           | game page, catalogue, both hubs, Gauntlet, `Lists`, `News`, a post, both collection pages | the same trail as the visible breadcrumbs                                           |
+| `Article`                  | a post (`/news/[slug]`)                                                                   | headline, summary, dates, author, image, and the game as `about` for a game article |
+| `ItemList`                 | catalogue, both hubs, a collection                                                        | the games rendered on the page, with position, url and name                         |
 
 ## Hub pages
 
@@ -126,6 +135,26 @@ no `searchParams`, which is what lets them be cached.
 The platform hub's "recent releases" hint states that dates are a game's first release anywhere,
 not its release on that platform.
 
+## Collections
+
+`/collections` and `/collections/[slug]` publish the ranks `GeneratedListsService`
+(`apps/api/src/module/collections/services/generated-lists.service.ts`) rebuilds every Monday:
+the best games of each recent year and decade, the standalone expansions, `GENERATED_LIST_COMPANIES`
+and `GENERATED_LIST_KEYWORDS`. The same documents used to be reachable only as
+`/user/MoonCellar/lists/<slug>`, a system account's profile URL; `GET /collections` and
+`GET /collections/:slug` expose exactly the lists carrying a `generator`, and the old URL answers
+a 308 to the collection.
+
+On 2026-11-03 that is 53 collections holding 5 to 100 games each; every one of them is listed in
+the sitemap and indexable. The order is the combined IGDB / HowLongToBeat / MoonCellar rating
+described in each collection's own generated description, and the page prints the stored
+`position` as the card's rank instead of its array index.
+
+The wave exists for the internal links as much as for the pages: a collection links to every game
+it ranks, and each game card answers through `GameRecord`'s "Collections and lists that include it"
+block, so a card and the rankings that mention it are two clicks apart. `/lists` links to the hub
+with its "Collections" button, and the hub links back to every ranking.
+
 ## Caching
 
 | Route                                | Strategy                                                                                                                                                              |
@@ -136,6 +165,8 @@ not its release on that platform.
 | `/lists`                             | dynamic, it reads `searchParams` and passes page 1 to the client as `initialData`                                                                                     |
 | `/news`                              | dynamic, it reads `searchParams` and passes the page and the archive to the client as `initialData`                                                                   |
 | `/news/[slug]`                       | ISR like a game page (`revalidate = 3600`, empty `generateStaticParams`); the admin editor purges it with `revalidateArticlePage` after a save or a delete            |
+| `/collections`                       | `force-dynamic`: a static route would prerender an empty hub at build time, when the API is not reachable; the list itself is `unstable_cache`d for 3600 s            |
+| `/collections/[slug]`                | ISR like a game page (`revalidate = 3600`, empty `generateStaticParams`)                                                                                              |
 | `/user/[name]`, `/user/[name]/[tab]` | dynamic: the profile layout reads `cookies()` to decide who is viewing                                                                                                |
 | `/user/[name]/lists/[slug]`          | dynamic: it reads `cookies()` (forwarded to `by-slug` for private lists) and `searchParams` (`page`, sort)                                                            |
 | `/requests`, `/gauntlet`             | static: no server fetch, no `revalidate`; the client page reads the query string inside its `Suspense`                                                                |
@@ -164,9 +195,9 @@ ninety days to 2026-10-31).
 
 `src/app/sitemap.ts` emits, in order:
 
-1. The static links from the `links` constant — `/`, `/games`, `/gauntlet`, `/news`, without
-   `lastModified`: nothing tracks when those pages change, and a `new Date()` here made the file
-   differ on every request.
+1. The static links from the `links` constant — `/`, `/games`, `/collections`, `/gauntlet`,
+   `/news`, without `lastModified`: nothing tracks when those pages change, and a `new Date()`
+   here made the file differ on every request.
 2. The game cards of `INDEXABLE_GAME_SLUGS`: `/games/<slug>` with `lastModified` from the record
    and, when the game has a cover, an `<image:loc>` pointing at `/img/image-proxy`. A card of that
    list that the popular query does not return — the MoonCellar port's card — is still listed, on
@@ -174,12 +205,15 @@ ninety days to 2026-10-31).
 3. Genre hubs with at least `MIN_GAMES_FOR_INDEX` games (100), slugged with `toSlug`.
 4. Platform hubs with at least `MIN_GAMES_FOR_INDEX` games, from `GET /games/count-by-platform`.
 5. Every published post: `/news/<slug>` with `lastModified`, from `GET /articles/slugs`.
+6. Every generated collection: `/collections/<slug>` with `lastModified`, from `GET /collections`.
+   They are the site's own rankings and the only pages that link to dozens of game cards at
+   once, so they are listed whole rather than by a threshold.
 
 An entry is listed only while the page it points at is indexable, which is why both hubs read the
 same `MIN_GAMES_FOR_INDEX` constant their metadata uses instead of a threshold of their own. User
 profiles are not listed: they carry no editorial value and their tabs only duplicate the profile.
 
-Each of the four upstream calls has its own `unstable_cache` entry and falls back to an empty
+Each of the five upstream calls has its own `unstable_cache` entry and falls back to an empty
 list on error, so one failing endpoint does not empty the whole sitemap.
 
 ## Game cards: keep, merge or noindex
@@ -234,13 +268,13 @@ achievements, no port and no list to show.
 Its paragraphs come from `getGameRecordParagraphs`
 (`src/lib/shared/utils/game-record.utils.ts`), a pure builder over the card's own data:
 
-| Paragraph    | Source                                                                 |
-| ------------ | ---------------------------------------------------------------------- |
+| Paragraph    | Source                                                                      |
+| ------------ | --------------------------------------------------------------------------- |
 | Editorial    | `GAME_EDITORIAL[slug]` (`src/lib/shared/constants/game-editorial.const.ts`) |
-| Rating       | `averageRating` / `ratingsCount` on the game                           |
-| Tracking     | `GET /games/:id/stats` — accounts per status                           |
-| Playtime     | `GET /games/:id/community` — hours logged and the newest entry         |
-| Achievements | `steamAchievements.total`, `retroachievements`, the MoonCellar port count |
+| Rating       | `averageRating` / `ratingsCount` on the game                                |
+| Tracking     | `GET /games/:id/stats` — accounts per status                                |
+| Playtime     | `GET /games/:id/community` — hours logged and the newest entry              |
+| Achievements | `steamAchievements.total`, `retroachievements`, the MoonCellar port count   |
 
 The editorial paragraph is the one part nothing generates: a note written by the team, one per
 indexable card, about what the game asks of a player and how it sits next to its sequels. It lives
@@ -260,7 +294,6 @@ place, that is **604–910 characters, median 695, and 31 of 31 cards above the 
 `--check` fails when a card of `INDEXABLE_GAME_SLUGS` has no note, when the note map holds a slug
 outside that list, or when a card falls below the bar — so a card cannot be added to the indexed
 set without its text.
-
 
 ## Images
 

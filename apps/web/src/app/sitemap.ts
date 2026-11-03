@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 import { unstable_cache } from "next/cache";
-import { articlesAPI, gamesApi } from "@/src/lib/shared/api";
+import { articlesAPI, collectionsAPI, gamesApi } from "@/src/lib/shared/api";
 import { toSlug } from "@/src/lib/shared/utils/slug.utils";
 import { IGetGameSlugsResponse } from "@mooncellar/schemas";
 import { FRONT_URL, links } from "@/src/lib/shared/constants";
@@ -52,11 +52,22 @@ const getPlatformCounts = unstable_cache(
   { revalidate: 3600 }
 );
 
+const getCollections = unstable_cache(
+  async () => {
+    const { data } = await collectionsAPI.getAll();
+
+    return data.results;
+  },
+  ["sitemap-collections"],
+  { revalidate: 3600 }
+);
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const gameSlugs = await getAllGameSlugs().catch(() => []);
   const genres = await getGenreCounts().catch(() => []);
   const platformCounts = await getPlatformCounts().catch(() => []);
   const articleSlugs = await getArticleSlugs().catch(() => []);
+  const collections = await getCollections().catch(() => []);
   const listedGames = new Set(gameSlugs.map(({ slug }) => slug));
   const unlistedGames = [...INDEXABLE_GAME_SLUGS].filter(
     (slug) => !listedGames.has(slug)
@@ -92,6 +103,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })),
     ...articleSlugs.map(({ slug, updatedAt }) => ({
       url: `${FRONT_URL}/news/${slug}`,
+      lastModified: new Date(updatedAt),
+    })),
+    ...collections.map(({ slug, updatedAt }) => ({
+      url: `${FRONT_URL}/collections/${slug}`,
       lastModified: new Date(updatedAt),
     })),
   ];

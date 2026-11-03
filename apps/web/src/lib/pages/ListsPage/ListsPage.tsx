@@ -17,6 +17,7 @@ import { useMinimumLoading } from "@/src/lib/shared/hooks/useMinimumLoading";
 import { BGImage } from "@/src/lib/shared/ui/BGImage";
 import { Box } from "@/src/lib/shared/ui/Box";
 import { Breadcrumbs } from "@/src/lib/shared/ui/Breadcrumbs";
+import { Button } from "@/src/lib/shared/ui/Button";
 import { EmptyState } from "@/src/lib/shared/ui/EmptyState";
 import { ExpandMenu } from "@/src/lib/shared/ui/ExpandMenu";
 import { ListCard, ListCardSkeleton } from "@/src/lib/shared/ui/ListCard";
@@ -164,7 +165,15 @@ export const ListsPage: FC<IListsPageProps> = ({
             { name: "Lists", href: "/lists" },
           ]}
         />
-        <SectionTitle as="h1" count={isLoading ? undefined : total}>
+        <SectionTitle
+          as="h1"
+          count={isLoading ? undefined : total}
+          action={
+            <Button href="/collections" compact>
+              Collections
+            </Button>
+          }
+        >
           Lists
         </SectionTitle>
         <AppliedFilters

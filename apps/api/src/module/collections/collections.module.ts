@@ -18,6 +18,7 @@ import { MetricsModule } from "../metrics/metrics.module";
 import { UserLogs, UserLogsSchema } from "../user/schemas/user-logs.schema";
 import { User, UserSchema } from "../user/schemas/user.schema";
 import { UserLogsService } from "../user/services/user-logs.service";
+import { CollectionsController } from "./controllers/collections.controller";
 import { CustomListsController } from "./controllers/custom-lists.controller";
 import { FavoritesController } from "./controllers/favorites.controller";
 import { UsersSearchController } from "./controllers/users-search.controller";
@@ -53,6 +54,7 @@ import { NotificationsModule } from "../notifications/notifications.module";
   ],
   controllers: [
     CustomListsController,
+    CollectionsController,
     FavoritesController,
     UsersSearchController,
   ],
