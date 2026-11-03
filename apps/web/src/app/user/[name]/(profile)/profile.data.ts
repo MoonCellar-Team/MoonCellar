@@ -31,6 +31,6 @@ export const getProfileTabMetadata = async (
   return {
     title: `${profileTabLabels[tab]}: ${user.userName}`,
     alternates: { canonical: getProfileHref(user.userName, tab) },
-    ...(tab === "settings" && { robots: { index: false, follow: false } }),
+    robots: { index: false, follow: tab !== "settings" },
   };
 };
