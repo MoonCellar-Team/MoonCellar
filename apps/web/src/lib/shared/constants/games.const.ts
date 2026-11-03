@@ -1,4 +1,5 @@
 import { IGameResponse } from "@mooncellar/schemas";
+import { GAME_CARD_DUPLICATES } from "./game-duplicates.const";
 
 export const emptyGames: IGameResponse[] = Array(16)
   .fill("")
@@ -93,4 +94,5 @@ export const GAME_CARD_REDIRECTS: Readonly<Record<string, string>> = {
 };
 
 export const getGameCardRedirect = (slug: string) =>
-  GAME_CARD_REDIRECTS[slug] as string | undefined;
+  GAME_CARD_DUPLICATES[slug] ??
+  (GAME_CARD_REDIRECTS[slug] as string | undefined);

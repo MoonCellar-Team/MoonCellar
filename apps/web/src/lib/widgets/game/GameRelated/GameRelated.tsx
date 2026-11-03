@@ -4,6 +4,7 @@ import { FC, useState } from "react";
 import classNames from "classnames";
 import styles from "./GameRelated.module.scss";
 import { RELATION_LABELS } from "@/src/lib/shared/constants/related-games.const";
+import { getGameCardRedirect } from "@/src/lib/shared/constants/games.const";
 import { Box } from "@/src/lib/shared/ui/Box";
 import { Tabs } from "@/src/lib/shared/ui/Tabs";
 import { GamesCards } from "@/src/lib/widgets/game/GamesCards";
@@ -69,6 +70,7 @@ export const GameRelated: FC<IGameRelatedProps> = ({ related }) => {
     group.relations.forEach((relation) =>
       related?.[relation]?.forEach((game) => {
         if (relationById.has(game._id)) return;
+        if (getGameCardRedirect(game.slug)) return;
         relationById.set(game._id, relation);
         games.push(game);
       })
