@@ -26,7 +26,10 @@ import {
 } from "@/src/lib/shared/api";
 import { ACCESS_TOKEN, API_URL } from "@/src/lib/shared/constants";
 import { IAuthToken } from "@/src/lib/shared/types/auth.type";
-import { getListHref } from "@/src/lib/shared/utils/links.utils";
+import {
+  getCollectionHref,
+  getListHref,
+} from "@/src/lib/shared/utils/links.utils";
 import { fetchOrNull } from "@/src/lib/shared/utils/not-found.utils";
 
 interface IListRouteProps {
@@ -120,6 +123,10 @@ export default async function CustomListRoute({
 
   if (!list) {
     notFound();
+  }
+
+  if (list.isGenerated) {
+    permanentRedirect(getCollectionHref(list.slug));
   }
 
   const page = Math.max(1, Number(query.page) || 1);

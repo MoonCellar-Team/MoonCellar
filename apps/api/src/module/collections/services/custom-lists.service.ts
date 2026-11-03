@@ -190,6 +190,7 @@ export class CustomListsService {
       sortOrder: doc.sortOrder ?? DEFAULT_CUSTOM_LIST_GAMES_ORDER,
       gamesCount: doc.gamesCount ?? 0,
       ...(doc.source ? { source: doc.source } : {}),
+      ...(doc.generator ? { isGenerated: true } : {}),
       likesCount: Math.max(doc.likesCount ?? 0, 0),
       covers,
       author: author
@@ -626,6 +627,48 @@ export class CustomListsService {
           sortBy
         )
       ),
+    };
+  }
+
+  async getGeneratedCollections(): Promise<IGetCustomListsResponse> {
+    try {
+      const docs = await this.listModel.aggregate<IAggregatedList>([
+        {
+          $match: {
+            isPrivate: { $ne: true },
+            "generator.kind": { $exists: true },
+          },
+        },
+        { $sort: { gamesCount: -1, name: 1 } },
+        ...this.presentationStages(),
+        { $project: { games: 0 } },
+      ]);
+
+      return {
+        results: docs.map((doc) => this.toList(doc)),
+        total: docs.length,
+      };
+    } catch (err) {
+      this.logger.error(err, "Failed to get generated collections");
+      throw err;
+    }
+  }
+
+  async getGeneratedCollection(slug: string): Promise<ICustomListDetails> {
+    const doc = await this.findPresented({
+      $or: [{ slug }, { previousSlugs: slug }],
+      "generator.kind": { $exists: true },
+    });
+
+    if (!doc) throw new NotFoundException("Collection not found");
+
+    return {
+      ...this.toList(doc),
+      games: (doc.games ?? []).map((game, index) => ({
+        gameId: game.gameId.toString(),
+        addedAt: toIsoString(game.addedAt),
+        position: index + 1,
+      })),
     };
   }
 

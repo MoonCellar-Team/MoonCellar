@@ -1,10 +1,16 @@
 import { FC } from "react";
 import Link from "next/link";
-import { IGameCommunity, IGameListsResponse, IGameResponse, IGameStats } from "@mooncellar/schemas";
+import {
+  IGameCommunity,
+  IGameListsResponse,
+  IGameResponse,
+  IGameStats,
+} from "@mooncellar/schemas";
 import { Box } from "@/src/lib/shared/ui/Box";
 import { IPortGameAchievements } from "@/src/lib/entities/port-achievement/model";
 import { getGameRecordParagraphs } from "@/src/lib/shared/utils/game-record.utils";
 import { getGameEditorial } from "@/src/lib/shared/constants/game-editorial.const";
+import { getCollectionHref } from "@/src/lib/shared/utils/links.utils";
 import styles from "./GameRecord.module.scss";
 
 interface IGameRecordProps {
@@ -87,14 +93,20 @@ export const GameRecord: FC<IGameRecordProps> = ({
 
         {!!lists.length && (
           <div className={styles.record__block}>
-            <h3 className={styles.record__subtitle}>Lists that include it</h3>
+            <h3 className={styles.record__subtitle}>
+              Collections and lists that include it
+            </h3>
             <ul className={styles.record__list}>
               {lists.map((list) => (
                 <li className={styles.record__entry} key={list.slug}>
                   {list.authorName ? (
                     <Link
                       className={styles.record__link}
-                      href={`/user/${list.authorName}/lists/${list.slug}`}
+                      href={
+                        list.isGenerated
+                          ? getCollectionHref(list.slug)
+                          : `/user/${list.authorName}/lists/${list.slug}`
+                      }
                     >
                       {list.name}
                     </Link>
@@ -103,7 +115,7 @@ export const GameRecord: FC<IGameRecordProps> = ({
                   )}
                   <span className={styles.record__meta}>
                     {list.isGenerated
-                      ? `MoonCellar list, ${plural(list.gamesCount, "game", "games")}`
+                      ? `MoonCellar collection, ${plural(list.gamesCount, "game", "games")}`
                       : `${plural(list.gamesCount, "game", "games")}`}
                   </span>
                 </li>

@@ -1,0 +1,31 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-x5);
+  color: var(--color-text-primary);
+
+  &__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-x2) var(--gap-x5);
+    font-size: 13px;
+    color: var(--color-text-muted);
+  }
+
+  &__stat b {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__intro {
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+  }
+
+  &__more {
+    align-self: flex-start;
+  }
+}

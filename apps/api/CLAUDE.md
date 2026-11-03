@@ -216,7 +216,7 @@ an instance of Module)`. Use a default import; tsc reports the call as `TS2349`.
 - **The relay password is mounted at `/secrets`, never at `/run/secrets`.** `boky/postfix` declares
   `VOLUME /var/run/`, `/var/run` is a symlink to `/run`, and Docker puts an anonymous volume there
   that masks the bind — the container then dies with `/run/secrets/password: No such file or
-  directory` while the file is sitting on the host.
+directory` while the file is sitting on the host.
 - **A letter is always sent with both `html` and `text`.** The plain-text part is what a client
   without HTML shows and what several spam filters compare the HTML against; sending HTML alone
   lowers the score for no benefit.
@@ -315,6 +315,12 @@ an instance of Module)`. Use a default import; tsc reports the call as `TS2349`.
   whose `kind` + `key` is no longer defined, so the year window rolls forward without leaving a
   frozen list behind — and renaming a `key` deletes the old list with its likes instead of
   renaming it.
+- **A generated list is published as a collection: `GET /collections` and `GET /collections/:slug`
+  (`CollectionsController`) read only documents carrying a `generator`, and `CustomListsService.toList`
+  sets `isGenerated` on them.** The web's `getListHref` turns that flag into `/collections/<slug>`,
+  and `/user/MoonCellar/lists/<slug>` answers a 308 there — a generated rank must not exist twice
+  under two indexable URLs. Do not relax either endpoint to every list: a player's list belongs
+  to its profile page, with its likes and Manage mode.
 - **A company list matches the developer role only, by name pattern.** IGDB records regional
   publishers, so a publisher match put Warcraft III and GTA III into "Best Capcom games"; the
   patterns are prefixes so a family's studios (Rockstar North, Nintendo EAD, Ubisoft Montreal)

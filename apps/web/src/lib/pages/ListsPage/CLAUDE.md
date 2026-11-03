@@ -27,10 +27,11 @@ games, size and last update, 24 per page. Public.
 1. `BGImage`.
 2. Left `ExpandMenu` "Filters" → `features/lists/ui/ListsFilters`.
 3. `Pagination` (fixed, `take={CUSTOM_LISTS_PAGE_SIZE}`).
-4. `Box`: `Breadcrumbs`, `SectionTitle as="h1"` "Lists" with the total as its `count`, `AppliedFilters`
-   chips derived here from the parsed query, then `EmptyState` or `ListCardsGrid` of
-   `ListCard`s. While loading, `ListCardsGrid isLoading` holds `CUSTOM_LISTS_PAGE_SIZE`
-   `ListCardSkeleton`s.
+4. `Box`: `Breadcrumbs`, `SectionTitle as="h1"` "Lists" with the total as its `count` and a
+   "Collections" `Button` as its `action` (the way to `/collections`, which no other page
+   links to), `AppliedFilters` chips derived here from the parsed query, then `EmptyState` or
+   `ListCardsGrid` of `ListCard`s. While loading, `ListCardsGrid isLoading` holds
+   `CUSTOM_LISTS_PAGE_SIZE` `ListCardSkeleton`s.
 
 ## Rules and gotchas
 
