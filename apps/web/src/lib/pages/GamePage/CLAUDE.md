@@ -76,7 +76,7 @@ landing page — the catalogue holds 439 455 of them and 31 are indexable.
    port; then "The same accounts also tracked" (`community.alsoPlayed`) and "Lists that include
    it" (`lists`). The builder is a pure function over numbers the page already has, and the block
    renders nothing when it has nothing to say. [`docs/seo.md`](../../../../../docs/seo.md), "The
-   MoonCellar record", measures what it produces: 143–380 characters per indexable card on
+   MoonCellar record", measures what it produces: 143–364 characters per indexable card on
    2026-11-03, so it narrows but does not close the 600-character bar of the indexable list.
 6. `entities/game/ui/GameDetails` — the remaining catalogue facts.
 7. `widgets/game/GameRelated`.

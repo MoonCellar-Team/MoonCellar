@@ -247,8 +247,8 @@ up to eight. Both are links, so the block also gives crawlers a path through our
 
 The blocking is measured, not assumed: `bun --env-file=apps/api/.env
 scripts/audit-game-card-text.ts` rebuilds the same facts from the database and prints the
-characters of our own text each indexable card renders. On 2026-11-03 that is 143–380 characters,
-median 258, and **none of the 31 cards reaches 600**. The record block therefore does not by
+characters of our own text each indexable card renders. On 2026-11-03 that is 143–364 characters,
+median 246, and **none of the 31 cards reaches 600**. The record block therefore does not by
 itself make a card indexable — the 600-character bar in `INDEXABLE_GAME_SLUGS` still needs written
 editorial text on top of what our accounts produce.
 
