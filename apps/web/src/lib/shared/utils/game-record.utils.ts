@@ -32,6 +32,7 @@ export interface IGameRecordPort {
 
 export interface IGameRecordFacts {
   name: string;
+  editorial?: string | null;
   rating?: IGameRecordRating | null;
   stats?: IGameRecordStats | null;
   playtime?: IGameRecordPlaytime | null;
@@ -161,6 +162,7 @@ export const getGameRecordParagraphs = (
   facts: IGameRecordFacts
 ): string[] =>
   [
+    facts.editorial?.trim() || null,
     getGameRecordRating(facts),
     getGameRecordTrack(facts),
     getGameRecordPlaytime(facts),

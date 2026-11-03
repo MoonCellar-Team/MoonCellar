@@ -4,6 +4,7 @@ import { IGameCommunity, IGameListsResponse, IGameResponse, IGameStats } from "@
 import { Box } from "@/src/lib/shared/ui/Box";
 import { IPortGameAchievements } from "@/src/lib/entities/port-achievement/model";
 import { getGameRecordParagraphs } from "@/src/lib/shared/utils/game-record.utils";
+import { getGameEditorial } from "@/src/lib/shared/constants/game-editorial.const";
 import styles from "./GameRecord.module.scss";
 
 interface IGameRecordProps {
@@ -28,6 +29,7 @@ export const GameRecord: FC<IGameRecordProps> = ({
 }) => {
   const paragraphs = getGameRecordParagraphs({
     name: game.name,
+    editorial: getGameEditorial(game.slug),
     rating:
       game.ratingsCount && game.averageRating != null
         ? { average: game.averageRating, count: game.ratingsCount }
