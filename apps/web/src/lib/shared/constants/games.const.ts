@@ -35,3 +35,5 @@ export const takeUserGames = 30;
 export const takeHubGames = 30;
 
 export const takeHubRecentGames = 6;
+
+export const MIN_GAMES_FOR_INDEX = 100;

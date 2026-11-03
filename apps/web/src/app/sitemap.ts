@@ -1,13 +1,10 @@
 import { MetadataRoute } from "next";
 import { unstable_cache } from "next/cache";
-import { articlesAPI, gamesApi, userAPI } from "@/src/lib/shared/api";
-import { platformsAPI } from "@/src/lib/shared/api/platforms.api";
+import { articlesAPI, gamesApi } from "@/src/lib/shared/api";
 import { toSlug } from "@/src/lib/shared/utils/slug.utils";
-import {
-  IGetGameSlugsResponse,
-  IGetUserLoginsResponse,
-} from "@mooncellar/schemas";
+import { IGetGameSlugsResponse } from "@mooncellar/schemas";
 import { FRONT_URL, links } from "@/src/lib/shared/constants";
+import { MIN_GAMES_FOR_INDEX } from "@/src/lib/shared/constants/games.const";
 
 export const dynamic = "force-dynamic";
 
@@ -21,16 +18,6 @@ const getAllGameSlugs = unstable_cache(
   { revalidate: 3600 }
 );
 
-const getAllUserLogins = unstable_cache(
-  async (): Promise<IGetUserLoginsResponse> => {
-    const { data } = await userAPI.getLogins();
-
-    return data;
-  },
-  ["sitemap-user-logins"],
-  { revalidate: 3600 }
-);
-
 const getArticleSlugs = unstable_cache(
   async () => {
     const { data } = await articlesAPI.getSlugs();
@@ -40,8 +27,6 @@ const getArticleSlugs = unstable_cache(
   ["sitemap-article-slugs"],
   { revalidate: 3600 }
 );
-
-const MIN_GAMES_FOR_HUB = 100;
 
 const getGenreCounts = unstable_cache(
   async () => {
@@ -53,27 +38,25 @@ const getGenreCounts = unstable_cache(
   { revalidate: 3600 }
 );
 
-const getPlatforms = unstable_cache(
+const getPlatformCounts = unstable_cache(
   async () => {
-    const { data } = await platformsAPI.getAll();
+    const { data } = await gamesApi.getTotalGamesByPlatformCount();
 
     return data;
   },
-  ["sitemap-platforms"],
+  ["sitemap-platform-counts"],
   { revalidate: 3600 }
 );
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const gameSlugs = await getAllGameSlugs().catch(() => []);
-  const userLogins = await getAllUserLogins().catch(() => []);
   const genres = await getGenreCounts().catch(() => []);
-  const platforms = await getPlatforms().catch(() => []);
+  const platformCounts = await getPlatformCounts().catch(() => []);
   const articleSlugs = await getArticleSlugs().catch(() => []);
 
   return [
     ...links.map(({ link }) => ({
       url: `${FRONT_URL}${link}`,
-      lastModified: new Date(),
     })),
     ...gameSlugs.map(({ slug, updatedAt, cover }) => ({
       url: `${FRONT_URL}/games/${slug}`,
@@ -85,19 +68,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }),
     })),
     ...genres
-      .filter(({ count }) => count >= MIN_GAMES_FOR_HUB)
+      .filter(({ count }) => count >= MIN_GAMES_FOR_INDEX)
       .map(({ genre }) => ({
         url: `${FRONT_URL}/games/genre/${toSlug(genre)}`,
-        lastModified: new Date(),
       })),
-    ...platforms.map(({ slug }) => ({
-      url: `${FRONT_URL}/games/platform/${slug}`,
-      lastModified: new Date(),
-    })),
-    ...userLogins.map(({ userName, updatedAt }) => ({
-      url: `${FRONT_URL}/user/${userName}`,
-      lastModified: new Date(updatedAt),
-    })),
+    ...platformCounts
+      .filter(({ count }) => count >= MIN_GAMES_FOR_INDEX)
+      .map(({ platform }) => ({
+        url: `${FRONT_URL}/games/platform/${platform}`,
+      })),
     ...articleSlugs.map(({ slug, updatedAt }) => ({
       url: `${FRONT_URL}/news/${slug}`,
       lastModified: new Date(updatedAt),

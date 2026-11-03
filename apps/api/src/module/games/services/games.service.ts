@@ -1049,6 +1049,53 @@ export class GamesService implements OnModuleInit {
     }
   }
 
+  async getTotalGamesCountByPlatform() {
+    try {
+      const result = (await this.Games.aggregate([
+        {
+          $match: {
+            platformIds: { $exists: true, $ne: [] },
+          },
+        },
+        {
+          $unwind: "$platformIds",
+        },
+        {
+          $group: {
+            _id: "$platformIds",
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $lookup: {
+            from: "platforms",
+            localField: "_id",
+            foreignField: "_id",
+            as: "platform",
+          },
+        },
+        {
+          $unwind: "$platform",
+        },
+        {
+          $sort: { count: -1 },
+        },
+        {
+          $project: {
+            _id: 0,
+            platform: "$platform.slug",
+            count: 1,
+          },
+        },
+      ])) as unknown as { platform: string; count: number }[];
+
+      return result;
+    } catch (err) {
+      this.logger.error(err, `Failed to get total games count by platform`);
+      throw err;
+    }
+  }
+
   async getFollowingsStatus(
     gameId: string,
     { userId }: IGetGameFollowingsStatusRequest

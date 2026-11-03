@@ -12,6 +12,7 @@ import {
   IGetGamesRequest,
   IGetGameSlugsResponse,
   IGetRandomGameSlugResponse,
+  IPlatformCountResponse,
   IUpcomingReleaseGroup,
   IUpdateGameRequest,
   IGetGameFollowingsStatusResponse,
@@ -146,6 +147,12 @@ export const gamesApi = {
 
   getTotalGamesByCount: async () => {
     return agent.get<IGenreResponse[]>(`${GAMES_URL}/count-by-genre`);
+  },
+
+  getTotalGamesByPlatformCount: async () => {
+    return agent.get<IPlatformCountResponse[]>(
+      `${GAMES_URL}/count-by-platform`
+    );
   },
 
   getUpcomingReleases: async () => {

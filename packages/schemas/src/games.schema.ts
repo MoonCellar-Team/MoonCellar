@@ -658,6 +658,7 @@ export type IGetRandomGameSlugResponse = z.infer<
 >;
 
 export type IGenreResponse = { genre: string; count: number };
+export type IPlatformCountResponse = { platform: string; count: number };
 export type IGameImageKind = (typeof GAME_IMAGE_KINDS)[number];
 export type IFindGameImagesRequest = z.infer<
   typeof FindGameImagesRequestSchema
