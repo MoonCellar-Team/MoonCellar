@@ -12,7 +12,8 @@ editing controls.
   - `(profile)/page.tsx` — the Profile tab. It `permanentRedirect`s the legacy
     `?list=<tab>` to `/user/<name>/<tab>`, keeping the other params.
   - `(profile)/[tab]/page.tsx` — `notFound()` for a tab outside `profileTabs`; metadata
-    `<Tab label>: <name>`, canonical per tab, `noindex` for `settings`.
+    `<Tab label>: <name>`, canonical per tab and `noindex, follow` on every tab (`follow: false`
+    for `settings`).
   - `(profile)/favourites/[kind]/page.tsx` — `favourites/games` and `favourites/characters`, the
     only two-segment tabs; same metadata through `getProfileTabMetadata`. The layout reads the
     tab with `useSelectedLayoutSegments()` joined by `/`, since a single segment would read
@@ -157,3 +158,13 @@ editing controls.
 - **Open long content (reviews, comments) in the shared drawer**, never a panel of your own; the
   drawer is what keeps it off the bottom-right Menu.
 - `PATCH profile-time` (`userAPI.updateUserTime`) fires only when the viewer is the owner.
+- **Every profile tab is `noindex, follow`; `/user/<name>` is the only indexable URL of a user.**
+  A tab is a filtered view of the same person — the same games, lists and reviews behind the same
+  name — so it carries nothing the profile does not already answer, and indexing it puts a dozen
+  thin, near-identical URLs per account in front of Google while the sitemap lists no profile at
+  all. It is `noindex` rather than a canonical to the profile because it is not a duplicate: it
+  holds a different list, and a canonical would point at a page that does not contain it. `follow`
+  stays on, so the links a tab renders stay crawlable; `settings` is the owner's own page and is
+  `noindex, nofollow`. Every tab gets this from `getProfileTabMetadata` (`profile.data.ts`), so a
+  new tab route must not set `robots` of its own, and a failed user lookup there still returns
+  `{}` rather than `noindex` (a 200 page must not be headlined as a 404).
