@@ -3,7 +3,7 @@ import {
   getPortGameAchievements,
   getSitePort,
 } from "@/src/lib/entities/port-achievement/api/port-achievement.loaders";
-import { commentsAPI, gamesApi } from "@/src/lib/shared/api";
+import { commentsAPI, gamesApi, listsAPI } from "@/src/lib/shared/api";
 import { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
@@ -56,6 +56,20 @@ const getRelated = cache(async (gameId: string) =>
 const getReviews = cache(async (gameId: string) =>
   commentsAPI
     .getReviews(gameId, {})
+    .then(({ data }) => data)
+    .catch(() => undefined)
+);
+
+const getCommunity = cache(async (gameId: string) =>
+  gamesApi
+    .getCommunity(gameId)
+    .then(({ data }) => data)
+    .catch(() => undefined)
+);
+
+const getLists = cache(async (gameId: string) =>
+  listsAPI
+    .getByGame(gameId)
     .then(({ data }) => data)
     .catch(() => undefined)
 );
@@ -147,13 +161,16 @@ const GamePageIndex = async ({ params }: { params: any }) => {
     permanentRedirect(`/games/${redirectTo}`);
   }
 
-  const [stats, reviews, related, portAchievements, port] = await Promise.all([
-    getStats(game._id),
-    getReviews(game._id),
-    getRelated(game._id),
-    getPortAchievements(game.slug),
-    getPort(game.slug),
-  ]);
+  const [stats, reviews, related, portAchievements, port, community, lists] =
+    await Promise.all([
+      getStats(game._id),
+      getReviews(game._id),
+      getRelated(game._id),
+      getPortAchievements(game.slug),
+      getPort(game.slug),
+      getCommunity(game._id),
+      getLists(game._id),
+    ]);
 
   return (
     <>
@@ -172,6 +189,8 @@ const GamePageIndex = async ({ params }: { params: any }) => {
         related={related}
         portAchievements={portAchievements}
         port={port}
+        community={community}
+        lists={lists}
       />
     </>
   );

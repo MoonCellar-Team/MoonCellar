@@ -21,6 +21,7 @@ export * from "./game-auth.schema";
 export * from "./game.schema";
 export * from "./games.schema";
 export * from "./game-stats.schema";
+export * from "./game-community.schema";
 export * from "./platforms.schema";
 export * from "./playthroughs.schema";
 export * from "./projects.schema";

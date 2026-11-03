@@ -9,6 +9,7 @@ import {
   ICustomListSort,
   IGetCustomListsRequest,
   IGetCustomListsResponse,
+  IGameListsResponse,
   IReorderCustomListRequest,
   IReorderCustomListsRequest,
   IUpdateCustomListRequest,
@@ -36,6 +37,8 @@ export const listsAPI = {
     }),
   getLikedLists: (userId: string) =>
     agent.get<ICustomList[]>(`${LISTS_URL}/liked/${userId}`),
+  getByGame: (gameId: string) =>
+    agent.get<IGameListsResponse>(`${LISTS_URL}/game/${gameId}`),
   getMyGameCounts: () =>
     agent.get<ICustomListGameCountsResponse>(`${LISTS_URL}/mine/game-counts`),
   getBySlug: (

@@ -4,7 +4,9 @@ import { FC } from "react";
 import styles from "./GamePage.module.scss";
 import { BGImage } from "@/src/lib/shared/ui/BGImage";
 import {
+  IGameCommunity,
   IGameDefinitionInfo,
+  IGameListsResponse,
   IGameResponse,
   IGameStats,
   IRelatedGamesResponse,
@@ -24,6 +26,7 @@ import { GameReleaseDates } from "@/src/lib/entities/game/ui/GameReleaseDates";
 import { GameMultiplayer } from "@/src/lib/entities/game/ui/GameMultiplayer";
 import { GameCharacters } from "@/src/lib/widgets/game/GameCharacters";
 import { GameRelated } from "@/src/lib/widgets/game/GameRelated";
+import { GameRecord } from "@/src/lib/widgets/game/GameRecord";
 import { GameCommunity } from "@/src/lib/widgets/game/GameCommunity";
 import { IPortGameAchievements } from "@/src/lib/entities/port-achievement/model";
 
@@ -34,6 +37,8 @@ interface IGamePageProps {
   related?: IRelatedGamesResponse;
   portAchievements?: IPortGameAchievements;
   port?: IGameDefinitionInfo;
+  community?: IGameCommunity;
+  lists?: IGameListsResponse;
 }
 
 export const GamePage: FC<IGamePageProps> = ({
@@ -43,6 +48,8 @@ export const GamePage: FC<IGamePageProps> = ({
   related,
   portAchievements,
   port,
+  community,
+  lists,
 }) => {
   const hideMedia = useHideAdult() && isAdultGame(game);
 
@@ -64,6 +71,14 @@ export const GamePage: FC<IGamePageProps> = ({
       {!hideMedia && (
         <GameCharacters characters={game.characters} gameId={game._id} />
       )}
+      <GameRecord
+        game={game}
+        stats={stats}
+        community={community}
+        lists={lists}
+        port={port}
+        portAchievements={portAchievements}
+      />
       <GameDetails game={game} />
       <GameRelated related={related} />
       <GameCommunity game={game} initialReviews={reviews} />
