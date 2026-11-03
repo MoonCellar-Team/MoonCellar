@@ -1,6 +1,8 @@
 # SEO
 
-An inventory of the search-related functionality in `apps/web`: what exists and where it lives.
+An inventory of the search-related functionality in `apps/web`: what exists and where it lives. The
+weekly routine that follows the demotion — the four numbers read every week, the recovery thresholds
+and the rule about Request indexing — is [SEO recovery](seo-recovery.md).
 
 ## Metadata
 
