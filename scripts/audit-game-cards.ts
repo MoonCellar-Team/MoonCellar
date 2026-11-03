@@ -8,10 +8,14 @@ const CONSTANTS_PATH = new URL(
   "../apps/web/src/lib/shared/constants/games.const.ts",
   import.meta.url
 );
+const DUPLICATES_PATH = new URL(
+  "../apps/web/src/lib/shared/constants/game-duplicates.const.ts",
+  import.meta.url
+);
 
 const USAGE = `Audit the game cards the sitemap publishes and file each one as keep, merge or noindex.
 
-  bun --env-file=apps/api/.env scripts/audit-game-cards.ts [--csv <path>] [--check]
+  bun --env-file=apps/api/.env scripts/audit-game-cards.ts [--csv <path>] [--check] [--write]
 
 The database is reached through the tunnel, so run \`bun run mongo\` first.
 
@@ -22,8 +26,13 @@ keep. A card is merge when it is an edition of another card in the sitemap: the 
 same IGDB text. Everything else is noindex — thin when it has no own data at all, weak when it has
 some but is not on the shortlist.
 
---csv writes the whole table, --check fails when apps/web's INDEXABLE_GAME_SLUGS or
-GAME_CARD_REDIRECTS disagree with the database (run it after a catalogue change).`;
+A duplicate is a card outside the sitemap that carries the same normalised name and release year as
+a card in it: a second page of a game the site already has. The card in the sitemap with the IGDB
+link is kept and every other card of the group answers 308 to it.
+
+--csv writes the whole table, --check fails when apps/web's INDEXABLE_GAME_SLUGS, GAME_CARD_REDIRECTS
+or GAME_CARD_DUPLICATES disagree with the database (run it after a catalogue change). --write fills
+GAME_CARD_DUPLICATES from the database; the editions in GAME_CARD_REDIRECTS stay by hand.`;
 
 export type ICardVerdict = "keep" | "merge" | "noindex";
 
@@ -45,6 +54,16 @@ export interface IGameCardInput {
   portAchievements: number;
 }
 
+export interface IDuplicateCandidate {
+  slug: string;
+  name: string;
+  releaseYear: number | null;
+  hasIgdb: boolean;
+  votes: number;
+  inSitemap: boolean;
+  isPort?: boolean;
+}
+
 export interface IGameCardVerdict extends IGameCardInput {
   verdict: ICardVerdict;
   reason: string;
@@ -55,6 +74,7 @@ export interface IGameCardAudit {
   cards: IGameCardVerdict[];
   keep: string[];
   merged: Record<string, string>;
+  duplicates: Record<string, string>;
   counts: {
     total: number;
     sitemap: number;
@@ -63,6 +83,7 @@ export interface IGameCardAudit {
     noindex: number;
     thin: number;
     weak: number;
+    duplicates: number;
     withFirstPartyData: number;
   };
 }
@@ -87,9 +108,55 @@ const describeSignals = (card: IGameCardInput) =>
     .filter(Boolean)
     .join(", ") || "no playthrough, rating, note, discussion or list";
 
+export const normaliseName = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+export const findDuplicates = (
+  candidates: IDuplicateCandidate[]
+): Record<string, string> => {
+  const groups = new Map<string, IDuplicateCandidate[]>();
+
+  for (const candidate of candidates) {
+    if (candidate.releaseYear === null) continue;
+
+    const key = `${normaliseName(candidate.name)}|${candidate.releaseYear}`;
+
+    groups.set(key, [...(groups.get(key) ?? []), candidate]);
+  }
+
+  const duplicates: Record<string, string> = {};
+
+  for (const group of groups.values()) {
+    const listed = group.filter(
+      (candidate) => candidate.inSitemap && !candidate.isPort
+    );
+
+    if (!listed.length) continue;
+
+    const target = [...listed].sort(
+      (a, b) =>
+        Number(b.hasIgdb) - Number(a.hasIgdb) ||
+        b.votes - a.votes ||
+        a.slug.localeCompare(b.slug)
+    )[0];
+
+    for (const candidate of group) {
+      if (candidate.inSitemap || candidate.isPort) continue;
+
+      duplicates[candidate.slug] = target.slug;
+    }
+  }
+
+  return duplicates;
+};
+
 export const auditGameCards = (
   input: IGameCardInput[],
-  keepLimit = KEEP_LIMIT
+  keepLimit = KEEP_LIMIT,
+  duplicates: Record<string, string> = {}
 ): IGameCardAudit => {
   const bySlug = new Map(input.map((card) => [card.slug, card]));
   const merged: Record<string, string> = {};
@@ -157,6 +224,7 @@ export const auditGameCards = (
       .filter((card) => card.verdict === "keep")
       .map((card) => card.slug),
     merged,
+    duplicates,
     counts: {
       total: cards.length,
       sitemap: cards.filter((card) => card.inSitemap).length,
@@ -165,12 +233,56 @@ export const auditGameCards = (
       noindex: noindex.length,
       thin: noindex.filter((card) => !ownData(card)).length,
       weak: noindex.filter((card) => ownData(card)).length,
+      duplicates: Object.keys(duplicates).length,
       withFirstPartyData: cards.filter(ownData).length,
     },
   };
 };
 
 const withStringIds = (ids: ObjectId[]) => [...ids, ...ids.map(String)];
+
+export const loadDuplicates = async (
+  db: Db,
+  sitemapIds: ObjectId[],
+  portSlugs: string[]
+): Promise<Record<string, string>> => {
+  const groups = await db
+    .collection("games")
+    .aggregate([
+      { $match: { first_release: { $gt: 0 } } },
+      {
+        $project: {
+          slug: 1,
+          name: { $ifNull: ["$nameNormalized", "$name"] },
+          releaseYear: {
+            $year: { $toDate: { $multiply: ["$first_release", 1000] } },
+          },
+          hasIgdb: { $ne: [{ $ifNull: ["$igdb.gameId", null] }, null] },
+          votes: { $ifNull: ["$igdb.total_rating_count", 0] },
+          inSitemap: { $in: ["$_id", sitemapIds] },
+        },
+      },
+      {
+        $group: {
+          _id: { name: "$name", releaseYear: "$releaseYear" },
+          cards: { $push: "$$ROOT" },
+          listed: { $sum: { $cond: ["$inSitemap", 1, 0] } },
+        },
+      },
+      { $match: { listed: { $gt: 0 }, cards: { $not: { $size: 1 } } } },
+    ])
+    .toArray();
+
+  const ports = new Set(portSlugs);
+  const candidates = groups.flatMap((group) =>
+    (group.cards as IDuplicateCandidate[]).map((card) => ({
+      ...card,
+      isPort: ports.has(card.slug),
+    }))
+  );
+
+  return findDuplicates(candidates);
+};
 
 const sitemapGameIds = async (Games: Collection) => {
   const now = Math.floor(Date.now() / 1000);
@@ -226,7 +338,12 @@ const loadPorts = async (): Promise<
   }
 };
 
-export const loadCards = async (db: Db): Promise<IGameCardInput[]> => {
+export const loadCards = async (
+  db: Db
+): Promise<{
+  cards: IGameCardInput[];
+  duplicates: Record<string, string>;
+}> => {
   const Games = db.collection("games");
   const [sitemapIds, ports] = await Promise.all([
     sitemapGameIds(Games),
@@ -359,7 +476,7 @@ export const loadCards = async (db: Db): Promise<IGameCardInput[]> => {
   const sitemapIdSet = new Set(sitemapIds.map(String));
   const slugById = new Map(games.map((game) => [String(game._id), game.slug]));
 
-  return games.map((game) => {
+  const cards = games.map((game) => {
     const id = String(game._id);
     const playthrough = playthroughsByGame.get(id);
     const port = portByGame.get(game.slug);
@@ -384,6 +501,11 @@ export const loadCards = async (db: Db): Promise<IGameCardInput[]> => {
       portAchievements: port?.achievements ?? 0,
     };
   });
+
+  return {
+    cards,
+    duplicates: await loadDuplicates(db, sitemapIds, portSlugs),
+  };
 };
 
 const printReport = ({ cards, counts }: IGameCardAudit) => {
@@ -391,6 +513,7 @@ const printReport = ({ cards, counts }: IGameCardAudit) => {
     `\nCards audited: ${counts.total} — ${counts.sitemap} in the sitemap, ${counts.total - counts.sitemap} with a MoonCellar port outside it\n` +
       `  keep     ${counts.keep}\n` +
       `  merge    ${counts.merge}\n` +
+      `  redirect ${counts.duplicates} duplicate cards\n` +
       `  noindex  ${counts.noindex} — thin ${counts.thin}, weak ${counts.weak}\n` +
       `  cards carrying our data: ${counts.withFirstPartyData}\n`
   );
@@ -473,8 +596,11 @@ const readConstantSlugs = (source: string) => {
   return [...block.matchAll(/"([^"]+)"/g)].map((match) => match[1]);
 };
 
-const readConstantRedirects = (source: string) => {
-  const start = source.indexOf("GAME_CARD_REDIRECTS:");
+const readConstantRedirects = (
+  source: string,
+  name = "GAME_CARD_REDIRECTS"
+) => {
+  const start = source.indexOf(`${name}:`);
   const block = source.slice(start, source.indexOf("};", start));
 
   return new Map(
@@ -485,12 +611,35 @@ const readConstantRedirects = (source: string) => {
   );
 };
 
+export const renderDuplicates = (duplicates: Record<string, string>) =>
+  `export const GAME_CARD_DUPLICATES: Readonly<Record<string, string>> = {\n${Object.keys(
+    duplicates
+  )
+    .sort()
+    .map((slug) => {
+      const key = JSON.stringify(slug);
+      const target = JSON.stringify(duplicates[slug]);
+      const line = `  ${key}: ${target},`;
+
+      return line.length > 80 ? `  ${key}:\n    ${target},` : line;
+    })
+    .join("\n")}\n};\n`;
+
 export const compareWithConstants = (
   source: string,
-  { keep, merged }: Pick<IGameCardAudit, "keep" | "merged">
+  duplicatesSource: string,
+  {
+    keep,
+    merged,
+    duplicates,
+  }: Pick<IGameCardAudit, "keep" | "merged" | "duplicates">
 ) => {
   const listed = new Set(readConstantSlugs(source));
   const redirects = readConstantRedirects(source);
+  const duplicateRedirects = readConstantRedirects(
+    duplicatesSource,
+    "GAME_CARD_DUPLICATES"
+  );
 
   return [
     ...keep
@@ -511,6 +660,19 @@ export const compareWithConstants = (
           redirects.has(slug) && redirects.get(slug) !== target
       )
       .map(([slug, target]) => `merge: ${slug} should point at ${target}`),
+    ...Object.entries(duplicates)
+      .filter(([slug]) => !duplicateRedirects.has(slug))
+      .map(([slug, target]) => `duplicate: add "${slug}": "${target}",`),
+    ...[...duplicateRedirects.keys()]
+      .filter((slug) => !duplicates[slug])
+      .map((slug) => `duplicate: drop ${slug}`),
+    ...Object.entries(duplicates)
+      .filter(
+        ([slug, target]) =>
+          duplicateRedirects.has(slug) &&
+          duplicateRedirects.get(slug) !== target
+      )
+      .map(([slug, target]) => `duplicate: ${slug} should point at ${target}`),
   ];
 };
 
@@ -532,7 +694,8 @@ const main = async () => {
   await client.connect();
 
   try {
-    const audit = auditGameCards(await loadCards(client.db(DB_NAME)));
+    const { cards, duplicates } = await loadCards(client.db(DB_NAME));
+    const audit = auditGameCards(cards, KEEP_LIMIT, duplicates);
 
     printReport(audit);
 
@@ -541,9 +704,15 @@ const main = async () => {
       console.log(`Wrote ${csvPath}\n`);
     }
 
+    if (args.includes("--write")) {
+      writeFileSync(DUPLICATES_PATH, renderDuplicates(audit.duplicates));
+      console.log(`Wrote ${DUPLICATES_PATH.pathname}\n`);
+    }
+
     if (args.includes("--check")) {
       const problems = compareWithConstants(
         readFileSync(CONSTANTS_PATH, "utf8"),
+        readFileSync(DUPLICATES_PATH, "utf8"),
         audit
       );
 
