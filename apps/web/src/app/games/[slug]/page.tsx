@@ -5,10 +5,14 @@ import {
 } from "@/src/lib/entities/port-achievement/api/port-achievement.loaders";
 import { commentsAPI, gamesApi } from "@/src/lib/shared/api";
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { cache } from "react";
 import { fetchOrNull } from "@/src/lib/shared/utils/not-found.utils";
 import { FRONT_URL } from "@/src/lib/shared/constants";
+import {
+  getGameCardRedirect,
+  isIndexableGame,
+} from "@/src/lib/shared/constants/games.const";
 import { JsonLd } from "@/src/lib/shared/ui/JsonLd";
 import {
   getBreadcrumbJsonLd,
@@ -103,6 +107,7 @@ export async function generateMetadata({
     title: game.name,
     description,
     keywords,
+    robots: { index: isIndexableGame(game.slug), follow: true },
     alternates: {
       canonical: `/games/${game.slug}`,
     },
@@ -134,6 +139,12 @@ const GamePageIndex = async ({ params }: { params: any }) => {
 
   if (!game) {
     notFound();
+  }
+
+  const redirectTo = getGameCardRedirect(game.slug);
+
+  if (redirectTo) {
+    permanentRedirect(`/games/${redirectTo}`);
   }
 
   const [stats, reviews, related, portAchievements, port] = await Promise.all([

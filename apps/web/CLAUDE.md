@@ -244,7 +244,7 @@ border-radius: inherit; pointer-events: none`) with the same inset outline, as `
 
 ## Server rendering and SEO
 
-The site's value in search is its 10 000 game pages, so **every change must keep page content
+The site's value in search is its game cards, so **every change must keep page content
 in the server-rendered HTML**. See [`docs/seo.md`](../../docs/seo.md) for the full picture. The rules that broke it
 before:
 

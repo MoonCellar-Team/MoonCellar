@@ -15,23 +15,23 @@ An inventory of the search-related functionality in `apps/web`: what exists and 
 
 Each route adds its own metadata on top:
 
-| Route                            | Title                                       | Canonical                        | Other                                                                                                                                                                  |
-| -------------------------------- | ------------------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                              | `MAIN_PAGE_META_TITLE` via `title.absolute` | `/`                              | own `keywords`; the template does not apply to the root segment                                                                                                        |
-| `/games`                         | `Games`                                     | `/games`                         | own `keywords`                                                                                                                                                         |
-| `/games/[slug]`                  | game name                                   | `/games/<slug>`                  | description from `game.summary`, keywords from name + genres + themes + IGDB keywords, Open Graph block restated in full with the cover as `og:image` (200×266)        |
-| `/games/genre/[slug]`            | `<Genre> Games`                             | `/games/genre/<slug>`            | description carries the game count; `robots: { index: false, follow: true }` when the genre has fewer than 100 games                                                   |
-| `/games/platform/[slug]`         | `<Platform> Games`                          | `/games/platform/<slug>`         | same shape as the genre hub, count fetched with a `take: 1` query                                                                                                      |
-| `/gauntlet`                      | `Gauntlet`                                  | `/gauntlet`                      | own `keywords`                                                                                                                                                         |
-| `/user/[name]`                   | `Profile: <name>`                           | `/user/<name>`                   | description from the user's own bio when set                                                                                                                           |
-| `/user/[name]/[tab]`             | `<Tab label>: <name>`                       | `/user/<name>/<tab>`             | one route per `profileTabs` entry; `robots: { index: false, follow: false }` on `settings`; an unknown tab is a 404 from the page component                            |
-| `/user/[name]/favourites/[kind]` | `<Tab label>: <name>`                       | `/user/<name>/favourites/<kind>` | `games` or `characters`; the former `/favorites` and `/characters` tabs `permanentRedirect` here                                                                       |
-| `/user/[name]/lists/[slug]`      | `<List> — a list by <author>`               | `/user/<name>/lists/<slug>`      | description from the list's own text or its game count; `robots: { index: false, follow: false }` for a private list                                                   |
-| `/lists`                         | `Lists`                                     | `/lists`                         | own `keywords`                                                                                                                                                         |
-| `/news`                          | `News`                                      | `/news`                          | own `keywords`; the archive and game filters (`?year`, `?month`, `?game`, `?type`) keep the same canonical                                                             |
-| `/news/[slug]`                   | post title                                  | `/news/<slug>`                   | description from the post summary, `og:type` `article` with `publishedTime`/`modifiedTime`, `og:image` from the post image, else the game cover, else `og-default.png` |
-| `/requests`                      | `Requests`                                  | —                                | `robots: { index: false, follow: true }`                                                                                                                               |
-| `not-found`                      | `Page not found`                            | —                                | `robots: { index: false, follow: false }`                                                                                                                              |
+| Route                            | Title                                       | Canonical                        | Other                                                                                                                                                                                                                                                                                                                      |
+| -------------------------------- | ------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                              | `MAIN_PAGE_META_TITLE` via `title.absolute` | `/`                              | own `keywords`; the template does not apply to the root segment                                                                                                                                                                                                                                                            |
+| `/games`                         | `Games`                                     | `/games`                         | own `keywords`                                                                                                                                                                                                                                                                                                             |
+| `/games/[slug]`                  | game name                                   | `/games/<slug>`                  | description from `game.summary`, keywords from name + genres + themes + IGDB keywords, Open Graph block restated in full with the cover as `og:image` (200×266); `robots: { index: false, follow: true }` unless the slug is in `INDEXABLE_GAME_SLUGS`; an edition in `GAME_CARD_REDIRECTS` answers a 308 to its base card |
+| `/games/genre/[slug]`            | `<Genre> Games`                             | `/games/genre/<slug>`            | description carries the game count; `robots: { index: false, follow: true }` when the genre has fewer than 100 games                                                                                                                                                                                                       |
+| `/games/platform/[slug]`         | `<Platform> Games`                          | `/games/platform/<slug>`         | same shape as the genre hub, count fetched with a `take: 1` query                                                                                                                                                                                                                                                          |
+| `/gauntlet`                      | `Gauntlet`                                  | `/gauntlet`                      | own `keywords`                                                                                                                                                                                                                                                                                                             |
+| `/user/[name]`                   | `Profile: <name>`                           | `/user/<name>`                   | description from the user's own bio when set                                                                                                                                                                                                                                                                               |
+| `/user/[name]/[tab]`             | `<Tab label>: <name>`                       | `/user/<name>/<tab>`             | one route per `profileTabs` entry; `robots: { index: false, follow: false }` on `settings`; an unknown tab is a 404 from the page component                                                                                                                                                                                |
+| `/user/[name]/favourites/[kind]` | `<Tab label>: <name>`                       | `/user/<name>/favourites/<kind>` | `games` or `characters`; the former `/favorites` and `/characters` tabs `permanentRedirect` here                                                                                                                                                                                                                           |
+| `/user/[name]/lists/[slug]`      | `<List> — a list by <author>`               | `/user/<name>/lists/<slug>`      | description from the list's own text or its game count; `robots: { index: false, follow: false }` for a private list                                                                                                                                                                                                       |
+| `/lists`                         | `Lists`                                     | `/lists`                         | own `keywords`                                                                                                                                                                                                                                                                                                             |
+| `/news`                          | `News`                                      | `/news`                          | own `keywords`; the archive and game filters (`?year`, `?month`, `?game`, `?type`) keep the same canonical                                                                                                                                                                                                                 |
+| `/news/[slug]`                   | post title                                  | `/news/<slug>`                   | description from the post summary, `og:type` `article` with `publishedTime`/`modifiedTime`, `og:image` from the post image, else the game cover, else `og-default.png`                                                                                                                                                     |
+| `/requests`                      | `Requests`                                  | —                                | `robots: { index: false, follow: true }`                                                                                                                                                                                                                                                                                   |
+| `not-found`                      | `Page not found`                            | —                                | `robots: { index: false, follow: false }`                                                                                                                                                                                                                                                                                  |
 
 A page-level `openGraph` object replaces the parent's rather than merging with it, which is why
 the game and hub routes repeat `siteName`, `type` and `locale`.
@@ -167,8 +167,10 @@ ninety days to 2026-10-31).
 1. The static links from the `links` constant — `/`, `/games`, `/gauntlet`, `/news`, without
    `lastModified`: nothing tracks when those pages change, and a `new Date()` here made the file
    differ on every request.
-2. Every game: `/games/<slug>` with `lastModified` from the record and, when the game has a
-   cover, an `<image:loc>` pointing at `/img/image-proxy`.
+2. The game cards of `INDEXABLE_GAME_SLUGS`: `/games/<slug>` with `lastModified` from the record
+   and, when the game has a cover, an `<image:loc>` pointing at `/img/image-proxy`. A card of that
+   list that the popular query does not return — the MoonCellar port's card — is still listed, on
+   its own, without `lastModified`.
 3. Genre hubs with at least `MIN_GAMES_FOR_INDEX` games (100), slugged with `toSlug`.
 4. Platform hubs with at least `MIN_GAMES_FOR_INDEX` games, from `GET /games/count-by-platform`.
 5. Every published post: `/news/<slug>` with `lastModified`, from `GET /articles/slugs`.
@@ -179,6 +181,47 @@ profiles are not listed: they carry no editorial value and their tabs only dupli
 
 Each of the four upstream calls has its own `unstable_cache` entry and falls back to an empty
 list on error, so one failing endpoint does not empty the whole sitemap.
+
+## Game cards: keep, merge or noindex
+
+The October 2026 re-evaluation was about the catalogue: 1,100 game cards, nearly all of them an
+IGDB summary and "No reviews yet". The audit of 2026-11-03 measured what the cards actually carry
+(`scripts/audit-game-cards.ts`):
+
+| Measurement                                                             | Value     |
+| ----------------------------------------------------------------------- | --------- |
+| Games in the catalogue                                                  | 439 455   |
+| Games with any first-party data (playthrough, rating, comment or list)  | 1 097     |
+| Accounts on the site                                                    | 32        |
+| Public playthroughs / games with a public review in the whole catalogue | 5 / 4     |
+| Cards in the sitemap                                                    | 1 100     |
+| … keep                                                                  | 30        |
+| … merge                                                                 | 14        |
+| … noindex                                                               | 1 056     |
+| … of them thin (no first-party data at all)                             | 720       |
+| … of them weak (our data, below the shortlist)                          | 336       |
+| Median IGDB summary length of a thin card                               | 457 chars |
+
+A card carries content Google cannot get from IGDB only when it has one of our own signals: a
+MoonCellar Team port with its achievements, a playthrough, a rating, a written note, a discussion
+post or a public list. Everything else repeats the IGDB summary. Every card is therefore filed in
+`apps/web/src/lib/shared/constants/games.const.ts`:
+
+- `INDEXABLE_GAME_SLUGS` — 31 cards: the 30 most searched cards that carry our data, plus the card
+  of the MoonCellar port (`Glassline` on the iOS Mirror's Edge), which is always indexable. The
+  limit is what keeps the set small enough to rewrite by hand; a card joins the list only once it
+  carries 600+ characters of our own text.
+- `GAME_CARD_REDIRECTS` — 14 edition cards (`… Game of the Year Edition`, `… Ultimate Edition`,
+  `… Complete Edition`, the GTA V bundle) whose `relatedGames.version_parent` is another card in
+  the sitemap. They carry the same IGDB text as their base card, so they answer a 308 to it.
+- Every other card answers `robots: { index: false, follow: true }`: reachable and linked from the
+  hubs and the catalogue, out of the sitemap, and out of Google's index.
+
+`scripts/audit-game-cards.ts` reproduces all of it: run `bun run mongo` (the SSH tunnel to the
+production database), then `bun --env-file=apps/api/.env scripts/audit-game-cards.ts`. It prints
+the three lists with a reason per card, `--csv <path>` writes the whole table, and `--check` fails
+when either list in `games.const.ts` no longer matches the database — run it after a catalogue
+change or an IGDB sync that moves the popular cards.
 
 ## Images
 

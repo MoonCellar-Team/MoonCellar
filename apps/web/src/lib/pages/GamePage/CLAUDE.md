@@ -2,7 +2,7 @@
 
 The page of one game: hero, overview, ratings, media, characters, details, related games,
 reviews and discussion, release dates and multiplayer. Public, and the site's main search
-landing page — there are about 10 000 of them.
+landing page — the catalogue holds 439 455 of them and 31 are indexable.
 
 ## Routes
 
@@ -16,6 +16,12 @@ landing page — there are about 10 000 of them.
 - Metadata: title = game name, description = `summary` (or a fallback), keywords from name,
   genres, themes and IGDB keywords, canonical `/games/<slug>`, and a full `openGraph` block with
   the cover through `/img/image-proxy` (200×266).
+- Only the slugs of `INDEXABLE_GAME_SLUGS` (`shared/constants/games.const.ts`) are indexable; every
+  other card answers `robots: { index: false, follow: true }` and stays out of the sitemap. The
+  list and the audit behind it are in [`docs/seo.md`](../../../../../docs/seo.md), "Game cards:
+  keep, merge or noindex" — a card joins it only once it carries 600+ characters of our own text.
+- An edition card in `GAME_CARD_REDIRECTS` calls `permanentRedirect` to its base card right after
+  `getGame`, before the stats, reviews and related fetches; the two pages carry the same IGDB text.
 - The route renders `VideoGame` and `BreadcrumbList` JSON-LD next to the page.
 - No segment `error.tsx`: an API failure reaches `src/app/error.tsx` (`ErrorPage`), never a
   404 body.
