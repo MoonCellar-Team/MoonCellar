@@ -70,14 +70,17 @@ landing page — the catalogue holds 439 455 of them and 31 are indexable.
    `GET /games`, e.g. Glassline) opens `widgets/game/GamePortAchievementsModal`, titled the same.
 4. `entities/game/ui/GameMedia` and `widgets/game/GameCharacters` (`game.characters`, ordered by role in `getGameBySlug` / `getGameById` with `sortCharactersByRole`: an admin's role, else VNDB's, else Protagonist from the description; `GET /characters?gameId=` uses the same order) — hidden for adult games
    when `useHideAdult()` is true.
-5. `widgets/game/GameRecord` — the card's own record: paragraphs built by
-   `getGameRecordParagraphs` (`shared/utils/game-record.utils.ts`) from our rating, the accounts
-   per status, the logged hours and the newest entry, Steam, RetroAchievements and the MoonCellar
-   port; then "The same accounts also tracked" (`community.alsoPlayed`) and "Lists that include
-   it" (`lists`). The builder is a pure function over numbers the page already has, and the block
-   renders nothing when it has nothing to say. [`docs/seo.md`](../../../../../docs/seo.md), "The
-   MoonCellar record", measures what it produces: 143–364 characters per indexable card on
-   2026-11-03, so it narrows but does not close the 600-character bar of the indexable list.
+5. `widgets/game/GameRecord` — the card's own record: the editorial note of the card
+   (`shared/constants/game-editorial.const.ts`, written by the team, one per indexable slug),
+   then paragraphs built by `getGameRecordParagraphs` (`shared/utils/game-record.utils.ts`) from
+   our rating, the accounts per status, the logged hours and the newest entry, Steam,
+   RetroAchievements and the MoonCellar port; then "The same accounts also tracked"
+   (`community.alsoPlayed`) and "Lists that include it" (`lists`). The builder is a pure function
+   over data the page already has, and the block renders nothing when it has nothing to say.
+   [`docs/seo.md`](../../../../../docs/seo.md), "The MoonCellar record", measures what it
+   produces: 604–910 characters per indexable card on 2026-11-03, every card above the
+   600-character bar of `INDEXABLE_GAME_SLUGS`. A new indexable slug without a note in that map
+   fails `scripts/audit-game-card-text.ts --check`.
 6. `entities/game/ui/GameDetails` — the remaining catalogue facts.
 7. `widgets/game/GameRelated`.
 8. `widgets/game/GameCommunity` — `features/comments/ui/GameReviews` (seeded with

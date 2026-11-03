@@ -1,6 +1,10 @@
 import { MongoClient, type Db, type ObjectId } from "mongodb";
 import { INDEXABLE_GAME_SLUGS } from "../apps/web/src/lib/shared/constants/games.const.ts";
 import {
+  GAME_EDITORIAL,
+  getGameEditorial,
+} from "../apps/web/src/lib/shared/constants/game-editorial.const.ts";
+import {
   getGameRecordParagraphs,
   type IGameRecordFacts,
 } from "../apps/web/src/lib/shared/utils/game-record.utils.ts";
@@ -11,16 +15,19 @@ const ALSO_PLAYED_LIMIT = 6;
 
 const USAGE = `Measure the first-party text a game card renders in its MoonCellar record block.
 
-  bun --env-file=apps/api/.env scripts/audit-game-card-text.ts
+  bun --env-file=apps/api/.env scripts/audit-game-card-text.ts [--check]
 
 The database is reached through the tunnel, so run \`bun run mongo\` first.
 
 The record block is built by getGameRecordParagraphs (apps/web/src/lib/shared/utils/
-game-record.utils.ts) out of what MoonCellar itself knows: our rating, the playthroughs and the
-hours accounts logged, Steam and RetroAchievements counts, the MoonCellar port, the public lists
-that hold the game and the games the same accounts tracked. This script rebuilds those facts from
-the database and prints how many characters of our own text each indexable card gets, so a card
-can be indexed only while it carries something of ours.`;
+game-record.utils.ts) out of what MoonCellar itself knows: the editorial note of the card, our
+rating, the playthroughs and the hours accounts logged, Steam and RetroAchievements counts, the
+MoonCellar port, the public lists that hold the game and the games the same accounts tracked. This
+script rebuilds those facts from the database and prints how many characters of our own text each
+indexable card gets, so a card stays in the indexable list only while it carries enough of ours.
+
+--check fails when a card of INDEXABLE_GAME_SLUGS has no editorial note, when the note map holds a
+slug that is not in that list, or when a card measures less than the ${TARGET_CHARS}-character bar.`;
 
 interface IPort {
   siteGame: string | null;
@@ -105,6 +112,7 @@ const loadCard = async (
     name: game.name,
     facts: {
       name: game.name,
+      editorial: getGameEditorial(slug),
       rating:
         game.ratingsCount && game.averageRating != null
           ? { average: game.averageRating, count: game.ratingsCount }
@@ -200,6 +208,8 @@ const cardText = (card: ICard) =>
     ...card.lists,
   ].join(" ");
 
+const isCheck = process.argv.includes("--check");
+
 const main = async () => {
   const client = new MongoClient(process.env.MONGO_CONNECTION_STRING as string);
 
@@ -241,7 +251,42 @@ const main = async () => {
     `Cards at or above ${TARGET_CHARS} characters: ${overTarget} of ${measured.length}`
   );
 
+  const withoutEditorial = cards
+    .filter((card) => !card.facts.editorial?.trim())
+    .map((card) => card.slug);
+  const unknownEditorial = Object.keys(GAME_EDITORIAL).filter(
+    (slug) => !INDEXABLE_GAME_SLUGS.has(slug)
+  );
+  const belowTarget = measured
+    .filter((card) => card.text.length < TARGET_CHARS)
+    .map((card) => card.slug);
+
+  if (!withoutEditorial.length && !unknownEditorial.length && !belowTarget.length) {
+    console.log("\nEvery indexable card carries an editorial note and clears the bar.");
+  }
+
+  if (withoutEditorial.length) {
+    console.log(`\nNo editorial note: ${withoutEditorial.join(", ")}`);
+  }
+
+  if (unknownEditorial.length) {
+    console.log(
+      `\nEditorial note for a slug outside INDEXABLE_GAME_SLUGS: ${unknownEditorial.join(", ")}`
+    );
+  }
+
+  if (belowTarget.length) {
+    console.log(`\nBelow ${TARGET_CHARS} characters: ${belowTarget.join(", ")}`);
+  }
+
   await client.close();
+
+  if (
+    isCheck &&
+    (withoutEditorial.length || unknownEditorial.length || belowTarget.length)
+  ) {
+    process.exit(1);
+  }
 };
 
 main().catch((error) => {

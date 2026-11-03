@@ -210,7 +210,8 @@ post or a public list. Everything else repeats the IGDB summary. Every card is t
 - `INDEXABLE_GAME_SLUGS` — 31 cards: the 30 most searched cards that carry our data, plus the card
   of the MoonCellar port (`Glassline` on the iOS Mirror's Edge), which is always indexable. The
   limit is what keeps the set small enough to rewrite by hand; a card joins the list only once it
-  carries 600+ characters of our own text.
+  carries 600+ characters of our own text, and `scripts/audit-game-card-text.ts --check` enforces
+  it ("The MoonCellar record" below).
 - `GAME_CARD_REDIRECTS` — 14 edition cards (`… Game of the Year Edition`, `… Ultimate Edition`,
   `… Complete Edition`, the GTA V bundle) whose `relatedGames.version_parent` is another card in
   the sitemap. They carry the same IGDB text as their base card, so they answer a 308 to it.
@@ -227,30 +228,39 @@ change or an IGDB sync that moves the popular cards.
 
 Every game page renders `widgets/game/GameRecord` between the characters and the details: the part
 of the card that is ours rather than IGDB's. It is built on the server and travels in the ISR
-entry, and it renders nothing when the card has no rating, no playthrough, no achievements, no
-port and no list to show.
+entry, and it renders nothing when the card has no editorial note, no rating, no playthrough, no
+achievements, no port and no list to show.
 
 Its paragraphs come from `getGameRecordParagraphs`
-(`src/lib/shared/utils/game-record.utils.ts`), a pure builder over numbers the page already has:
+(`src/lib/shared/utils/game-record.utils.ts`), a pure builder over the card's own data:
 
 | Paragraph    | Source                                                                 |
 | ------------ | ---------------------------------------------------------------------- |
+| Editorial    | `GAME_EDITORIAL[slug]` (`src/lib/shared/constants/game-editorial.const.ts`) |
 | Rating       | `averageRating` / `ratingsCount` on the game                           |
 | Tracking     | `GET /games/:id/stats` — accounts per status                           |
 | Playtime     | `GET /games/:id/community` — hours logged and the newest entry         |
 | Achievements | `steamAchievements.total`, `retroachievements`, the MoonCellar port count |
 
-Two lists follow it. "The same accounts also tracked" comes from the same endpoint: the games the
-accounts of this card tracked as well, most shared first, up to six. "Lists that include it" comes
-from `GET /lists/game/:gameId`: the lists people made first, then the MoonCellar generated ones,
-up to eight. Both are links, so the block also gives crawlers a path through our own content.
+The editorial paragraph is the one part nothing generates: a note written by the team, one per
+indexable card, about what the game asks of a player and how it sits next to its sequels. It lives
+in the repository rather than in the database, so the whole set is reviewed in the pull request
+that changes it and no admin edit can ship copy nobody read.
+
+Two lists follow the paragraphs. "The same accounts also tracked" comes from the same endpoint: the
+games the accounts of this card tracked as well, most shared first, up to six. "Lists that include
+it" comes from `GET /lists/game/:gameId`: the lists people made first, then the MoonCellar
+generated ones, up to eight. Both are links, so the block also gives crawlers a path through our
+own content.
 
 The blocking is measured, not assumed: `bun --env-file=apps/api/.env
-scripts/audit-game-card-text.ts` rebuilds the same facts from the database and prints the
-characters of our own text each indexable card renders. On 2026-11-03 that is 143–364 characters,
-median 246, and **none of the 31 cards reaches 600**. The record block therefore does not by
-itself make a card indexable — the 600-character bar in `INDEXABLE_GAME_SLUGS` still needs written
-editorial text on top of what our accounts produce.
+scripts/audit-game-card-text.ts --check` rebuilds the same facts from the database and prints the
+characters of our own text each indexable card renders. On 2026-11-03, with the editorial notes in
+place, that is **604–910 characters, median 695, and 31 of 31 cards above the 600-character bar**.
+`--check` fails when a card of `INDEXABLE_GAME_SLUGS` has no note, when the note map holds a slug
+outside that list, or when a card falls below the bar — so a card cannot be added to the indexed
+set without its text.
+
 
 ## Images
 
