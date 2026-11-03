@@ -170,6 +170,27 @@ export class GamesController {
     return this.games.getTotalGamesCountByGenre();
   }
 
+  @Get("/count-by-platform")
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(WEEK)
+  @ApiOperation({ summary: "Get total games count grouped by platform" })
+  @ApiCreatedResponse({
+    description: "Array of objects with platform slug and count",
+    schema: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          platform: { type: "string" },
+          count: { type: "number" },
+        },
+      },
+    },
+  })
+  async getTotalGamesCountByPlatform() {
+    return this.games.getTotalGamesCountByPlatform();
+  }
+
   @Get("/upcoming")
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(HOUR)

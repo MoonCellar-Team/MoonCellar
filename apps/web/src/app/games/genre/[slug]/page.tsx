@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { gamesApi } from "@/src/lib/shared/api";
 import {
+  MIN_GAMES_FOR_INDEX,
   takeGames,
   takeHubGames,
   takeHubRecentGames,
@@ -23,7 +24,6 @@ export async function generateStaticParams() {
 }
 
 const DEFAULT_OG_IMAGE = "/images/og-default.png";
-const MIN_GAMES_FOR_INDEX = 100;
 const LARGE_GENRE_SIZE = 5000;
 const TOP_COUNT = 5;
 

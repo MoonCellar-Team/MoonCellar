@@ -4,6 +4,7 @@ import { cache } from "react";
 import { gamesApi } from "@/src/lib/shared/api";
 import { platformsAPI } from "@/src/lib/shared/api/platforms.api";
 import {
+  MIN_GAMES_FOR_INDEX,
   takeGames,
   takeHubGames,
   takeHubRecentGames,
@@ -23,7 +24,6 @@ export async function generateStaticParams() {
 }
 
 const DEFAULT_OG_IMAGE = "/images/og-default.png";
-const MIN_GAMES_FOR_INDEX = 100;
 const TOP_COUNT = 5;
 
 const getPlatforms = cache(async () =>

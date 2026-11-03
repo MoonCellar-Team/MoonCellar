@@ -15,23 +15,23 @@ An inventory of the search-related functionality in `apps/web`: what exists and 
 
 Each route adds its own metadata on top:
 
-| Route                            | Title                                       | Canonical                        | Other                                                                                                                                                           |
-| -------------------------------- | ------------------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                              | `MAIN_PAGE_META_TITLE` via `title.absolute` | `/`                              | own `keywords`; the template does not apply to the root segment                                                                                                 |
-| `/games`                         | `Games`                                     | `/games`                         | own `keywords`                                                                                                                                                  |
-| `/games/[slug]`                  | game name                                   | `/games/<slug>`                  | description from `game.summary`, keywords from name + genres + themes + IGDB keywords, Open Graph block restated in full with the cover as `og:image` (200×266) |
-| `/games/genre/[slug]`            | `<Genre> Games`                             | `/games/genre/<slug>`            | description carries the game count; `robots: { index: false, follow: true }` when the genre has fewer than 100 games                                            |
-| `/games/platform/[slug]`         | `<Platform> Games`                          | `/games/platform/<slug>`         | same shape as the genre hub, count fetched with a `take: 1` query                                                                                               |
-| `/gauntlet`                      | `Gauntlet`                                  | `/gauntlet`                      | own `keywords`                                                                                                                                                  |
-| `/user/[name]`                   | `Profile: <name>`                           | `/user/<name>`                   | description from the user's own bio when set                                                                                                                    |
-| `/user/[name]/[tab]`             | `<Tab label>: <name>`                       | `/user/<name>/<tab>`             | one route per `profileTabs` entry; `robots: { index: false, follow: false }` on `settings`; an unknown tab is a 404 from the page component                     |
-| `/user/[name]/favourites/[kind]` | `<Tab label>: <name>`                       | `/user/<name>/favourites/<kind>` | `games` or `characters`; the former `/favorites` and `/characters` tabs `permanentRedirect` here                                                                |
-| `/user/[name]/lists/[slug]`      | `<List> — a list by <author>`               | `/user/<name>/lists/<slug>`      | description from the list's own text or its game count; `robots: { index: false, follow: false }` for a private list                                            |
-| `/lists`                         | `Lists`                                     | `/lists`                         | own `keywords`                                                                                                                                                  |
-| `/news`                          | `News`                                      | `/news`                          | own `keywords`; the archive and game filters (`?year`, `?month`, `?game`, `?type`) keep the same canonical                                                     |
+| Route                            | Title                                       | Canonical                        | Other                                                                                                                                                                  |
+| -------------------------------- | ------------------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                              | `MAIN_PAGE_META_TITLE` via `title.absolute` | `/`                              | own `keywords`; the template does not apply to the root segment                                                                                                        |
+| `/games`                         | `Games`                                     | `/games`                         | own `keywords`                                                                                                                                                         |
+| `/games/[slug]`                  | game name                                   | `/games/<slug>`                  | description from `game.summary`, keywords from name + genres + themes + IGDB keywords, Open Graph block restated in full with the cover as `og:image` (200×266)        |
+| `/games/genre/[slug]`            | `<Genre> Games`                             | `/games/genre/<slug>`            | description carries the game count; `robots: { index: false, follow: true }` when the genre has fewer than 100 games                                                   |
+| `/games/platform/[slug]`         | `<Platform> Games`                          | `/games/platform/<slug>`         | same shape as the genre hub, count fetched with a `take: 1` query                                                                                                      |
+| `/gauntlet`                      | `Gauntlet`                                  | `/gauntlet`                      | own `keywords`                                                                                                                                                         |
+| `/user/[name]`                   | `Profile: <name>`                           | `/user/<name>`                   | description from the user's own bio when set                                                                                                                           |
+| `/user/[name]/[tab]`             | `<Tab label>: <name>`                       | `/user/<name>/<tab>`             | one route per `profileTabs` entry; `robots: { index: false, follow: false }` on `settings`; an unknown tab is a 404 from the page component                            |
+| `/user/[name]/favourites/[kind]` | `<Tab label>: <name>`                       | `/user/<name>/favourites/<kind>` | `games` or `characters`; the former `/favorites` and `/characters` tabs `permanentRedirect` here                                                                       |
+| `/user/[name]/lists/[slug]`      | `<List> — a list by <author>`               | `/user/<name>/lists/<slug>`      | description from the list's own text or its game count; `robots: { index: false, follow: false }` for a private list                                                   |
+| `/lists`                         | `Lists`                                     | `/lists`                         | own `keywords`                                                                                                                                                         |
+| `/news`                          | `News`                                      | `/news`                          | own `keywords`; the archive and game filters (`?year`, `?month`, `?game`, `?type`) keep the same canonical                                                             |
 | `/news/[slug]`                   | post title                                  | `/news/<slug>`                   | description from the post summary, `og:type` `article` with `publishedTime`/`modifiedTime`, `og:image` from the post image, else the game cover, else `og-default.png` |
-| `/requests`                      | `Requests`                                  | —                                | `robots: { index: false, follow: true }`                                                                                                                        |
-| `not-found`                      | `Page not found`                            | —                                | `robots: { index: false, follow: false }`                                                                                                                       |
+| `/requests`                      | `Requests`                                  | —                                | `robots: { index: false, follow: true }`                                                                                                                               |
+| `not-found`                      | `Page not found`                            | —                                | `robots: { index: false, follow: false }`                                                                                                                              |
 
 A page-level `openGraph` object replaces the parent's rather than merging with it, which is why
 the game and hub routes repeat `siteName`, `type` and `locale`.
@@ -93,15 +93,15 @@ both hubs, the Gauntlet, `Lists`, list pages, `Requests` and user profiles.
 `src/lib/shared/ui/JsonLd` renders a `<script type="application/ld+json">` with `<` escaped;
 the builders live in `src/lib/shared/utils/json-ld.utils.ts`.
 
-| Type                       | Where                                              | Contents                                                                       |
-| -------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `WebSite` + `SearchAction` | root layout, every page                            | search endpoint `/games?search={search_term_string}`                           |
-| `VideoGame`                | game page                                          | name, url, description, cover, genres, `datePublished` from `first_release`    |
-| `AggregateRating`          | inside `VideoGame`                                 | only when the game has at least 10 MoonCellar ratings; scale 1–10              |
-| `Review`                   | inside `VideoGame`                                 | the loaded reviews that have a rating, an author and text and are not spoilers |
-| `BreadcrumbList`           | game page, catalogue, both hubs, Gauntlet, `Lists`, `News`, a post | the same trail as the visible breadcrumbs                      |
-| `Article`                  | a post (`/news/[slug]`)                            | headline, summary, dates, author, image, and the game as `about` for a game article |
-| `ItemList`                 | catalogue, both hubs                               | the games rendered on the page, with position, url and name                    |
+| Type                       | Where                                                              | Contents                                                                            |
+| -------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| `WebSite` + `SearchAction` | root layout, every page                                            | search endpoint `/games?search={search_term_string}`                                |
+| `VideoGame`                | game page                                                          | name, url, description, cover, genres, `datePublished` from `first_release`         |
+| `AggregateRating`          | inside `VideoGame`                                                 | only when the game has at least 10 MoonCellar ratings; scale 1–10                   |
+| `Review`                   | inside `VideoGame`                                                 | the loaded reviews that have a rating, an author and text and are not spoilers      |
+| `BreadcrumbList`           | game page, catalogue, both hubs, Gauntlet, `Lists`, `News`, a post | the same trail as the visible breadcrumbs                                           |
+| `Article`                  | a post (`/news/[slug]`)                                            | headline, summary, dates, author, image, and the game as `about` for a game article |
+| `ItemList`                 | catalogue, both hubs                                               | the games rendered on the page, with position, url and name                         |
 
 ## Hub pages
 
@@ -152,20 +152,32 @@ A cached game page is purged on demand by `revalidateGamePage`
 
 ## robots.txt and sitemap
 
-`src/app/robots.ts` allows everything for `*`, disallows `/admin` and `/api`, and points at
-`${FRONT_URL}/sitemap.xml`.
+`src/app/robots.ts` allows everything for `*`, disallows `/admin`, `/api`, `/games?` and
+`/requests`, and points at `${FRONT_URL}/sitemap.xml`. A second group names the crawlers that once
+filled the server disk with ISR and image caches (`ClaudeBot`, `Applebot`, `SemrushBot`,
+`AhrefsBot`, …) and gives them `/_next/image` disallowed and a `Crawl-delay`.
+
+`api.mooncellar.space` answers its own `robots.txt` from the API's nginx block
+(`infra/nginx/mooncellar.conf`) with `Disallow: /`. The API serves JSON and has no page to index,
+while Googlebot was spending a third of the site's crawl requests on it (25 511 of 71 500 in the
+ninety days to 2026-10-31).
 
 `src/app/sitemap.ts` emits, in order:
 
-1. The static links from the `links` constant — `/`, `/games`, `/gauntlet`, `/news`.
+1. The static links from the `links` constant — `/`, `/games`, `/gauntlet`, `/news`, without
+   `lastModified`: nothing tracks when those pages change, and a `new Date()` here made the file
+   differ on every request.
 2. Every game: `/games/<slug>` with `lastModified` from the record and, when the game has a
    cover, an `<image:loc>` pointing at `/img/image-proxy`.
-3. Genre hubs with at least 100 games (`MIN_GAMES_FOR_HUB`), slugged with `toSlug`.
-4. Every platform hub.
-5. Every user profile, with `lastModified`.
-6. Every published post: `/news/<slug>` with `lastModified`, from `GET /articles/slugs`.
+3. Genre hubs with at least `MIN_GAMES_FOR_INDEX` games (100), slugged with `toSlug`.
+4. Platform hubs with at least `MIN_GAMES_FOR_INDEX` games, from `GET /games/count-by-platform`.
+5. Every published post: `/news/<slug>` with `lastModified`, from `GET /articles/slugs`.
 
-Each of the five upstream calls has its own `unstable_cache` entry and falls back to an empty
+An entry is listed only while the page it points at is indexable, which is why both hubs read the
+same `MIN_GAMES_FOR_INDEX` constant their metadata uses instead of a threshold of their own. User
+profiles are not listed: they carry no editorial value and their tabs only duplicate the profile.
+
+Each of the four upstream calls has its own `unstable_cache` entry and falls back to an empty
 list on error, so one failing endpoint does not empty the whole sitemap.
 
 ## Images
