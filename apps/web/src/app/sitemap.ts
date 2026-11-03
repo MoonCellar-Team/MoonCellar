@@ -4,7 +4,11 @@ import { articlesAPI, gamesApi } from "@/src/lib/shared/api";
 import { toSlug } from "@/src/lib/shared/utils/slug.utils";
 import { IGetGameSlugsResponse } from "@mooncellar/schemas";
 import { FRONT_URL, links } from "@/src/lib/shared/constants";
-import { MIN_GAMES_FOR_INDEX } from "@/src/lib/shared/constants/games.const";
+import {
+  INDEXABLE_GAME_SLUGS,
+  MIN_GAMES_FOR_INDEX,
+  isIndexableGame,
+} from "@/src/lib/shared/constants/games.const";
 
 export const dynamic = "force-dynamic";
 
@@ -53,19 +57,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const genres = await getGenreCounts().catch(() => []);
   const platformCounts = await getPlatformCounts().catch(() => []);
   const articleSlugs = await getArticleSlugs().catch(() => []);
+  const listedGames = new Set(gameSlugs.map(({ slug }) => slug));
+  const unlistedGames = [...INDEXABLE_GAME_SLUGS].filter(
+    (slug) => !listedGames.has(slug)
+  );
 
   return [
     ...links.map(({ link }) => ({
       url: `${FRONT_URL}${link}`,
     })),
-    ...gameSlugs.map(({ slug, updatedAt, cover }) => ({
+    ...gameSlugs
+      .filter(({ slug }) => isIndexableGame(slug))
+      .map(({ slug, updatedAt, cover }) => ({
+        url: `${FRONT_URL}/games/${slug}`,
+        lastModified: new Date(updatedAt),
+        ...(cover && {
+          images: [
+            `${FRONT_URL}/img/image-proxy?url=${encodeURIComponent(cover)}`,
+          ],
+        }),
+      })),
+    ...unlistedGames.map((slug) => ({
       url: `${FRONT_URL}/games/${slug}`,
-      lastModified: new Date(updatedAt),
-      ...(cover && {
-        images: [
-          `${FRONT_URL}/img/image-proxy?url=${encodeURIComponent(cover)}`,
-        ],
-      }),
     })),
     ...genres
       .filter(({ count }) => count >= MIN_GAMES_FOR_INDEX)
