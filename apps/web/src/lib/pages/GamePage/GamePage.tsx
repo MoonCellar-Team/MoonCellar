@@ -68,9 +68,9 @@ export const GamePage: FC<IGamePageProps> = ({
       {!hideMedia && (
         <GameCharacters characters={game.characters} gameId={game._id} />
       )}
-      <GameLists lists={lists} />
       <GameDetails game={game} />
       <GameRelated related={related} />
+      <GameLists lists={lists} />
       <GameCommunity game={game} initialReviews={reviews} />
       <div className={styles.page__columns}>
         <GameReleaseDates game={game} className={styles.page__column} />

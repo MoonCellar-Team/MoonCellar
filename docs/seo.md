@@ -283,8 +283,8 @@ so the whole set is reviewed in the pull request that changes it and no admin ed
 nobody read. `entities/game/ui/GameOverview` renders it as "MoonCellar note:" above "Summary:";
 every card outside the indexed set has no note and opens at Summary exactly as before.
 
-**The lists panel** is `widgets/game/GameLists`, titled "Lists that include it", between the
-characters and the details. It asks `GET /lists/game/:gameId` for the public lists and generated
+**The lists panel** is `widgets/game/GameLists`, titled "Lists that include it", below the related
+games. It asks `GET /lists/game/:gameId` for the public lists and generated
 collections that hold the game — people's lists first, then the MoonCellar ones, at most eight —
 and renders each as a `ListCard` tile: the mosaic of the first covers, the game count, the name,
 the author and the likes. A generated collection is labelled "Collection" where a player's name

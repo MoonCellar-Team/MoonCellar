@@ -1,7 +1,7 @@
 # GamePage
 
-The page of one game: hero, overview, ratings, media, characters, the lists that hold it, details,
-related games, reviews and discussion, release dates and multiplayer. Public, and the site's main search
+The page of one game: hero, overview, ratings, media, characters, details, related games, the lists
+that hold it, reviews and discussion, release dates and multiplayer. Public, and the site's main search
 landing page — the catalogue holds 439 455 of them and 31 are indexable.
 
 ## Routes
@@ -71,17 +71,18 @@ landing page — the catalogue holds 439 455 of them and 31 are indexable.
    `GET /games`, e.g. Glassline) opens `widgets/game/GamePortAchievementsModal`, titled the same.
 4. `entities/game/ui/GameMedia` and `widgets/game/GameCharacters` (`game.characters`, ordered by role in `getGameBySlug` / `getGameById` with `sortCharactersByRole`: an admin's role, else VNDB's, else Protagonist from the description; `GET /characters?gameId=` uses the same order) — hidden for adult games
    when `useHideAdult()` is true.
-5. `widgets/game/GameLists` — "Lists that include it": the public lists and generated collections
+5. `entities/game/ui/GameDetails` — the remaining catalogue facts.
+6. `widgets/game/GameRelated`.
+7. `widgets/game/GameLists` — "Lists that include it": the public lists and generated collections
    that hold the game, one `ListCard` tile each inside `ListCardsGrid isDense` (proposal:
-   `docs/mockups/game-page-own-text.html`). Eight, four or two columns by the grid's own width,
+   `docs/mockups/game-page-own-text.html`). It sits after the related games, so it closes the
+   page's reading order before the reviews. Eight, four or two columns by the grid's own width,
    because the route fetches at most eight and every count divides eight — one row, never ragged.
    `listsAPI.getByGame` returns full `ICustomList`s, so a tile carries the cover mosaic, the game
    count, the name, the author and the likes; a generated collection passes
    `authorLabel="Collection"` and links to `/collections/<slug>`, a player's list keeps the author
    and goes to its profile URL through `getListHref`. The route fetches people's lists first;
    the block renders nothing when the game sits in none.
-6. `entities/game/ui/GameDetails` — the remaining catalogue facts.
-7. `widgets/game/GameRelated`.
 8. `widgets/game/GameCommunity` — `features/comments/ui/GameReviews` (seeded with
    `initialReviews`) and the Discussion tab, `features/comments/ui/CommentThread` with the game as
    its target.
