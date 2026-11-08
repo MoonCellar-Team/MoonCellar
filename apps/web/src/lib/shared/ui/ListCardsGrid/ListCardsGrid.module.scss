@@ -1,5 +1,9 @@
 .wrapper {
   width: 100%;
+
+  &_dense {
+    container-type: inline-size;
+  }
 }
 
 .grid {
@@ -28,6 +32,20 @@
     @include mediaSm {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--gap-x2);
+    }
+  }
+
+  &_dense {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: var(--gap-x4);
+
+    @container (max-width: #{$screenLaptop}) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    @container (max-width: #{$screenMd}) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--gap-x3);
     }
   }
 

@@ -1,6 +1,6 @@
 # GamePage
 
-The page of one game: hero, overview, ratings, media, characters, the MoonCellar record, details,
+The page of one game: hero, overview, ratings, media, characters, the lists that hold it, details,
 related games, reviews and discussion, release dates and multiplayer. Public, and the site's main search
 landing page — the catalogue holds 439 455 of them and 31 are indexable.
 
@@ -19,7 +19,8 @@ landing page — the catalogue holds 439 455 of them and 31 are indexable.
 - Only the slugs of `INDEXABLE_GAME_SLUGS` (`shared/constants/games.const.ts`) are indexable; every
   other card answers `robots: { index: false, follow: true }` and stays out of the sitemap. The
   list and the audit behind it are in [`docs/seo.md`](../../../../../docs/seo.md), "Game cards:
-  keep, merge or noindex" — a card joins it only once it carries 600+ characters of our own text.
+  keep, merge or noindex" — a card joins it only once it carries its own editorial note, which is
+  what `scripts/audit-game-card-text.ts --check` measures.
 - An edition card in `GAME_CARD_REDIRECTS` calls `permanentRedirect` to its base card right after
   `getGame`, before the stats, reviews and related fetches; the two pages carry the same IGDB text.
 - The route renders `VideoGame` and `BreadcrumbList` JSON-LD next to the page.
@@ -29,17 +30,17 @@ landing page — the catalogue holds 439 455 of them and 31 are indexable.
 ## Data
 
 - Server, all in the route: `gamesApi.getBySlug` (via `fetchOrNull`, 404 → `null`), then in
-  parallel `gamesApi.getStats`, `commentsAPI.getReviews`, `gamesApi.getRelated`,
-  `gamesApi.getCommunity` and `listsAPI.getByGame` — each falls back to `undefined` on error so a
-  failing side block never breaks the page.
+  parallel `gamesApi.getStats`, `commentsAPI.getReviews`, `gamesApi.getRelated` and
+  `listsAPI.getByGame` — each falls back to `undefined` on error so a failing side block never
+  breaks the page.
 - The game service (`apps/game`), also in parallel: `getPortGameAchievements` — the MoonCellar Team
   port whose `siteGame` (in its `GET /games`) is this page, with every achievement, or `undefined`.
   It reaches the service with its own axios client (`portAchievementsApi`): no cookies, no toasts.
   `getSitePort` reads the same `GET /games` for the port itself, whatever its achievements, so the
   hero can offer its browser version (`playUrl`).
   The viewer's own states load in the browser once the port's modal opens.
-- The page receives `game`, `stats`, `reviews`, `related`, `portAchievements`, `port`,
-  `community` and `lists` as props and renders them directly.
+- The page receives `game`, `stats`, `reviews`, `related`, `portAchievements`, `port` and
+  `lists` as props and renders them directly.
   Widgets below may run their own client queries (reviews paging, discussion), but the
   first render needs none.
 - No URL state in the route. The `#reviews` and `#discussion` hashes (notification links) open
@@ -58,7 +59,7 @@ landing page — the catalogue holds 439 455 of them and 31 are indexable.
    platforms are `Chip` rows labelled in a `dl`, so a genre such as "Platform" is never read as a
    platform (mockup: `docs/mockups/game-hero-facts.html`, variant B).
 3. A text column and a sidebar (mockup: `docs/mockups/game-overview-row.html`, variant C). Left:
-   `entities/game/ui/GameOverview` (summary, storyline, keywords), then `widgets/game/GameLinksPanel`
+   `entities/game/ui/GameOverview` (the MoonCellar note, summary, storyline, keywords), then `widgets/game/GameLinksPanel`
    (external pages and links). Right, as wide as the hero's counters plus the hero's padding so
    the two line up: `widgets/game/GameScoreColumn`, then `GameFriendsStatus` in its own panel.
    Ratings show each source's vote count in parentheses after the score (`9.4 (938)`). The score
@@ -70,20 +71,15 @@ landing page — the catalogue holds 439 455 of them and 31 are indexable.
    `GET /games`, e.g. Glassline) opens `widgets/game/GamePortAchievementsModal`, titled the same.
 4. `entities/game/ui/GameMedia` and `widgets/game/GameCharacters` (`game.characters`, ordered by role in `getGameBySlug` / `getGameById` with `sortCharactersByRole`: an admin's role, else VNDB's, else Protagonist from the description; `GET /characters?gameId=` uses the same order) — hidden for adult games
    when `useHideAdult()` is true.
-5. `widgets/game/GameRecord` — the card's own record: the editorial note of the card
-   (`shared/constants/game-editorial.const.ts`, written by the team, one per indexable slug),
-   then paragraphs built by `getGameRecordParagraphs` (`shared/utils/game-record.utils.ts`) from
-   our rating, the accounts per status, the logged hours and the newest entry, Steam,
-   RetroAchievements and the MoonCellar port; then "The same accounts also tracked"
-   (`community.alsoPlayed`) and "Collections and lists that include it" (`lists`). A generated
-   collection links to `/collections/<slug>` and a player's list to its profile URL — the same
-   `getListHref` branch `ListCard` uses, so one card never sends a reader to two addresses. The
-   builder is a pure function
-   over data the page already has, and the block renders nothing when it has nothing to say.
-   [`docs/seo.md`](../../../../../docs/seo.md), "The MoonCellar record", measures what it
-   produces: 604–910 characters per indexable card on 2026-11-03, every card above the
-   600-character bar of `INDEXABLE_GAME_SLUGS`. A new indexable slug without a note in that map
-   fails `scripts/audit-game-card-text.ts --check`.
+5. `widgets/game/GameLists` — "Lists that include it": the public lists and generated collections
+   that hold the game, one `ListCard` tile each inside `ListCardsGrid isDense` (proposal:
+   `docs/mockups/game-page-own-text.html`). Eight, four or two columns by the grid's own width,
+   because the route fetches at most eight and every count divides eight — one row, never ragged.
+   `listsAPI.getByGame` returns full `ICustomList`s, so a tile carries the cover mosaic, the game
+   count, the name, the author and the likes; a generated collection passes
+   `authorLabel="Collection"` and links to `/collections/<slug>`, a player's list keeps the author
+   and goes to its profile URL through `getListHref`. The route fetches people's lists first;
+   the block renders nothing when the game sits in none.
 6. `entities/game/ui/GameDetails` — the remaining catalogue facts.
 7. `widgets/game/GameRelated`.
 8. `widgets/game/GameCommunity` — `features/comments/ui/GameReviews` (seeded with

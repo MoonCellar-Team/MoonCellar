@@ -4,7 +4,7 @@ export * from "./GameCharacters";
 export * from "./GameControls";
 export * from "./GameHero";
 export * from "./GameRelated";
-export * from "./GameRecord";
+export * from "./GameLists";
 export * from "./GameScoreColumn";
 export * from "./GameLinksPanel";
 export * from "./GamesCards";

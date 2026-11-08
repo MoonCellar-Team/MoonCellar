@@ -16,6 +16,7 @@ interface IListCardProps {
   query?: string;
   isWithAuthor?: boolean;
   isWithDate?: boolean;
+  authorLabel?: string;
   className?: string;
   onClick?: () => void;
 }
@@ -70,9 +71,12 @@ export const ListCard: FC<IListCardProps> = ({
   query,
   isWithAuthor = true,
   isWithDate = true,
+  authorLabel,
   className,
   onClick,
 }) => {
+  const byline = authorLabel ?? (isWithAuthor ? list.author?.userName : undefined);
+
   const isDescriptionMatch =
     !!query?.trim() &&
     !list.name.toLowerCase().includes(query.trim().toLowerCase()) &&
@@ -104,9 +108,7 @@ export const ListCard: FC<IListCardProps> = ({
               <SvgLock size="12" className={styles.lock} aria-label="Private" />
             )}
           </span>
-          {isWithAuthor && !!list.author && (
-            <span className={styles.author}>{list.author.userName}</span>
-          )}
+          {!!byline && <span className={styles.author}>{byline}</span>}
           <span className={styles.meta}>
             {isDescriptionMatch ? (
               <span className={styles.description}>
@@ -154,12 +156,10 @@ export const ListCard: FC<IListCardProps> = ({
           <SvgLock size="12" className={styles.lock} aria-label="Private" />
         )}
       </span>
-      {(isWithAuthor && !!list.author) || list.likesCount > 0 ? (
+      {!!byline || list.likesCount > 0 ? (
         <span className={styles.tile__byline}>
-          {isWithAuthor && !!list.author && (
-            <span className={styles.tile__author}>{list.author.userName}</span>
-          )}
-          {isWithAuthor && !!list.author && list.likesCount > 0 && (
+          {!!byline && <span className={styles.tile__author}>{byline}</span>}
+          {!!byline && list.likesCount > 0 && (
             <span aria-hidden="true">·</span>
           )}
           {list.likesCount > 0 && (

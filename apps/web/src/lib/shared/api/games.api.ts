@@ -17,7 +17,6 @@ import {
   IUpdateGameRequest,
   IGetGameFollowingsStatusResponse,
   IGameStats,
-  IGameCommunity,
   IGetGamesStatsResponse,
   IRelatedGamesResponse,
   IFindGameImagesRequest,
@@ -56,10 +55,6 @@ export const gamesApi = {
 
   getRelated: (gameId: string) => {
     return agent.get<IRelatedGamesResponse>(`${GAMES_URL}/${gameId}/related`);
-  },
-
-  getCommunity: (gameId: string) => {
-    return agent.get<IGameCommunity>(`${GAMES_URL}/${gameId}/community`);
   },
 
   getStatsByIds: (gameIds: string[]) => {

@@ -7,6 +7,7 @@ interface IListCardsGridProps {
   children: ReactNode;
   maxRows?: number;
   isGameSized?: boolean;
+  isDense?: boolean;
   isLoading?: boolean;
   className?: string;
 }
@@ -15,6 +16,7 @@ export const ListCardsGrid: FC<IListCardsGridProps> = ({
   children,
   maxRows,
   isGameSized,
+  isDense,
   isLoading,
   className,
 }) => {
@@ -25,11 +27,16 @@ export const ListCardsGrid: FC<IListCardsGridProps> = ({
   );
 
   return (
-    <div className={classNames(styles.wrapper, className)}>
+    <div
+      className={classNames(styles.wrapper, className, {
+        [styles.wrapper_dense]: isDense,
+      })}
+    >
       <div
         ref={ref}
         className={classNames(styles.grid, {
           [styles.grid_gameSized]: isGameSized,
+          [styles.grid_dense]: isDense,
           [styles.grid_twoRows]: isGameSized && maxRows === 2,
         })}
         role={isLoading ? "status" : undefined}

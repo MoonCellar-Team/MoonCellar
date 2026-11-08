@@ -44,6 +44,27 @@ type Story = StoryObj<typeof meta>;
 
 export const Tile: Story = {};
 
+export const TileCollection: Story = {
+  args: {
+    list: {
+      ...list,
+      name: "Best games of the 2010s",
+      gamesCount: 100,
+      likesCount: 18,
+      isGenerated: true,
+      author: { _id: "6650a1f2c3b4d5e6f7a8b9c2", userName: "MoonCellar" },
+    },
+    authorLabel: "Collection",
+  },
+  decorators: [
+    (Story) => (
+      <div style={{ width: 160 }}>
+        <Story />
+      </div>
+    ),
+  ],
+};
+
 export const TilePrivateNoLikes: Story = {
   args: {
     list: {

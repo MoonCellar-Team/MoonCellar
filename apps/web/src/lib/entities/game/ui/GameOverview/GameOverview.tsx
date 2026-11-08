@@ -3,6 +3,7 @@ import styles from "./GameOverview.module.scss";
 import { Box } from "@/src/lib/shared/ui/Box";
 import { Chip } from "@/src/lib/shared/ui/Chip";
 import { ExpandableBlock } from "@/src/lib/shared/ui/ExpandableBlock";
+import { getGameEditorial } from "@/src/lib/shared/constants/game-editorial.const";
 import { IGameResponse } from "@mooncellar/schemas";
 
 interface IGameOverviewProps {
@@ -11,7 +12,10 @@ interface IGameOverviewProps {
 }
 
 export const GameOverview: FC<IGameOverviewProps> = ({ game, className }) => {
-  if (!game.summary && !game.storyline && !game.keywords?.length) return null;
+  const editorial = getGameEditorial(game.slug);
+
+  if (!editorial && !game.summary && !game.storyline && !game.keywords?.length)
+    return null;
 
   return (
     <Box
@@ -19,6 +23,12 @@ export const GameOverview: FC<IGameOverviewProps> = ({ game, className }) => {
       classNameContent={styles.overview}
       contentStyle={{ padding: "var(--padding-x4)" }}
     >
+      {!!editorial && (
+        <div className={styles.overview__text}>
+          <h4>MoonCellar note:</h4>
+          <p>{editorial}</p>
+        </div>
+      )}
       {!!game.summary && (
         <div className={styles.overview__text}>
           <h4>Summary:</h4>

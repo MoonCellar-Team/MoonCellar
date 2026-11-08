@@ -9,6 +9,8 @@ const LIST_NAMES = [
   "Metroidvanias",
   "Short games under 5 hours",
   "Childhood favourites",
+  "Games we finished twice",
+  "Rainy day replays",
 ];
 
 const Tile = ({ name }: { name: string }) => (
@@ -54,6 +56,10 @@ export const TwoRows: Story = {
 
 export const GameSized: Story = {
   args: { isGameSized: true, maxRows: 2 },
+};
+
+export const Dense: Story = {
+  args: { isDense: true },
 };
 
 export const Loading: Story = {

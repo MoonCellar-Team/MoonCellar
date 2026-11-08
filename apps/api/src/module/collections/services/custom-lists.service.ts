@@ -410,37 +410,24 @@ export class CustomListsService {
     const targetId = toObjectId(gameId, "game id");
 
     try {
-      const docs = await this.listModel
-        .find({
-          isPrivate: { $ne: true },
-          "games.gameId": { $in: [targetId, gameId] },
-        })
-        .sort({ updatedAt: -1, _id: -1 })
-        .limit(LISTS_BY_GAME_LIMIT * 4)
-        .select("name slug gamesCount userId generator")
-        .lean();
-
-      if (!docs.length) return [];
-
-      const authors = await this.userModel
-        .find({ _id: { $in: docs.map((doc) => doc.userId) } })
-        .select("userName")
-        .lean();
-      const authorNames = new Map(
-        authors.map((user) => [String(user._id), user.userName])
-      );
+      const docs = await this.listModel.aggregate<IAggregatedList>([
+        {
+          $match: {
+            isPrivate: { $ne: true },
+            "games.gameId": { $in: [targetId, gameId] },
+          },
+        },
+        { $sort: { gamesCount: -1, _id: -1 } },
+        { $limit: LISTS_BY_GAME_LIMIT * 4 },
+        ...this.presentationStages(),
+        { $project: { games: 0 } },
+      ]);
 
       return docs
-        .map((doc) => ({
-          name: doc.name,
-          slug: doc.slug,
-          authorName: authorNames.get(String(doc.userId)) ?? null,
-          gamesCount: doc.gamesCount ?? 0,
-          isGenerated: !!doc.generator,
-        }))
+        .map((doc) => this.toList(doc))
         .sort(
           (a, b) =>
-            Number(a.isGenerated) - Number(b.isGenerated) ||
+            Number(!!a.isGenerated) - Number(!!b.isGenerated) ||
             b.gamesCount - a.gamesCount
         )
         .slice(0, LISTS_BY_GAME_LIMIT);

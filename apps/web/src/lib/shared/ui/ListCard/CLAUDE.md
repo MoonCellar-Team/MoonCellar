@@ -22,6 +22,7 @@ private lists), the author, the game count, the last update and the like count. 
 | `layout`       | `"tile" \| "row"` | `"tile"` | Grid tile or compact row                                                                                                           |
 | `query`        | `string`          | –        | Highlights matches in the name; when only the description matches, the description is shown with the match highlighted             |
 | `isWithAuthor` | `boolean`         | `true`   | Shows `author.userName` (hide it on the author's own profile)                                                                      |
+| `authorLabel`  | `string`          | –        | Replaces the author line with a fixed label, as "Collection" on a generated list; the likes stay after it                           |
 | `isWithDate`   | `boolean`         | `true`   | Adds the human-readable `updatedAt` to the meta line                                                                               |
 | `className`    | `string`          | –        | Class on the link                                                                                                                  |
 | `onClick`      | `() => void`      | –        | Click handler on the link (closing the search modal)                                                                               |
@@ -56,6 +57,10 @@ import { ListCard } from "@/src/lib/shared/ui/ListCard";
 - A generated list (`list.isGenerated`) links to `/collections/<slug>`, a player's list to
   `/user/<name>/lists/<slug>`. The branch lives in `getListHref`, so this card, the search modal
   and the profile all point at the collection page without a second card.
+- **A generated list says so through `authorLabel="Collection"`, not through a second card.**
+  Its `author` is the MoonCellar account, whose name says nothing to a reader; the label takes
+  the author line and the likes keep their place after it. The game page's lists panel is the
+  consumer (`widgets/game/GameLists`).
 - The `/lists` grid's column counts must divide `CUSTOM_LISTS_PAGE_SIZE` (24), and its
   `@container` thresholds copy `--list-card-min-width`/`--gap-x4`; change both together.
 - The tile's hover ring is drawn on an `::after` overlay because the `fill` images paint above an
@@ -66,5 +71,5 @@ import { ListCard } from "@/src/lib/shared/ui/ListCard";
 
 ## Storybook
 
-`Shared/ListCard`: Tile, TilePrivateNoLikes, Row, RowDescriptionMatch, EmptyList, Mosaic,
-TileSkeleton, RowSkeleton.
+`Shared/ListCard`: Tile, TileCollection, TilePrivateNoLikes, Row, RowDescriptionMatch, EmptyList,
+Mosaic, TileSkeleton, RowSkeleton.

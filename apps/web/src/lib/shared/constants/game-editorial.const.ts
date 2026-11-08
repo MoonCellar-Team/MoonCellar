@@ -1,4 +1,4 @@
-// Our own note on a game, rendered above the numbers in the MoonCellar record.
+// Our own note on a game, rendered above the IGDB summary in the overview block.
 // Written by the team, one per indexable card, and measured by
 // `scripts/audit-game-card-text.ts`. A card is worth indexing only while it
 // carries something of ours, and this text is the part a crawler cannot get from
