@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Game page: our own text</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* mooncellar-tokens:start */
+/* Generated from apps/web/src/lib/app/styles/vars by
+   `bun --filter web sync:tokens`. Do not edit by hand. */
+:root {
+  /* vars/_colors.scss */
+  --color-neutral-5: #080a0b;
+  --color-neutral-10: #0d1011;
+  --color-neutral-15: #121516;
+  --color-neutral-20: #161b1d;
+  --color-neutral-25: #1a2022;
+  --color-neutral-30: #1f2628;
+  --color-neutral-35: #262d2f;
+  --color-neutral-40: #2f3537;
+  --color-neutral-45: #383e40;
+  --color-neutral-50: #3f4750;
+  --color-neutral-55: #50575d;
+  --color-neutral-60: #5e6a6e;
+  --color-neutral-70: #747d82;
+  --color-neutral-80: #9192a1;
+  --color-neutral-85: #b0b2bc;
+  --color-neutral-90: #d9d9d9;
+  --color-neutral-95: #eaeaea;
+  --color-neutral-100: #ffffff;
+  --color-blue: #3d6bff;
+  --color-blue-light: #00d4ff;
+  --color-cyan: #48cae4;
+  --color-gray: #afb3b9;
+  --color-white: #e8edf5;
+  --color-yellow: #ffc451;
+  --color-yellow-light: #f9f871;
+  --color-orange: #ff8862;
+  --color-pink: #ff4b8f;
+  --color-violet: #9b5de5;
+  --color-green: #2dc653;
+  --color-red: #e5383b;
+  --color-positive: #00c292;
+  --color-negative: #d02729;
+  --color-primary: var(--color-neutral-30);
+  --color-secondary: var(--color-neutral-90);
+  --color-contrast: var(--color-neutral-100);
+  --color-contrast-reverse: var(--color-neutral-5);
+  --color-attention: #ffc451;
+  --color-text-primary: var(--color-neutral-100);
+  --color-text-secondary: var(--color-neutral-90);
+  --color-text-muted: var(--color-neutral-85);
+  --color-accent: #6951ee;
+  --color-bg-primary: #191d24;
+  --color-bg-secondary: #212731;
+  --color-bg-tertiary: #2c3340;
+  --color-bg-accent: #6951ee;
+  --color-bg-hover: #374151;
+  --color-bg-positive: #00c292;
+  --color-bg-primary-tint: #191d24ee;
+  --color-bg-secondary-tint: #212731ee;
+  --color-bg-tertiary-tint: #2c3340ee;
+  --color-bg-accent-tint: #6951eeee;
+  --color-bg-positive-tint: #00c292ee;
+  --color-border-primary: var(--color-neutral-35);
+  --color-scrollbar-track: var(--color-neutral-15);
+  --color-scrollbar-thumb: var(--color-neutral-80);
+  --color-border-secondary: var(--color-neutral-85);
+
+  /* vars/_common.scss */
+  --padding-x05: calc(var(--padding-x1) * 0.5);
+  --padding-x1: 4px;
+  --padding-x2: calc(var(--padding-x1) * 2);
+  --padding-x3: calc(var(--padding-x1) * 3);
+  --padding-x4: calc(var(--padding-x1) * 4);
+  --padding-x5: calc(var(--padding-x1) * 5);
+  --padding-x6: calc(var(--padding-x1) * 6);
+  --padding-x7: calc(var(--padding-x1) * 7);
+  --padding-x8: calc(var(--padding-x1) * 8);
+  --padding-x9: calc(var(--padding-x1) * 9);
+  --padding-x10: calc(var(--padding-x1) * 10);
+  --padding-x11: calc(var(--padding-x1) * 11);
+  --padding-x12: calc(var(--padding-x1) * 12);
+  --padding-x13: calc(var(--padding-x1) * 13);
+  --padding-x14: calc(var(--padding-x1) * 14);
+  --padding-x15: calc(var(--padding-x1) * 15);
+  --padding-x16: calc(var(--padding-x1) * 16);
+  --padding-x17: calc(var(--padding-x1) * 17);
+  --padding-x18: calc(var(--padding-x1) * 18);
+  --padding-x19: calc(var(--padding-x1) * 19);
+  --padding-x20: calc(var(--padding-x1) * 20);
+  --padding-x25: calc(var(--padding-x1) * 25);
+  --radius-x1: 4px;
+  --radius-x2: calc(var(--radius-x1) * 2);
+  --radius-x3: calc(var(--radius-x1) * 3);
+  --radius-x4: calc(var(--radius-x1) * 4);
+  --radius-x5: calc(var(--radius-x1) * 5);
+  --radius-x6: calc(var(--radius-x1) * 6);
+  --radius-x7: calc(var(--radius-x1) * 7);
+  --radius-x8: calc(var(--radius-x1) * 8);
+  --radius-x9: calc(var(--radius-x1) * 9);
+  --radius-x10: calc(var(--radius-x1) * 10);
+  --radius-control: var(--radius-x4);
+  --radius-button: var(--radius-x3);
+  --gap-x05: calc(var(--gap-x1) * 0.5);
+  --gap-x1: 4px;
+  --gap-x2: calc(var(--gap-x1) * 2);
+  --gap-x3: calc(var(--gap-x1) * 3);
+  --gap-x4: calc(var(--gap-x1) * 4);
+  --gap-x5: calc(var(--gap-x1) * 5);
+  --gap-x6: calc(var(--gap-x1) * 6);
+  --gap-x7: calc(var(--gap-x1) * 7);
+  --gap-x8: calc(var(--gap-x1) * 8);
+  --gap-x9: calc(var(--gap-x1) * 9);
+  --gap-x10: calc(var(--gap-x1) * 10);
+  --gap-x11: calc(var(--gap-x1) * 11);
+  --gap-x12: calc(var(--gap-x1) * 12);
+  --blur-x1: 6px;
+  --rich-text-gap: 8px;
+  --duration-instant: 1ms;
+  --duration-fast: 160ms;
+  --duration-base: 280ms;
+  --duration-slow: 400ms;
+  --delay-stagger: 90ms;
+  --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --easing-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --reveal-offset: 12px;
+  --reveal-scale: 0.96;
+  --header-height: 45px;
+  --container-padding-top: calc(var(--header-height) + var(--padding-x3));
+  --container-padding-bottom: var(--padding-x3);
+  --page-height-available: calc(
+    100dvh - var(--container-padding-top) - var(--container-padding-bottom)
+  );
+
+  /* vars/_components.scss */
+  --game-completed-color: var(--color-green);
+  --game-dropped-color: var(--color-red);
+  --game-playing-color: var(--color-blue);
+  --game-wishlist-color: var(--color-violet);
+  --game-backlog-color: var(--color-white);
+  --game-played-color: var(--color-cyan);
+  --game-mastered-color: var(--color-yellow);
+  --cover-ratio: 528/704;
+  --shadow-basic: 0px 4px 4px var(--color-neutral-5);
+  --shadow-text: drop-shadow(0 1px 2px var(--color-neutral-5))
+    drop-shadow(0 0 6px var(--color-neutral-5));
+  --glow-accent: 0 0 0.4rem var(--color-accent);
+  --glow-accent-sm: 0 0 0.15rem var(--color-accent);
+  --avatar-size-sm: var(--padding-x6);
+  --navigation-progress-height: 1px;
+  --navigation-progress-z-index: 1002;
+  --bprogress-color: var(--color-accent) !important;
+  --bprogress-height: var(--navigation-progress-height) !important;
+  --bprogress-box-shadow: var(--glow-accent) !important;
+  --bprogress-z-index: var(--navigation-progress-z-index) !important;
+  --modal-text-width: min(720px, calc(100vw - var(--padding-x10)));
+  --rich-editor-image-width: 400px;
+  --rich-editor-separator-height: 18px;
+  --playthrough-modal-width: min(80vw, 400px);
+  --header-logo-height: 85%;
+  --header-logo-height-sm: 72%;
+  --tab-count-color: color-mix(in srgb, currentColor 60%, transparent);
+  --playthrough-modal-height: min(70dvh, 500px);
+  --playthrough-modal-width-lg: min(88vw, 760px);
+  --playthrough-modal-height-lg: min(86dvh, 780px);
+  --games-card-min-width: 180px;
+  --list-card-min-width: 180px;
+  --range-track-height: 6px;
+  --progress-bar-height: 6px;
+  --progress-bar-sweep-duration: 1200ms;
+  --range-thumb-size: 20px;
+  --range-thumb-width: 44px;
+  --range-thumb-height: 24px;
+  --scrollbar-horizontal-size: 6px;
+  --scrollbar-arrow-width: 32px;
+  --scrollbar-fade-width: 48px;
+  --game-keywords-collapsed-height: 66px;
+  --game-hero-artwork-height: 300px;
+  --game-hero-artwork-height-sm: 180px;
+  --game-hero-cover-width: 200px;
+  --game-hero-cover-offset: 104px;
+  --game-hero-counters-width: 360px;
+  --game-facts-label-width: 84px;
+  --game-rating-popover-width: 320px;
+  --popover-width: 320px;
+  --achievements-icon-size: 44px;
+  --achievements-icon-size-sm: 48px;
+  --port-achievement-icon-size-sm: 32px;
+  --port-game-card-width: 140px;
+  --port-game-card-width-sm: 96px;
+  --popover-max-height: 320px;
+  --popover-sheet-max-height: 85dvh;
+  --textarea-handle-size: 20px;
+  --image-generator-preview-width: 160px;
+  --ai-drafts-count-width: 88px;
+  --image-finder-portrait-width: 216px;
+  --image-finder-landscape-width: 320px;
+  --site-sessions-modal-width: min(560px, calc(100vw - var(--padding-x8)));
+  --image-generator-elements-width: min(640px, calc(100vw - var(--padding-x8)));
+  --popover-sheet-grabber-width: 40px;
+  --popover-sheet-grabber-height: 5px;
+  --drawer-width: max(20vw, 460px);
+  --drawer-z-index: 5;
+  --expandable-scroll-height: 132px;
+  --expandable-fade-height: 32px;
+  --date-picker-width: 300px;
+  --date-picker-field-min-width: 140px;
+  --game-card-min-width: 160px;
+  --playthrough-platform-min-width: 200px;
+  --playthrough-time-min-width: 120px;
+  --date-picker-cell-size: 34px;
+  --emoji-picker-width: 328px;
+  --emoji-picker-cell-size: 34px;
+  --emoji-picker-group-size: 28px;
+  --emoji-picker-grid-height: 238px;
+  --game-hero-scrim: linear-gradient(
+    180deg,
+    #191d248c 0%,
+    #191d2400 30%,
+    #212731d1 72%,
+    var(--color-bg-secondary) 100%
+  );
+  --spoiler-blur: 7px;
+  --community-avatar-size: 36px;
+  --community-reply-avatar-size: 28px;
+  --community-review-clamp-height: 132px;
+  --community-distribution-height: 8px;
+  --community-distribution-min-width: 240px;
+  --community-dot-size: 7px;
+  --community-loading-height: 96px;
+  --user-review-card-width: 170px;
+  --user-review-card-width-sm: 140px;
+  --user-review-rating-filter-width: 260px;
+  --vndb-review-height: max(360px, calc(100vh - 420px));
+  --vndb-cover-width: 120px;
+  --vndb-search-width: 320px;
+  --conflicts-state-filter-width: 240px;
+  --conflicts-ai-limit-width: 96px;
+  --vndb-candidate-cover-width: 64px;
+  --empty-state-image-size: 180px;
+  --empty-state-image-size-sm: 96px;
+  --empty-state-inline-text-min-width: 200px;
+  --empty-state-page-content-width: 420px;
+  --badge-negative-color: var(--color-orange);
+  --badge-tint-strength: 16%;
+  --stat-tile-bg: var(--color-bg-primary);
+  --not-found-image-height: 240px;
+  --not-found-backdrop-size: 400px;
+  --favorite-color: var(--color-pink);
+  --moon-phase-lit-color: var(--color-neutral-95);
+  --moon-phase-dark-color: var(--color-bg-hover);
+  --moon-phase-unknown-color: var(--color-text-muted);
+  --moon-phase-unknown-fill: var(--color-bg-secondary);
+  --release-calendar-card-width: 172px;
+  --release-calendar-card-width-sm: var(--game-card-min-width);
+  --release-calendar-month-height: 16px;
+  --release-calendar-node-size: 28px;
+  --release-calendar-axis-color: var(--color-bg-hover);
+  --game-controls-icon-size: 24px;
+  --game-controls-icon-size-sm: 20px;
+  --game-controls-badge-size: 15px;
+  --list-card-row-mosaic-size: 44px;
+  --list-card-count-height: 20px;
+  --list-search-width: 320px;
+  --list-row-cover-width: 40px;
+  --profile-hero-height: 168px;
+  --profile-avatar-size: 112px;
+  --profile-avatar-size-sm: 72px;
+  --activity-cover-width: 80px;
+  --people-avatar-size: 22px;
+  --character-card-width: 128px;
+  --character-card-width-sm: 104px;
+  --character-profile-portrait-width: 200px;
+  --character-editor-portrait-width: 150px;
+  --image-picker-thumb-width: 160px;
+  --game-images-modal-width: min(92vw, 960px);
+  --game-port-achievements-modal-width: min(92vw, 960px);
+  --requests-queue-width: 440px;
+  --list-sort-width: 280px;
+  --field-control-height: 40px;
+  --gauntlet-mode-cards-width: 300px;
+  --gauntlet-winner-cover-width: 200px;
+  --gauntlet-winner-cover-width-mobile: 220px;
+  --gauntlet-wheel-max-width: 50vw;
+  --gauntlet-fact-label-width: 110px;
+  --object-field-min-width: 160px;
+  --requests-panel-min-height: 240px;
+  --page-skeleton-crumbs-width: 160px;
+  --page-skeleton-title-width: 240px;
+  --search-modal-width: 900px;
+  --search-tab-height: 36px;
+  --article-page-width: 1080px;
+  --news-sidebar-width: 300px;
+  --article-row-thumb-width: 176px;
+  --article-row-thumb-width-sm: 96px;
+  --article-row-game-cover-width: 14px;
+  --article-game-cover-width: 92px;
+  --article-game-cover-width-sm: 64px;
+  --article-text-gap: 16px;
+  --article-box-padding: var(--padding-x6);
+  --game-stats-bar-height: 8px;
+  --game-stats-dot-size: 7px;
+  --reaction-active-color: var(--color-accent);
+  --tabs-muted-opacity: 0.55;
+  --burger-animation-duration: 600ms;
+  --status-menu-width: 248px;
+  --status-menu-active-bg: color-mix(
+    in srgb,
+    var(--color-accent) 16%,
+    transparent
+  );
+  --status-pending-color: color-mix(
+    in srgb,
+    var(--color-positive) 38%,
+    var(--color-bg-primary)
+  );
+  --status-map-cell: 9px;
+  --status-card-width: min(380px, 100%);
+  --status-edit-modal-width: min(560px, calc(100vw - var(--padding-x8)));
+}
+/* mooncellar-tokens:end */
+
+  :root {
+    --mock-ui: "Hanken Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mock-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --mock-ground: var(--color-neutral-10);
+    --mock-page: 1360px;
+    --mock-overview: 760px;
+    --mock-phone: 390px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--mock-ground);
+    color: var(--color-text-primary);
+    font-family: var(--mock-ui);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .shell {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding-inline: var(--padding-x6);
+    padding-block: var(--padding-x14) var(--padding-x20);
+  }
+
+  @media (max-width: 520px) {
+    .shell { padding-inline: var(--padding-x4); padding-block: var(--padding-x9) var(--padding-x14); }
+  }
+
+  h1, h2, h3, h4, p { margin: 0; }
+  h1, h2 { text-wrap: balance; }
+  a { color: inherit; text-decoration: none; }
+
+  .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-gray); }
+  .masthead { display: flex; flex-direction: column; gap: var(--gap-x4); max-width: 960px; }
+  .masthead h1 { font-size: 34px; line-height: 1.15; font-weight: 700; letter-spacing: -0.5px; }
+  .lede { color: var(--color-text-secondary); max-width: 74ch; }
+
+  .brief {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--gap-x4) var(--gap-x6);
+    margin-top: var(--padding-x8);
+    padding-top: var(--padding-x5);
+    border-top: 1px solid var(--color-border-primary);
+  }
+  .brief h3 { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-gray); margin-bottom: var(--padding-x2); }
+  .brief p, .brief li { font-size: 14px; color: var(--color-text-secondary); }
+  .brief ul { margin: 0; padding-left: var(--padding-x5); display: grid; gap: var(--gap-x1); }
+  .brief code, code.t { font-family: var(--mock-mono); font-size: 12px; color: var(--color-yellow); }
+
+  .section { margin-top: var(--padding-x16); }
+  .section > h2 { font-size: 23px; font-weight: 700; letter-spacing: -0.2px; }
+  .section > p { color: var(--color-text-muted); max-width: 76ch; margin: var(--padding-x2) 0 var(--padding-x5); }
+
+  .variant { margin-top: var(--padding-x12); }
+  .variant__head { display: flex; align-items: baseline; gap: var(--gap-x3); flex-wrap: wrap; }
+  .variant__letter {
+    font-family: var(--mock-mono); font-size: 13px; font-weight: 500; color: var(--color-accent);
+    border: 1px solid var(--color-accent); border-radius: var(--radius-x1); padding: 1px 7px; flex-shrink: 0;
+  }
+  .variant__head h3 { font-size: 18px; font-weight: 600; }
+  .variant__thesis { color: var(--color-text-muted); max-width: 76ch; margin: var(--padding-x2) 0 var(--padding-x4); font-size: 14px; }
+
+  .stage { margin-top: var(--padding-x4); }
+  .stage__cap {
+    font-family: var(--mock-mono); font-size: 11px; color: var(--color-gray);
+    display: flex; align-items: center; gap: var(--gap-x2); flex-wrap: wrap;
+    margin-bottom: var(--padding-x2);
+  }
+  .stage__cap::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--color-accent); flex-shrink: 0; }
+  .canvas { background: var(--mock-ground); border: 1px solid var(--color-border-primary); border-radius: var(--radius-x4); padding: var(--padding-x4); }
+  .canvas--phone { width: calc(var(--mock-phone) + 2 * var(--padding-x4)); max-width: 100%; }
+  .frame { width: var(--mock-page); max-width: 100%; }
+  .frame--overview { width: var(--mock-overview); max-width: 100%; }
+  .frame--phone { width: var(--mock-phone); max-width: 100%; }
+
+  .panel {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-x5);
+    overflow: hidden;
+  }
+  .panel__head {
+    display: flex; align-items: flex-end; gap: var(--gap-x5);
+    padding: var(--padding-x2) var(--padding-x3);
+    border-bottom: 1px solid var(--color-bg-primary);
+  }
+  .panel__head h2 { font-size: 20px; font-weight: 600; line-height: 1.3; }
+  .panel__body { padding: var(--padding-x4); display: flex; flex-direction: column; gap: var(--gap-x4); }
+  .panel__body--lists { padding: var(--padding-x4); }
+
+  .blk { display: flex; flex-direction: column; gap: var(--gap-x2); }
+  .blk h4 { font-size: 16px; line-height: 20px; font-weight: 500; color: var(--color-text-primary); }
+  .blk p { font-size: 14px; line-height: 22px; color: var(--color-text-secondary); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: var(--gap-x2); }
+  .chip {
+    font-size: 12px; line-height: 20px; padding: 0 var(--padding-x2);
+    border-radius: var(--radius-x2); border: 1px solid var(--color-border-primary);
+    color: var(--color-text-muted);
+  }
+
+  .map { display: flex; flex-direction: column; gap: 2px; }
+  .map__band {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--gap-x3);
+    padding: var(--padding-x2) var(--padding-x3);
+    font-size: 12px; color: var(--color-gray);
+    border: 1px dashed var(--color-border-primary); border-radius: var(--radius-x2);
+  }
+  .map__band--here { border-style: solid; border-color: var(--color-accent); color: var(--color-text-primary); }
+
+  .gridwrap { container-type: inline-size; }
+  .grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: var(--gap-x4); }
+  @container (max-width: 1250px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @container (max-width: 768px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-x3); } }
+
+  .lcard { display: flex; flex-direction: column; gap: var(--gap-x1); min-width: 0; }
+  .lcard__art {
+    position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gap-x05); aspect-ratio: var(--cover-ratio);
+    border-radius: var(--radius-x4); overflow: hidden; background: var(--color-bg-tertiary);
+  }
+  .lcard__cell { display: block; }
+  .lcard__count {
+    position: absolute; right: var(--padding-x2); bottom: var(--padding-x2);
+    min-width: var(--list-card-count-height); height: var(--list-card-count-height);
+    padding-inline: var(--padding-x2); border-radius: var(--radius-x2);
+    background: var(--color-bg-primary-tint); color: var(--color-text-primary);
+    font-size: 12px; line-height: var(--list-card-count-height); text-align: center;
+  }
+  .lcard__name {
+    font-size: 14px; font-weight: 600; line-height: 1.3; min-width: 0;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .lcard__by { display: flex; align-items: center; gap: var(--gap-x1); font-size: 12px; color: var(--color-text-muted); min-width: 0; }
+  .lcard__author { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lcard__tag { color: var(--color-text-muted); }
+  .lcard__likes { display: inline-flex; align-items: center; gap: var(--gap-x05); flex-shrink: 0; }
+  .lcard__likes svg { width: 12px; height: 12px; fill: currentColor; }
+  .lcard__sep { color: var(--color-gray); }
+
+  .c-1 { background: linear-gradient(155deg, color-mix(in srgb, var(--color-violet) 62%, var(--color-neutral-20)), var(--color-neutral-25)); }
+  .c-2 { background: linear-gradient(155deg, color-mix(in srgb, var(--color-yellow) 52%, var(--color-neutral-20)), var(--color-neutral-25)); }
+  .c-3 { background: linear-gradient(155deg, color-mix(in srgb, var(--color-blue) 58%, var(--color-neutral-20)), var(--color-neutral-25)); }
+  .c-4 { background: linear-gradient(155deg, color-mix(in srgb, var(--color-positive) 45%, var(--color-neutral-20)), var(--color-neutral-25)); }
+  .c-5 { background: linear-gradient(155deg, color-mix(in srgb, var(--color-orange) 55%, var(--color-neutral-20)), var(--color-neutral-25)); }
+  .c-6 { background: linear-gradient(155deg, color-mix(in srgb, var(--color-pink) 48%, var(--color-neutral-20)), var(--color-neutral-25)); }
+  .c-7 { background: linear-gradient(155deg, color-mix(in srgb, var(--color-cyan) 45%, var(--color-neutral-20)), var(--color-neutral-25)); }
+  .c-8 { background: linear-gradient(155deg, color-mix(in srgb, var(--color-red) 42%, var(--color-neutral-20)), var(--color-neutral-25)); }
+
+  .missing {
+    display: flex; align-items: center; gap: var(--gap-x3);
+    padding: var(--padding-x4); border: 1px dashed var(--color-border-primary); border-radius: var(--radius-x5);
+    color: var(--color-gray); font-size: 13px;
+  }
+
+  .note {
+    margin-top: var(--padding-x12);
+    font-size: 13px;
+    color: var(--color-gray);
+    border-left: 2px solid var(--color-border-primary);
+    padding-left: var(--padding-x3);
+    max-width: 84ch;
+  }
+  .note + .note { margin-top: var(--padding-x5); }
+  .note b { color: var(--color-text-secondary); font-weight: 600; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: var(--duration-instant) !important; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="masthead">
+    <p class="eyebrow">MoonCellar · game page</p>
+    <h1>Game page: our own text</h1>
+    <p class="lede">
+      The MoonCellar record is replaced by two blocks. The team's note moves into the overview panel,
+      above the IGDB summary. The lists that hold the game become their own panel of list cards. The
+      sentences about ratings, tracking, playtime and achievements — and “The same accounts also
+      tracked” — are gone: they restated numbers the page already shows and read as filler.
+    </p>
+  </header>
+
+  <div class="brief">
+    <div>
+      <h3>Overview</h3>
+      <p>“MoonCellar note:” above “Summary:”, 14/22 secondary. Only the 31 indexable cards carry
+        one; every other card opens at Summary exactly as it does today.</p>
+    </div>
+    <div>
+      <h3>Lists panel</h3>
+      <p>One row of list cards below the related games: eight columns on a desktop,
+        four on a tablet, two on a phone. Every tier divides the eight the endpoint returns, so the
+        row is full at the cap and shorter when a game sits in fewer lists.</p>
+    </div>
+    <div>
+      <h3>Removed</h3>
+      <ul>
+        <li>Rating, tracking and playtime prose</li>
+        <li>Achievements sentence</li>
+        <li>“The same accounts also tracked”</li>
+      </ul>
+    </div>
+  </div>
+
+  <section class="section" aria-labelledby="s-note">
+    <h2 id="s-note">A · The note in the overview</h2>
+    <p>
+      The note is the only hand-written text on the card, so it takes the first slot of the panel and
+      keeps the heading rhythm of its neighbours. The Witcher 3 note is the longest in the set at 593
+      characters; the panel absorbs it without a clamp.
+    </p>
+
+    <div class="stage">
+      <p class="stage__cap">Left column of the overview row · 760px · The Witcher 3: Wild Hunt</p>
+      <div class="canvas">
+        <div class="frame frame--overview">
+          <div class="panel">
+            <div class="panel__body">
+              <div class="blk">
+                <h4>MoonCellar note:</h4>
+                <p>Widely treated as the high-water mark of the open-world role-playing game, and
+                  the argument is mostly about writing: side quests here have consequences that
+                  outlast their own cutscenes. You do not need the first two games to follow it,
+                  though importing a save changes a few early scenes. The expansions are stronger
+                  than the base campaign's middle act — Hearts of Stone is the tighter story, Blood
+                  and Wine the better-looking world — and playing them after the ending, rather than
+                  during, keeps the pacing intact. Fifty hours for the main story is a conservative
+                  figure; most people need more.</p>
+              </div>
+              <div class="blk">
+                <h4>Summary:</h4>
+                <p>You are Geralt of Rivia, a mercenary monster slayer hired to find the Child of
+                  Prophecy — a girl who may hold the key to saving the world. As war rages across
+                  the Northern Kingdoms, every contract, every conversation and every side quest
+                  pulls the same thread: what will you do for someone you have sworn to protect?</p>
+              </div>
+              <div class="blk">
+                <h4>Keywords:</h4>
+                <div class="chips">
+                  <span class="chip">fantasy</span>
+                  <span class="chip">open world</span>
+                  <span class="chip">rpg</span>
+                  <span class="chip">monsters</span>
+                  <span class="chip">book adaptation</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <p class="stage__cap">A card without a note · Gears of War 2 · overview starts at Summary</p>
+      <div class="canvas">
+        <div class="frame frame--overview">
+          <div class="panel">
+            <div class="panel__body">
+              <div class="blk">
+                <h4>Summary:</h4>
+                <p>From the mountains to the depths of the Hollow, the war against the Locust Horde
+                  grinds on. Delta Squad splits in two, and the campaign follows both halves to a
+                  finale built around one last push under the surface.</p>
+              </div>
+              <div class="blk">
+                <h4>Keywords:</h4>
+                <div class="chips">
+                  <span class="chip">third-person shooter</span>
+                  <span class="chip">co-op</span>
+                  <span class="chip">post-apocalyptic</span>
+                  <span class="chip">cover shooter</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="s-place">
+    <h2 id="s-place">B · Where the lists panel sits</h2>
+    <p>
+      The panel moves below the related games, so it closes the page's reading order before the
+      reviews. Nothing above it moves, so an arrival from search still meets the cover and the
+      score first.
+    </p>
+
+    <div class="stage">
+      <p class="stage__cap">Page order · full width · 1360px</p>
+      <div class="canvas">
+        <div class="frame">
+          <div class="map">
+            <div class="map__band"><span>GameMedia · screenshots and videos</span><span>full width</span></div>
+            <div class="map__band"><span>GameCharacters · cast rail</span><span>full width</span></div>
+            <div class="map__band"><span>GameDetails · release, companies, platforms</span><span>full width</span></div>
+            <div class="map__band"><span>GameRelated · sequels, ports, versions</span><span>full width</span></div>
+            <div class="map__band map__band--here"><span>GameLists · “Lists that include it”</span><span>this panel</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="s-lists">
+    <h2 id="s-lists">C · The lists panel</h2>
+    <p>
+      One row, eight columns at the page's full width. Eight is what the endpoint returns, and the
+      column count follows it down the breakpoints — four from 1250px, two below 768px — so the row is
+      never ragged and never wider than the cards need. Every card is the shared
+      <code class="t">ListCard</code> tile: a 2×2 mosaic of the first covers, the game count in the
+      corner, the name clamped to two lines, then the author and the likes.
+    </p>
+
+    <div class="variant">
+      <div class="variant__head">
+        <span class="variant__letter">A</span>
+        <h3>Cards as they ship today</h3>
+      </div>
+      <p class="variant__thesis">
+        A collection and a player's list are told apart only by the missing author: a collection is
+        owned by the MoonCellar account, so <code class="t">isWithAuthor</code> is false. Cheapest —
+        no component change — but a reader has to open a card to learn it is editorial.
+      </p>
+
+      <div class="stage">
+        <p class="stage__cap">8 lists · 1360px · The Witcher 3: Wild Hunt</p>
+        <div class="canvas">
+          <div class="frame">
+            <div class="panel">
+              <div class="panel__head"><h2>Lists that include it</h2></div>
+              <div class="panel__body panel__body--lists gridwrap">
+                <div class="grid">
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-1"></span><span class="lcard__cell c-2"></span>
+                      <span class="lcard__cell c-3"></span><span class="lcard__cell c-4"></span>
+                      <span class="lcard__count">100</span>
+                    </span>
+                    <span class="lcard__name">Best games of the 2010s</span>
+                    <span class="lcard__by"><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>18</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-5"></span><span class="lcard__cell c-6"></span>
+                      <span class="lcard__cell c-7"></span><span class="lcard__cell c-2"></span>
+                      <span class="lcard__count">100</span>
+                    </span>
+                    <span class="lcard__name">Best games of 2015</span>
+                    <span class="lcard__by"><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>9</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-8"></span><span class="lcard__cell c-3"></span>
+                      <span class="lcard__cell c-1"></span><span class="lcard__cell c-5"></span>
+                      <span class="lcard__count">100</span>
+                    </span>
+                    <span class="lcard__name">Best CD Projekt games</span>
+                    <span class="lcard__by"><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>6</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-2"></span><span class="lcard__cell c-7"></span>
+                      <span class="lcard__cell c-4"></span><span class="lcard__cell c-6"></span>
+                      <span class="lcard__count">100</span>
+                    </span>
+                    <span class="lcard__name">Best games of the 2000s</span>
+                    <span class="lcard__by"><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>31</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-3"></span><span class="lcard__cell c-5"></span>
+                      <span class="lcard__cell c-8"></span><span class="lcard__cell c-1"></span>
+                      <span class="lcard__count">9</span>
+                    </span>
+                    <span class="lcard__name">Three playthroughs and counting</span>
+                    <span class="lcard__by"><span class="lcard__author">kepler</span><span class="lcard__sep">·</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>4</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-6"></span><span class="lcard__cell c-4"></span>
+                      <span class="lcard__cell c-2"></span><span class="lcard__cell c-7"></span>
+                      <span class="lcard__count">17</span>
+                    </span>
+                    <span class="lcard__name">Fantasy that respects your time</span>
+                    <span class="lcard__by"><span class="lcard__author">mira</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>6</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-5"></span><span class="lcard__cell c-1"></span>
+                      <span class="lcard__cell c-7"></span><span class="lcard__cell c-8"></span>
+                      <span class="lcard__count">12</span>
+                    </span>
+                    <span class="lcard__name">Books before games</span>
+                    <span class="lcard__by"><span class="lcard__author">nightowl</span><span class="lcard__sep">·</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>3</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-4"></span><span class="lcard__cell c-8"></span>
+                      <span class="lcard__cell c-6"></span><span class="lcard__cell c-3"></span>
+                      <span class="lcard__count">23</span>
+                    </span>
+                    <span class="lcard__name">Comfort replays</span>
+                    <span class="lcard__by"><span class="lcard__author">rook</span></span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="variant">
+      <div class="variant__head">
+        <span class="variant__letter">B</span>
+        <h3>Collections name themselves</h3>
+      </div>
+      <p class="variant__thesis">
+        A generated collection puts “Collection” where a player's name would be. One new optional
+        prop, <code class="t">authorLabel</code>, on <code class="t">ListCard</code> — the same line,
+        the same size, the likes still after it — and the panel stops asking a reader to guess which
+        cards are editorial.
+      </p>
+
+      <div class="stage">
+        <p class="stage__cap">8 lists · 1360px · collection label replaces the author</p>
+        <div class="canvas">
+          <div class="frame">
+            <div class="panel">
+              <div class="panel__head"><h2>Lists that include it</h2></div>
+              <div class="panel__body panel__body--lists gridwrap">
+                <div class="grid">
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-1"></span><span class="lcard__cell c-2"></span>
+                      <span class="lcard__cell c-3"></span><span class="lcard__cell c-4"></span>
+                      <span class="lcard__count">100</span>
+                    </span>
+                    <span class="lcard__name">Best games of the 2010s</span>
+                    <span class="lcard__by"><span class="lcard__tag">Collection</span><span class="lcard__sep">·</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>18</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-5"></span><span class="lcard__cell c-6"></span>
+                      <span class="lcard__cell c-7"></span><span class="lcard__cell c-2"></span>
+                      <span class="lcard__count">100</span>
+                    </span>
+                    <span class="lcard__name">Best games of 2015</span>
+                    <span class="lcard__by"><span class="lcard__tag">Collection</span><span class="lcard__sep">·</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>9</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-8"></span><span class="lcard__cell c-3"></span>
+                      <span class="lcard__cell c-1"></span><span class="lcard__cell c-5"></span>
+                      <span class="lcard__count">100</span>
+                    </span>
+                    <span class="lcard__name">Best CD Projekt games</span>
+                    <span class="lcard__by"><span class="lcard__tag">Collection</span><span class="lcard__sep">·</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>6</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-2"></span><span class="lcard__cell c-7"></span>
+                      <span class="lcard__cell c-4"></span><span class="lcard__cell c-6"></span>
+                      <span class="lcard__count">100</span>
+                    </span>
+                    <span class="lcard__name">Best games of the 2000s</span>
+                    <span class="lcard__by"><span class="lcard__tag">Collection</span><span class="lcard__sep">·</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>31</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-3"></span><span class="lcard__cell c-5"></span>
+                      <span class="lcard__cell c-8"></span><span class="lcard__cell c-1"></span>
+                      <span class="lcard__count">9</span>
+                    </span>
+                    <span class="lcard__name">Three playthroughs and counting</span>
+                    <span class="lcard__by"><span class="lcard__author">kepler</span><span class="lcard__sep">·</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>4</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-6"></span><span class="lcard__cell c-4"></span>
+                      <span class="lcard__cell c-2"></span><span class="lcard__cell c-7"></span>
+                      <span class="lcard__count">17</span>
+                    </span>
+                    <span class="lcard__name">Fantasy that respects your time</span>
+                    <span class="lcard__by"><span class="lcard__author">mira</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>6</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-5"></span><span class="lcard__cell c-1"></span>
+                      <span class="lcard__cell c-7"></span><span class="lcard__cell c-8"></span>
+                      <span class="lcard__count">12</span>
+                    </span>
+                    <span class="lcard__name">Books before games</span>
+                    <span class="lcard__by"><span class="lcard__author">nightowl</span><span class="lcard__sep">·</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>3</span></span>
+                  </a>
+                  <a class="lcard" href="#">
+                    <span class="lcard__art">
+                      <span class="lcard__cell c-4"></span><span class="lcard__cell c-8"></span>
+                      <span class="lcard__cell c-6"></span><span class="lcard__cell c-3"></span>
+                      <span class="lcard__count">23</span>
+                    </span>
+                    <span class="lcard__name">Comfort replays</span>
+                    <span class="lcard__by"><span class="lcard__author">rook</span></span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="s-states">
+    <h2 id="s-states">D · States the build needs</h2>
+    <p>
+      Fewer lists, a phone, and the cards that make the panel disappear. A list name longer than two
+      lines clamps; a list without likes drops the counter and keeps the author.
+    </p>
+
+    <div class="stage">
+      <p class="stage__cap">Two lists · 1360px · one collection, one player</p>
+      <div class="canvas">
+        <div class="frame">
+          <div class="panel">
+            <div class="panel__head"><h2>Lists that include it</h2></div>
+            <div class="panel__body panel__body--lists gridwrap">
+              <div class="grid">
+                <a class="lcard" href="#">
+                  <span class="lcard__art">
+                    <span class="lcard__cell c-1"></span><span class="lcard__cell c-3"></span>
+                    <span class="lcard__cell c-2"></span><span class="lcard__cell c-6"></span>
+                    <span class="lcard__count">100</span>
+                  </span>
+                  <span class="lcard__name">Best games of 2015</span>
+                  <span class="lcard__by"><span class="lcard__tag">Collection</span><span class="lcard__sep">·</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>9</span></span>
+                </a>
+                <a class="lcard" href="#">
+                  <span class="lcard__art">
+                    <span class="lcard__cell c-5"></span><span class="lcard__cell c-4"></span>
+                    <span class="lcard__cell c-7"></span><span class="lcard__cell c-8"></span>
+                    <span class="lcard__count">31</span>
+                  </span>
+                  <span class="lcard__name">Deck verified backlog</span>
+                  <span class="lcard__by"><span class="lcard__author">sol</span></span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <p class="stage__cap">Phone · 390px · two columns, gap x3, names clamp at two lines</p>
+      <div class="canvas canvas--phone">
+        <div class="frame frame--phone">
+          <div class="panel">
+            <div class="panel__head"><h2>Lists that include it</h2></div>
+            <div class="panel__body panel__body--lists gridwrap">
+              <div class="grid">
+                <a class="lcard" href="#">
+                  <span class="lcard__art">
+                    <span class="lcard__cell c-1"></span><span class="lcard__cell c-2"></span>
+                    <span class="lcard__cell c-3"></span><span class="lcard__cell c-4"></span>
+                    <span class="lcard__count">100</span>
+                  </span>
+                  <span class="lcard__name">Best games of the 2010s</span>
+                  <span class="lcard__by"><span class="lcard__tag">Collection</span><span class="lcard__sep">·</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>18</span></span>
+                </a>
+                <a class="lcard" href="#">
+                  <span class="lcard__art">
+                    <span class="lcard__cell c-5"></span><span class="lcard__cell c-6"></span>
+                    <span class="lcard__cell c-7"></span><span class="lcard__cell c-2"></span>
+                    <span class="lcard__count">9</span>
+                  </span>
+                  <span class="lcard__name">Three playthroughs and counting</span>
+                  <span class="lcard__by"><span class="lcard__author">kepler</span><span class="lcard__sep">·</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>4</span></span>
+                </a>
+                <a class="lcard" href="#">
+                  <span class="lcard__art">
+                    <span class="lcard__cell c-6"></span><span class="lcard__cell c-4"></span>
+                    <span class="lcard__cell c-2"></span><span class="lcard__cell c-7"></span>
+                    <span class="lcard__count">17</span>
+                  </span>
+                  <span class="lcard__name">Fantasy that respects your time</span>
+                  <span class="lcard__by"><span class="lcard__author">mira</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>6</span></span>
+                </a>
+                <a class="lcard" href="#">
+                  <span class="lcard__art">
+                    <span class="lcard__cell c-8"></span><span class="lcard__cell c-3"></span>
+                    <span class="lcard__cell c-1"></span><span class="lcard__cell c-5"></span>
+                    <span class="lcard__count">100</span>
+                  </span>
+                  <span class="lcard__name">Best games of 2015</span>
+                  <span class="lcard__by"><span class="lcard__tag">Collection</span><span class="lcard__sep">·</span><span class="lcard__likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z"/></svg>9</span></span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <p class="stage__cap">No lists · the panel is not rendered</p>
+      <div class="canvas">
+        <div class="missing">GameLists returns null — the page goes from the characters straight to the details.</div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">
+    <b>Not in this proposal:</b> the note's own page (<code class="t">/collections</code> keeps its
+    cards as they are), a “see all” link on the lists panel — the endpoint returns every list the
+    game has, up to eight, and <code class="t">/lists?games=</code> already answers the full set —
+    and any change to the overview's Summary, Storyline or Keywords blocks.
+  </p>
+
+  <p class="note">
+    Colours, spacing and radii are the project's own tokens: the <code class="t">:root</code> block
+    above is generated from <code class="t">apps/web/src/lib/app/styles/vars</code> by
+    <code class="t">bun --filter web sync:tokens</code>. The typeface is substituted — Hanken Grotesk
+    stands in for ApercuPro, whose licensed file cannot be served from a third-party host.
+  </p>
+</div>
+</body>
+</html>

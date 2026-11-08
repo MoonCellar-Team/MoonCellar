@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CustomListSchema } from "./custom-lists.schema";
 
 export const GameCommunityPlaytimeSchema = z.object({
   accounts: z
@@ -37,25 +38,11 @@ export const GameCommunitySchema = z.object({
     .describe("Games the same accounts tracked, most shared first"),
 });
 
-export const GameListEntrySchema = z.object({
-  name: z.string().nonempty().describe("List name"),
-  slug: z.string().nonempty().describe("List slug"),
-  authorName: z
-    .string()
-    .nullable()
-    .describe("Owner of the list, null when the account is gone"),
-  gamesCount: z.number().int().min(0).describe("Games in the list"),
-  isGenerated: z
-    .boolean()
-    .describe("Built by MoonCellar rather than by a person"),
-});
-
-export const GameListsResponseSchema = GameListEntrySchema.array();
+export const GameListsResponseSchema = CustomListSchema.array();
 
 export type IGameCommunityPlaytime = z.infer<
   typeof GameCommunityPlaytimeSchema
 >;
 export type IGameCommunityGame = z.infer<typeof GameCommunityGameSchema>;
 export type IGameCommunity = z.infer<typeof GameCommunitySchema>;
-export type IGameListEntry = z.infer<typeof GameListEntrySchema>;
 export type IGameListsResponse = z.infer<typeof GameListsResponseSchema>;

@@ -60,13 +60,6 @@ const getReviews = cache(async (gameId: string) =>
     .catch(() => undefined)
 );
 
-const getCommunity = cache(async (gameId: string) =>
-  gamesApi
-    .getCommunity(gameId)
-    .then(({ data }) => data)
-    .catch(() => undefined)
-);
-
 const getLists = cache(async (gameId: string) =>
   listsAPI
     .getByGame(gameId)
@@ -161,14 +154,13 @@ const GamePageIndex = async ({ params }: { params: any }) => {
     permanentRedirect(`/games/${redirectTo}`);
   }
 
-  const [stats, reviews, related, portAchievements, port, community, lists] =
+  const [stats, reviews, related, portAchievements, port, lists] =
     await Promise.all([
       getStats(game._id),
       getReviews(game._id),
       getRelated(game._id),
       getPortAchievements(game.slug),
       getPort(game.slug),
-      getCommunity(game._id),
       getLists(game._id),
     ]);
 
@@ -189,7 +181,6 @@ const GamePageIndex = async ({ params }: { params: any }) => {
         related={related}
         portAchievements={portAchievements}
         port={port}
-        community={community}
         lists={lists}
       />
     </>

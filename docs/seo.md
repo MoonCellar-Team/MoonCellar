@@ -153,8 +153,8 @@ described in each collection's own generated description, and the page prints th
 `position` as the card's rank instead of its array index.
 
 The wave exists for the internal links as much as for the pages: a collection links to every game
-it ranks, and each game card answers through `GameRecord`'s "Collections and lists that include it"
-block, so a card and the rankings that mention it are two clicks apart. `/lists` links to the hub
+it ranks, and each game card answers through `widgets/game/GameLists` ("Lists that include it"),
+so a card and the rankings that mention it are two clicks apart. `/lists` links to the hub
 with its "Collections" button, and the hub links back to every ranking.
 
 ## Caching
@@ -248,8 +248,8 @@ post or a public list. Everything else repeats the IGDB summary. Every card is t
 - `INDEXABLE_GAME_SLUGS` — 31 cards: the 30 most searched cards that carry our data, plus the card
   of the MoonCellar port (`Glassline` on the iOS Mirror's Edge), which is always indexable. The
   limit is what keeps the set small enough to rewrite by hand; a card joins the list only once it
-  carries 600+ characters of our own text, and `scripts/audit-game-card-text.ts --check` enforces
-  it ("The MoonCellar record" below).
+  carries a note of its own, and `scripts/audit-game-card-text.ts --check` enforces it
+  ("The MoonCellar note" below).
 - `GAME_CARD_REDIRECTS` — 14 edition cards (`… Game of the Year Edition`, `… Ultimate Edition`,
   `… Complete Edition`, the GTA V bundle) whose `relatedGames.version_parent` is another card in
   the sitemap. They carry the same IGDB text as their base card, so they answer a 308 to it.
@@ -271,42 +271,40 @@ database — run it after a catalogue change or an IGDB sync that moves the popu
 regenerates the duplicate list from the database; the editions stay hand-picked, since they are
 decisions rather than a measurement.
 
-## The MoonCellar record
+## The MoonCellar note and the lists panel
 
-Every game page renders `widgets/game/GameRecord` between the characters and the details: the part
-of the card that is ours rather than IGDB's. It is built on the server and travels in the ISR
-entry, and it renders nothing when the card has no editorial note, no rating, no playthrough, no
-achievements, no port and no list to show.
+Two blocks on a game page carry text of ours rather than IGDB's. Both are server-rendered and travel
+in the ISR entry.
 
-Its paragraphs come from `getGameRecordParagraphs`
-(`src/lib/shared/utils/game-record.utils.ts`), a pure builder over the card's own data:
+**The note** is a paragraph written by the team, one per indexable card, about what the game asks of
+a player and how it sits next to its sequels. It lives in
+`GAME_EDITORIAL` (`src/lib/shared/constants/game-editorial.const.ts`) rather than in the database,
+so the whole set is reviewed in the pull request that changes it and no admin edit can ship copy
+nobody read. `entities/game/ui/GameOverview` renders it as "MoonCellar note:" above "Summary:";
+every card outside the indexed set has no note and opens at Summary exactly as before.
 
-| Paragraph    | Source                                                                      |
-| ------------ | --------------------------------------------------------------------------- |
-| Editorial    | `GAME_EDITORIAL[slug]` (`src/lib/shared/constants/game-editorial.const.ts`) |
-| Rating       | `averageRating` / `ratingsCount` on the game                                |
-| Tracking     | `GET /games/:id/stats` — accounts per status                                |
-| Playtime     | `GET /games/:id/community` — hours logged and the newest entry              |
-| Achievements | `steamAchievements.total`, `retroachievements`, the MoonCellar port count   |
+**The lists panel** is `widgets/game/GameLists`, titled "Lists that include it", below the related
+games. It asks `GET /lists/game/:gameId` for the public lists and generated
+collections that hold the game — people's lists first, then the MoonCellar ones, at most eight —
+and renders each as a `ListCard` tile: the mosaic of the first covers, the game count, the name,
+the author and the likes. A generated collection is labelled "Collection" where a player's name
+would be, links to `/collections/<slug>`, and a player's list goes to its profile. The block
+renders nothing when the game sits in none, and the links are why it exists at all: a card and the
+rankings that mention it are two clicks apart.
 
-The editorial paragraph is the one part nothing generates: a note written by the team, one per
-indexable card, about what the game asks of a player and how it sits next to its sequels. It lives
-in the repository rather than in the database, so the whole set is reviewed in the pull request
-that changes it and no admin edit can ship copy nobody read.
+The 2026-11-08 change removed the prose the panel used to carry — "one reader has rated…",
+"1 account tracks it…", the logged hours and the achievements sentence — together with "The same
+accounts also tracked". They restated numbers the hero and `GameScoreColumn` already show and read
+as filler; the editorial note moved into the overview panel instead.
 
-Two lists follow the paragraphs. "The same accounts also tracked" comes from the same endpoint: the
-games the accounts of this card tracked as well, most shared first, up to six. "Lists that include
-it" comes from `GET /lists/game/:gameId`: the lists people made first, then the MoonCellar
-generated ones, up to eight. Both are links, so the block also gives crawlers a path through our
-own content.
-
-The blocking is measured, not assumed: `bun --env-file=apps/api/.env
-scripts/audit-game-card-text.ts --check` rebuilds the same facts from the database and prints the
-characters of our own text each indexable card renders. On 2026-11-03, with the editorial notes in
-place, that is **604–910 characters, median 695, and 31 of 31 cards above the 600-character bar**.
-`--check` fails when a card of `INDEXABLE_GAME_SLUGS` has no note, when the note map holds a slug
-outside that list, or when a card falls below the bar — so a card cannot be added to the indexed
-set without its text.
+The indexed set is measured, not assumed: `bun --env-file=apps/api/.env
+scripts/audit-game-card-text.ts --check` rebuilds the note and the list titles from the database and
+prints the characters of our own text each indexable card renders. The notes themselves measure
+**401–593 characters** (2026-11-08), so the audit's bar is 400: a hand-written note shorter than
+that is not enough of a card. `--check` fails when a card of `INDEXABLE_GAME_SLUGS` has no note,
+when the note map holds a slug outside that list, or when a card falls below the bar — so a card
+cannot be added to the indexed set without its text. The bar was 600 while the removed paragraphs
+counted towards it; raising it back means writing longer notes, not restoring the sentences.
 
 ## Images
 
