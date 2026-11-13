@@ -166,20 +166,23 @@ export const TwoFactorSettings: FC = () => {
 
   if (pending === "email" || isDisabling) {
     const isEmailMethod = method === "email";
+    const isAppDisable = isDisabling && !isEmailMethod;
     return (
       <div className={styles.block}>
         <p className={styles.note}>
-          {isDisabling && isEmailMethod
-            ? "We sent a code to your email. Enter it to turn two-factor sign-in off."
-            : "We sent a code to your email. Enter it to confirm."}
+          {isAppDisable
+            ? "Enter a code from your authenticator app, or a backup code, to turn two-factor sign-in off."
+            : isDisabling
+              ? "We sent a code to your email. Enter it to turn two-factor sign-in off."
+              : "We sent a code to your email. Enter it to confirm."}
         </p>
         <Input
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          inputMode="numeric"
+          inputMode={isAppDisable ? "text" : "numeric"}
           autoComplete="one-time-code"
-          maxLength={6}
-          placeholder="6-digit code"
+          maxLength={isAppDisable ? 20 : 6}
+          placeholder={isAppDisable ? "Authenticator or backup code" : "6-digit code"}
           className={styles.input}
         />
         <div className={styles.actions}>
