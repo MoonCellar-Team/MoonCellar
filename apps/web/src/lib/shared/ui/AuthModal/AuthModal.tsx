@@ -26,7 +26,11 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 interface IAuthModalProps {
   isSignIn?: boolean;
   isPage?: boolean;
+  initialStep?: TStep;
+  initialEmail?: string;
 }
+
+type TStep = "form" | "verify-email" | "two-factor";
 
 export const openAuthModal = (props: IAuthModalProps = {}) =>
   modal.open(<AuthModal {...props} />, { id: AUTH_MODAL_ID });
@@ -34,12 +38,24 @@ export const openAuthModal = (props: IAuthModalProps = {}) =>
 export const AuthModal: FC<IAuthModalProps> = ({
   isSignIn = false,
   isPage = false,
+  initialStep = "form",
+  initialEmail = "",
 }) => {
-  const { login, signup } = useAuth();
+  const { login, signup, verifyEmail, verifyTwoFactor, resendEmailCode } =
+    useAuth();
   const [isRegister, setIsRegister] = useState<boolean>(!isSignIn && !isPage);
+  const [step, setStep] = useState<TStep>(initialStep);
+  const [pendingEmail, setPendingEmail] = useState(initialEmail);
+  const [twoFactorMethod, setTwoFactorMethod] = useState<"email" | "app">(
+    "email"
+  );
+  const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCodeLoading, setIsCodeLoading] = useState(false);
   const isLoaderShown = useMinimumLoading(isLoading);
+  const isCodeLoaderShown = useMinimumLoading(isCodeLoading);
 
   const {
     register,
@@ -66,6 +82,13 @@ export const AuthModal: FC<IAuthModalProps> = ({
     reset();
   };
 
+  const backToForm = () => {
+    setStep("form");
+    setError(null);
+    setNotice(null);
+    setCode("");
+  };
+
   const onSubmit = (e: ChangeEvent<HTMLFormElement>) => {
     new FormData(e.currentTarget).forEach((value, key) =>
       setValue(key as keyof AuthSchema, String(value))
@@ -80,10 +103,28 @@ export const AuthModal: FC<IAuthModalProps> = ({
     login({
       email: data.email,
       password: data.password,
-    }).catch((err) => {
-      setError(getErrorMessage(err, "Sign in failed"));
-      setIsLoading(false);
-    });
+    })
+      .then((result) => {
+        if (result && "twoFactorRequired" in result) {
+          setPendingEmail(data.email);
+          setTwoFactorMethod(result.method);
+          setCode("");
+          setStep("two-factor");
+        }
+      })
+      .catch((err) => {
+        if (isAxiosError(err) && err.response?.status === 403) {
+          setPendingEmail(data.email);
+          setCode("");
+          setStep("verify-email");
+          setError(
+            "Confirm your email first. Enter the code from your inbox, or resend it."
+          );
+          return;
+        }
+        setError(getErrorMessage(err, "Sign in failed"));
+      })
+      .finally(() => setIsLoading(false));
   };
 
   const handleSignUp: SubmitHandler<AuthSchema> = (data) => {
@@ -96,11 +137,71 @@ export const AuthModal: FC<IAuthModalProps> = ({
       userName: data.userName,
       email: data.email,
       password: data.password,
-    }).catch((err) => {
-      setError(getErrorMessage(err, "Sign up failed"));
-      setIsLoading(false);
-    });
+    })
+      .then((result) => {
+        setPendingEmail(result.email);
+        setCode("");
+        setStep("verify-email");
+      })
+      .catch((err) => {
+        setError(getErrorMessage(err, "Sign up failed"));
+      })
+      .finally(() => setIsLoading(false));
   };
+
+  const submitCode = () => {
+    setError(null);
+    setNotice(null);
+    setIsCodeLoading(true);
+
+    const verify =
+      step === "verify-email"
+        ? verifyEmail({ email: pendingEmail, code })
+        : verifyTwoFactor({ email: pendingEmail, code });
+
+    verify
+      .catch((err) => {
+        setError(
+          getErrorMessage(
+            err,
+            step === "verify-email" ? "Verification failed" : "Sign in failed"
+          )
+        );
+      })
+      .finally(() => setIsCodeLoading(false));
+  };
+
+  const handleResend = () => {
+    setError(null);
+    setNotice(null);
+    setIsCodeLoading(true);
+
+    resendEmailCode(pendingEmail)
+      .then(() => setNotice("A new code was sent to your email"))
+      .catch((err) => setError(getErrorMessage(err, "Could not send the code")))
+      .finally(() => setIsCodeLoading(false));
+  };
+
+  const codeHeading =
+    step === "verify-email"
+      ? "Confirm your email"
+      : twoFactorMethod === "app"
+        ? "Two-factor sign-in"
+        : "Two-factor sign-in";
+
+  const codeLabel =
+    step === "verify-email"
+      ? "Verification code"
+      : twoFactorMethod === "app"
+        ? "Authenticator or backup code"
+        : "Sign-in code";
+
+  const codeHint =
+    step === "verify-email"
+      ? `Enter the 6-digit code sent to ${pendingEmail}.`
+      : twoFactorMethod === "app"
+        ? "Enter the code from your authenticator app, or a backup code."
+        : `Enter the code sent to ${pendingEmail}.`;
 
   const form = (
     <form
@@ -168,11 +269,73 @@ export const AuthModal: FC<IAuthModalProps> = ({
     </form>
   );
 
-  if (isPage) return form;
+  const codeStep = (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        submitCode();
+      }}
+      className={isPage ? styles.page : styles.content}
+    >
+      <h3 className={styles.codeHeading}>{codeHeading}</h3>
+      <p className={styles.codeHint}>{codeHint}</p>
+      <div className={styles.content__inputs}>
+        <div>
+          <label>{codeLabel}</label>
+          <Input
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            maxLength={20}
+            autoFocus
+          />
+        </div>
+      </div>
+      {notice && <p className={styles.notice}>{notice}</p>}
+      {error && <p className={styles.error}>{error}</p>}
+      <div className={styles.content__buttons}>
+        <Button
+          color={ButtonColor.ACCENT}
+          className={styles.btn}
+          type="submit"
+          isLoading={isCodeLoaderShown}
+          disabled={!code}
+        >
+          Confirm
+        </Button>
+        {step === "verify-email" && (
+          <Button
+            type="button"
+            color={ButtonColor.TRANSPARENT}
+            className={styles.link}
+            compact
+            onClick={handleResend}
+          >
+            Resend code
+          </Button>
+        )}
+        <Button
+          type="button"
+          color={ButtonColor.TRANSPARENT}
+          className={styles.link}
+          compact
+          onClick={backToForm}
+        >
+          Back
+        </Button>
+      </div>
+    </form>
+  );
+
+  const content = step === "form" ? form : codeStep;
+
+  if (isPage) return content;
 
   return (
     <div className={styles.container}>
-      {form}
+      {content}
       <Button
         type="button"
         color={ButtonColor.TRANSPARENT}

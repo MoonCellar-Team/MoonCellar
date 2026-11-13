@@ -17,6 +17,8 @@ const recordCookies = (origin?: string) => {
     undefined as never,
     undefined as never,
     undefined as never,
+    undefined as never,
+    undefined as never,
     undefined as never
   );
 

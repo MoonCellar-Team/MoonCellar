@@ -115,6 +115,20 @@ Notes that matter:
   `SMTP_FROM` must not drift to another domain: an unaligned sender passes SPF and still fails
   DMARC.
 
+## Letters
+
+`mail.letter.ts` builds every letter from one `ILetter` shape: a heading, paragraphs, an optional
+code block, an optional action button and a footnote. The product sends:
+
+| Letter             | When                                                                       | Code            |
+| ------------------ | -------------------------------------------------------------------------- | --------------- |
+| Test letter        | `POST /mail/test`, admin only                                              | —               |
+| Confirm your email | At sign-up, and on "Resend code"                                           | 6 digits, 10 min |
+| Your sign-in code  | Signing in with e-mail two-factor, and turning e-mail two-factor on or off | 6 digits, 10 min |
+
+A code is stored hashed (`sha256`) with a ten-minute TTL and at most five attempts, and a resend
+is allowed once a minute. The plain-text part carries the same code as the HTML.
+
 ## Sending a test letter
 
 `POST /mail/test` is admin-only and sends one letter to one address:

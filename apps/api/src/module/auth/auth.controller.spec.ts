@@ -28,6 +28,8 @@ const createController = (
       undefined as never,
       undefined as never,
       undefined as never,
+      undefined as never,
+      undefined as never,
       undefined as never
     ),
     overrides
@@ -36,7 +38,12 @@ const createController = (
     verify: () => ({ id: "user-id" }),
   } as unknown as JwtService;
 
-  return new AuthController(undefined as never, authService, jwtService);
+  return new AuthController(
+    undefined as never,
+    authService,
+    undefined as never,
+    jwtService
+  );
 };
 
 const clearedNames = (res: ReturnType<typeof createResponse>) =>

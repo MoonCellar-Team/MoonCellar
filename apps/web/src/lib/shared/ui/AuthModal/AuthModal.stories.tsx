@@ -34,3 +34,15 @@ export const Page: Story = {
     ),
   ],
 };
+
+export const CodeStep: Story = {
+  args: { initialStep: "verify-email", initialEmail: "alex@example.com" },
+};
+
+export const TwoFactorStep: Story = {
+  args: {
+    isSignIn: true,
+    initialStep: "two-factor",
+    initialEmail: "alex@example.com",
+  },
+};

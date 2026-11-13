@@ -20,10 +20,14 @@ import { JwtRefreshStrategy } from "./jwt-refresh.strategy";
 import { FileService } from "../user/services/file-upload.service";
 import { MetricsModule } from "../metrics/metrics.module";
 import { IndexNowModule } from "../indexnow/indexnow.module";
+import { MailModule } from "../mail/mail.module";
+import { TwoFactorService } from "./two-factor.service";
 
 @Module({
   imports: [
     ActivityModule,
+    ConfigModule,
+    MailModule,
     MongooseModule.forFeature([
       { name: "User", schema: UserSchema },
       { name: UserLogs.name, schema: UserLogsSchema },
@@ -51,6 +55,7 @@ import { IndexNowModule } from "../indexnow/indexnow.module";
   controllers: [AuthController, UserProfileController],
   providers: [
     AuthService,
+    TwoFactorService,
     UserProfileService,
     UserLogsService,
     UserFiltersService,

@@ -1,0 +1,64 @@
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-x3);
+  align-items: flex-start;
+}
+
+.note {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.qr {
+  padding: var(--padding-x2);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-x2);
+
+  svg {
+    display: block;
+  }
+}
+
+.secret {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  word-break: break-all;
+
+  span {
+    color: var(--color-text-primary);
+    user-select: all;
+  }
+}
+
+.backupCodes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap-x1);
+
+  li {
+    padding: var(--padding-x1);
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-x1);
+    font-family: monospace;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    text-align: center;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-x2);
+}
+
+.input {
+  width: 100%;
+  max-width: 220px;
+}

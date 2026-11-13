@@ -8,6 +8,7 @@ export interface ILetterAction {
 export interface ILetter {
   heading: string;
   paragraphs: string[];
+  code?: string;
   action?: ILetterAction;
   footnote?: string;
 }
@@ -61,6 +62,11 @@ const renderFootnote = (footnote: string): string =>
     footnote
   )}</td></tr>`;
 
+const renderCode = (code: string): string =>
+  `<tr><td style="padding:24px 32px 0;"><div style="font-family:${FONT};font-size:36px;line-height:44px;letter-spacing:10px;font-weight:700;color:${COLOR_HEADING};text-align:center;">${escapeHtml(
+    code
+  )}</div></td></tr>`;
+
 const renderHtml = (letter: ILetter): string =>
   `<!doctype html>
 <html lang="en">
@@ -81,6 +87,7 @@ const renderHtml = (letter: ILetter): string =>
     letter.heading
   )}</td></tr>
 ${letter.paragraphs.map(renderParagraph).join("\n")}
+${letter.code ? renderCode(letter.code) : ""}
 ${letter.action ? renderAction(letter.action) : ""}
 ${letter.footnote ? renderFootnote(letter.footnote) : ""}
 <tr><td style="padding:32px;font-family:${FONT};font-size:13px;line-height:20px;color:${COLOR_MUTED};border-top:1px solid ${COLOR_BORDER};">MoonCellar &mdash; Game Tracker &amp; Database<br><a href="${FRONT_URL}" style="color:${COLOR_MUTED};">mooncellar.space</a></td></tr>
@@ -94,6 +101,7 @@ const renderText = (letter: ILetter): string =>
   [
     letter.heading,
     ...letter.paragraphs,
+    letter.code ?? "",
     letter.action ? `${letter.action.label}: ${letter.action.url}` : "",
     letter.footnote ?? "",
     "MoonCellar — Game Tracker & Database",
@@ -114,4 +122,23 @@ export const buildTestLetter = (): ILetter => ({
     "Nothing else was sent and no account is attached to this message. If it arrived in the Inbox rather than the spam folder, SPF, DKIM and DMARC are all doing their job.",
   ],
   action: { label: "Open MoonCellar", url: FRONT_URL },
+});
+
+export const buildVerificationCodeLetter = (code: string): ILetter => ({
+  heading: "Confirm your email",
+  paragraphs: [
+    "Use this code to confirm your MoonCellar account. It expires in 10 minutes.",
+  ],
+  code,
+  footnote:
+    "If you did not create a MoonCellar account, you can ignore this letter.",
+});
+
+export const buildTwoFactorCodeLetter = (code: string): ILetter => ({
+  heading: "Your sign-in code",
+  paragraphs: [
+    "Use this code to finish signing in to MoonCellar. It expires in 10 minutes.",
+  ],
+  code,
+  footnote: "If you did not try to sign in, change your password.",
 });
