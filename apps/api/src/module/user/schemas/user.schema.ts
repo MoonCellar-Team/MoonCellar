@@ -59,13 +59,39 @@ export class UserTwoFactor {
 
 export const UserTwoFactorSchema = SchemaFactory.createForClass(UserTwoFactor);
 
+@Schema({ _id: false })
+export class UserOAuthAccount {
+  @Prop({ type: String, required: true })
+  providerId: string;
+  @Prop({ type: String, default: null })
+  providerUserName: string | null;
+  @Prop({ type: Date, required: true })
+  linkedAt: Date;
+}
+
+export const UserOAuthAccountSchema =
+  SchemaFactory.createForClass(UserOAuthAccount);
+
+@Schema({ _id: false })
+export class UserOAuthLinks {
+  @Prop({ type: UserOAuthAccountSchema, default: null })
+  google?: UserOAuthAccount | null;
+  @Prop({ type: UserOAuthAccountSchema, default: null })
+  github?: UserOAuthAccount | null;
+  @Prop({ type: UserOAuthAccountSchema, default: null })
+  reddit?: UserOAuthAccount | null;
+}
+
+export const UserOAuthLinksSchema =
+  SchemaFactory.createForClass(UserOAuthLinks);
+
 @Schema({
   timestamps: true,
 })
 export class User extends Document {
   @Prop({ unique: true, required: true })
   userName: string;
-  @Prop({ unique: [true, "Duplicate email entered"] })
+  @Prop()
   email: string;
   @Prop()
   password: string;
@@ -110,6 +136,8 @@ export class User extends Document {
   steamIgnoredApps: number[];
   @Prop({ type: UserSteamAccountSchema, required: false })
   steam?: UserSteamAccount;
+  @Prop({ type: UserOAuthLinksSchema })
+  oauth?: UserOAuthLinks;
   @Prop({ type: [String], default: ["user"] })
   roles: IRole[];
   @Prop()
@@ -155,6 +183,23 @@ UserSchema.index(
     unique: true,
     partialFilterExpression: { "steam.steamId": { $exists: true } },
   }
+);
+
+const OAUTH_LINK_INDEXES = [
+  "oauth.google.providerId",
+  "oauth.github.providerId",
+  "oauth.reddit.providerId",
+] as const;
+
+OAUTH_LINK_INDEXES.forEach((providerIdPath) =>
+  UserSchema.index(
+    { [providerIdPath]: 1 },
+    {
+      unique: true,
+      partialFilterExpression: { [providerIdPath]: { $exists: true } },
+      name: providerIdPath.replace(/\./g, "_"),
+    }
+  )
 );
 
 const stripAuthSecrets = (_doc: unknown, ret: any): any => {

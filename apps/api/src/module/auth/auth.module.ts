@@ -22,6 +22,8 @@ import { MetricsModule } from "../metrics/metrics.module";
 import { IndexNowModule } from "../indexnow/indexnow.module";
 import { MailModule } from "../mail/mail.module";
 import { TwoFactorService } from "./two-factor.service";
+import { OAuthController } from "./oauth/oauth.controller";
+import { OAuthService } from "./oauth/oauth.service";
 
 @Module({
   imports: [
@@ -52,9 +54,10 @@ import { TwoFactorService } from "./two-factor.service";
       inject: [ConfigService],
     }),
   ],
-  controllers: [AuthController, UserProfileController],
+  controllers: [AuthController, OAuthController, UserProfileController],
   providers: [
     AuthService,
+    OAuthService,
     TwoFactorService,
     UserProfileService,
     UserLogsService,

@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Injectable,
   Logger,
+  type OnModuleInit,
   ServiceUnavailableException,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -42,13 +43,19 @@ import {
   newEmailCode,
 } from "./auth-codes";
 import type {
+  IAddEmailRequest,
+  IAddEmailResponse,
+  IConfirmEmailRequest,
   IResendEmailCodeRequest,
   IResendEmailCodeResponse,
+  ITwoFactorTicketRequest,
   ITwoFactorVerifyRequest,
   IVerifyEmailRequest,
 } from "@mooncellar/schemas";
+import { ensurePartialEmailIndex } from "./user-email-index";
+import { TWO_FACTOR_TICKET_SCOPE, TWO_FACTOR_TICKET_TTL_MS } from "./oauth/oauth.types";
 
-type TSignedIn = {
+export type TSignedIn = {
   accessToken: string;
   refreshToken: string;
   userId: string;
@@ -59,7 +66,7 @@ type TLoginResult =
   | { twoFactorRequired: true; method: "email" | "app" };
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleInit {
   private readonly logger = new Logger(AuthService.name);
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
@@ -70,7 +77,16 @@ export class AuthService {
     private readonly mail: MailService
   ) {}
 
-  private async generateTokensAndUpdateUser(
+  async onModuleInit(): Promise<void> {
+    await ensurePartialEmailIndex(this.userModel).catch((error) =>
+      this.logger.error(
+        error,
+        "Could not make the user email index partial"
+      )
+    );
+  }
+
+  async generateTokensAndUpdateUser(
     user: User
   ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
@@ -199,6 +215,78 @@ export class AuthService {
     };
   }
 
+  async startEmailAdd(
+    user: User,
+    { email }: IAddEmailRequest
+  ): Promise<IAddEmailResponse> {
+    if (user.email && user.emailVerified !== false) {
+      throw new BadRequestException(
+        "Your account already has an email address"
+      );
+    }
+
+    const taken = await this.userModel.findOne({ email });
+    if (taken && String(taken._id) !== String(user._id)) {
+      throw new ConflictException("Email already exists");
+    }
+
+    const resendAt = user.verificationCode?.resendAt;
+    if (resendAt && resendAt.getTime() > Date.now()) {
+      const seconds = Math.ceil((resendAt.getTime() - Date.now()) / 1000);
+      throw new BadRequestException(`Try again in ${seconds} seconds`);
+    }
+
+    const code = newEmailCode();
+    user.email = email;
+    user.emailVerified = false;
+    user.verificationCode = buildEmailCodeFields(code);
+    user.markModified("verificationCode");
+    await user.save();
+    this.sendVerificationEmail(email, code);
+
+    return {
+      email,
+      resendInSeconds: EMAIL_CODE_RESEND_COOLDOWN_MS / 1000,
+    };
+  }
+
+  async confirmEmailAdd(
+    user: User,
+    { code }: IConfirmEmailRequest
+  ): Promise<{ email: string }> {
+    if (!user.email) {
+      throw new BadRequestException("Add an email address first");
+    }
+
+    if (user.emailVerified !== false) {
+      throw new BadRequestException("Email is already confirmed");
+    }
+
+    if (
+      emailCodeIsExpired(user.verificationCode) ||
+      emailCodeAttemptsExhausted(user.verificationCode)
+    ) {
+      throw new BadRequestException(
+        "The code has expired or was tried too many times. Request a new one."
+      );
+    }
+
+    const record = user.verificationCode!;
+    const matches = emailCodeMatches(record, code);
+    record.attempts += 1;
+    user.markModified("verificationCode");
+    await user.save();
+
+    if (!matches) throw new BadRequestException("The code does not match");
+
+    user.emailVerified = true;
+    user.verificationCode = null;
+    user.markModified("verificationCode");
+    await user.save();
+
+    return { email: user.email };
+  }
+
   async login(loginDto: LoginDto): Promise<TLoginResult> {
     const { email, password } = loginDto;
     const user = await this.userModel.findOne({ email });
@@ -211,23 +299,91 @@ export class AuthService {
       );
     }
 
+    if (!user.password) {
+      throw new BadRequestException(
+        "This account signs in with Google, GitHub or Reddit. Use one of those buttons."
+      );
+    }
+
     const isPasswordMatched = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatched)
       throw new BadRequestException("Password does not match");
 
-    const method = user.twoFactor?.method ?? "off";
-    if (method === "email" || method === "app") {
-      if (method === "email") {
-        const code = newEmailCode();
-        user.twoFactorCode = buildEmailCodeFields(code);
-        user.markModified("twoFactorCode");
-        await user.save();
-        this.sendTwoFactorEmail(user.email, code);
-      }
+    const method = await this.startTwoFactorChallenge(user);
+    if (method !== "off") return { twoFactorRequired: true, method };
 
-      return { twoFactorRequired: true, method: method as "email" | "app" };
+    const tokens = await this.generateTokensAndUpdateUser(user);
+    return { ...tokens, userId: String(user._id) };
+  }
+
+  async startTwoFactorChallenge(
+    user: User
+  ): Promise<"off" | "email" | "app"> {
+    const method = user.twoFactor?.method ?? "off";
+
+    if (method === "email") {
+      const code = newEmailCode();
+      user.twoFactorCode = buildEmailCodeFields(code);
+      user.markModified("twoFactorCode");
+      await user.save();
+      this.sendTwoFactorEmail(user.email, code);
     }
+
+    return method as "off" | "email" | "app";
+  }
+
+  async completeTwoFactor(user: User, code: string): Promise<void> {
+    const method = user.twoFactor?.method ?? "off";
+
+    if (method === "off") {
+      throw new BadRequestException("Two-factor sign-in is not enabled");
+    }
+
+    const valid = await this.verifyTwoFactorCode(
+      user,
+      method as "email" | "app",
+      code
+    );
+
+    if (!valid) throw new BadRequestException("The code does not match");
+  }
+
+  createTwoFactorTicket(user: User): string {
+    return this.jwtService.sign(
+      { id: String(user._id), scope: TWO_FACTOR_TICKET_SCOPE },
+      { expiresIn: Math.floor(TWO_FACTOR_TICKET_TTL_MS / 1000) }
+    );
+  }
+
+  async verifyTwoFactorTicket({
+    ticket,
+    code,
+  }: ITwoFactorTicketRequest): Promise<TSignedIn> {
+    let payload: { id?: string; scope?: string };
+
+    try {
+      payload = this.jwtService.verify<{ id?: string; scope?: string }>(ticket);
+    } catch {
+      throw new UnauthorizedException(
+        "The two-factor sign-in has expired. Sign in again."
+      );
+    }
+
+    if (payload?.scope !== TWO_FACTOR_TICKET_SCOPE || !payload.id) {
+      throw new UnauthorizedException(
+        "The two-factor sign-in has expired. Sign in again."
+      );
+    }
+
+    const user = await this.userModel.findById(payload.id);
+    if (!user) {
+      throw new UnauthorizedException(
+        "The two-factor sign-in has expired. Sign in again."
+      );
+    }
+
+    await this.completeTwoFactor(user, code);
 
     const tokens = await this.generateTokensAndUpdateUser(user);
     return { ...tokens, userId: String(user._id) };
@@ -240,17 +396,7 @@ export class AuthService {
     const user = await this.userModel.findOne({ email });
     if (!user) throw new BadRequestException("Email does not exist");
 
-    const method = user.twoFactor?.method ?? "off";
-    if (method === "off") {
-      throw new BadRequestException("Two-factor sign-in is not enabled");
-    }
-
-    const valid = await this.verifyTwoFactorCode(
-      user,
-      method as "email" | "app",
-      code
-    );
-    if (!valid) throw new BadRequestException("The code does not match");
+    await this.completeTwoFactor(user, code);
 
     const tokens = await this.generateTokensAndUpdateUser(user);
     return { ...tokens, userId: String(user._id) };

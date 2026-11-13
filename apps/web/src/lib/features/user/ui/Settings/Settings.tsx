@@ -24,6 +24,7 @@ import { RaAccount } from "@/src/lib/features/user/ui/RaAccount";
 import { SteamAccount } from "@/src/lib/features/user/ui/SteamAccount";
 import { GameDevices } from "@/src/lib/features/user/ui/GameDevices";
 import { TwoFactorSettings } from "@/src/lib/features/user/ui/TwoFactorSettings";
+import { SignInMethods } from "@/src/lib/features/user/ui/SignInMethods";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FC, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -213,8 +214,14 @@ export const Settings: FC<SettingsProps> = ({}) => {
                     id="email"
                     className={styles.input}
                     containerClassname={styles.input}
+                    readOnly
                     {...register("email")}
                     error={errors.email}
+                    helpText={
+                      profile?.email
+                        ? undefined
+                        : "Add an email address under Sign-in methods."
+                    }
                   />
                 </div>
               </div>
@@ -235,6 +242,12 @@ export const Settings: FC<SettingsProps> = ({}) => {
         <CollapsibleSection title="Two-factor sign-in">
           <div className={styles.section}>
             <TwoFactorSettings />
+          </div>
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Sign-in methods">
+          <div className={styles.section}>
+            <SignInMethods />
           </div>
         </CollapsibleSection>
 

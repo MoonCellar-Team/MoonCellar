@@ -475,6 +475,22 @@ break silently when ignored:
   `{ twoFactorRequired, method }` instead of a `userId` for a two-factor account, and
   `verifyTwoFactor` is the step that fills the store. TOTP setup renders its QR code with
   `qrcode.react`; the e-mail sign-in code is never part of the profile payload.
+- **A provider sign-in leaves the site: `AuthModal`'s Google, GitHub and Reddit buttons are
+  `Button href` links to `PUBLIC_API_URL/auth/oauth/<provider>`, never an `agent` request.** The
+  API answers redirects and sets the session cookies on its own domain, so a fetch cannot do it;
+  `PUBLIC_API_URL` exists because `API_URL` is the container address on the server.
+- **The API returns to `/auth/oauth`, and that page finishes the job.** `status=signed-in` calls
+  `authUpdate(userId)`, `status=two-factor` renders `AuthModal isPage` with the ticket from the
+  query (`verifyTwoFactorTicket`), `status=linked` returns to Settings, and `status=error` maps
+  `error=<code>` to the sentence — the API cannot throw for a browser navigation. Both redirects
+  out of the page wait for the store's `profile` to change, like `StatusLoginPage`, so a
+  persisted stale profile cannot loop them.
+- **Settings' "Sign-in methods" section is `features/user/ui/SignInMethods`: it lists the
+  providers with Link (`?link=1`) and Unlink, and replaces the e-mail address of an account that
+  has none.** The Account section's e-mail field is `readOnly`; `PATCH /user/email` would set an
+  address without proving it, which is why the add flow goes through the code letter.
+- **`isPage` shows no provider buttons.** The status hub's sign-in page carries a `next` target
+  that the provider redirect (which lands on `/auth/oauth`) cannot keep.
 
 ## Sockets
 

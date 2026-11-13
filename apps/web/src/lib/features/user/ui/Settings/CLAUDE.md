@@ -1,9 +1,9 @@
 # Settings
 
 The profile settings form on `/user/<name>/settings`. One `CollapsibleSection` per group —
-Account, Two-factor sign-in, Notifications, Steam, RetroAchievements, Game devices, Profile page,
-Appearance, App, Preferences (geo-gated) and the Danger zone — with a single Save that sends the
-changed fields.
+Account, Two-factor sign-in, Sign-in methods, Notifications, Steam, RetroAchievements, Game
+devices, Profile page, Appearance, App, Preferences (geo-gated) and the Danger zone — with a
+single Save that sends the changed fields.
 
 ## Data
 
@@ -13,6 +13,12 @@ changed fields.
 - The two-factor section is `TwoFactorSettings`, which reads and writes through `authAPI`
   (`GET/POST /auth/two-factor*`) and refreshes its own `["two-factor"]` query; it does not go
   through the Save button.
+- The Sign-in methods section is `SignInMethods` (`features/user/ui/SignInMethods`): linked
+  providers with Link and Unlink, and the e-mail address of an account that has none.
+- The Account section's e-mail field is `readOnly` and is not part of the Save; an account
+  without an address adds one in Sign-in methods, through a code letter. The form schema keeps
+  `email` optional for that reason — a required field would block every other save on a
+  Reddit-created account.
 
 ## Rules and gotchas
 
@@ -23,7 +29,9 @@ changed fields.
   on unmount and on save.
 - The adult-content toggle exists only when `useGeoStore` resolved and the country is not
   blocked; do not render it otherwise.
-- The username field edits `userName` through the profile mutation, not the settings patch.
+- The username field is shown but not saved: `useUpdateProfileMutation` sends only the
+  description, the images and the settings, and a rename would move `/user/<name>`, so it needs
+  a flow of its own.
 
 ## Two-factor sign-in
 

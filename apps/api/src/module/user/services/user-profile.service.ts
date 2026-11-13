@@ -40,6 +40,7 @@ export class UserProfileService {
           "-updatedAt",
           "-refreshToken",
           "-royalGames",
+          "-oauth",
           "-__v",
         ]);
     } catch (err) {

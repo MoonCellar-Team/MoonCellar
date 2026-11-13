@@ -16,7 +16,7 @@ export interface IAuth {
 export interface IUser {
   _id: string;
   userName: string;
-  email: string;
+  email?: string;
   followings: IFollowings;
   followers: IFollowers;
   favorites?: string[];

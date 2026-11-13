@@ -90,6 +90,46 @@ an instance of Module)`. Use a default import; tsc reports the call as `TS2349`.
   when it is used. Game device sign-in does not change: it approves a device from the already
   signed-in site, so it does not ask for a second factor.
 
+- **Provider sign-in is a hand-written authorization-code exchange in `module/auth/oauth`, not
+  `passport-google-oauth20`/`passport-github2`.** Passport's OAuth strategies keep their `state` in
+  an express session the API does not have, and Reddit has no maintained strategy; the flow, the
+  endpoints and the provider apps are in [`docs/oauth.md`](../../docs/oauth.md).
+
+- **The callback compares the `state` nonce with the `oauthStateMoonToken` cookie before it
+  exchanges the code.** The state is signed, but nothing else ties it to this browser: without the
+  cookie check a link to `/auth/oauth/<provider>/callback` signs its visitor into the account the
+  link belongs to.
+
+- **A provider e-mail links to an existing account only when the provider marks it verified, and
+  never when that account's own e-mail is unconfirmed.** A weaker rule would either create a
+  duplicate of an account or let a provider sign-in bypass the confirmation `signUp` requires.
+
+- **A token signed with `JWT_SECRET` that is not a session carries a `scope`, and `JwtStrategy`
+  and `JwtRefreshStrategy` refuse a payload that has one.** The two-factor ticket holds the user
+  id; without the check, pasting it into `accessMoonToken` is a session that skipped the second
+  factor. The OAuth state carries the same scope for the same reason.
+
+- **One provider account belongs to one user, and one user holds one account per provider.** The
+  links live in `oauth.<provider>` (`providerId`, `providerUserName`, `linkedAt`) with a unique
+  partial index on each `oauth.<provider>.providerId` path, and a query for a link reads that one
+  path: a filter on two paths of an array cannot tell which element matched which.
+  `DELETE /auth/oauth/:provider` answers 409 when the account would be left without a password
+  sign-in and without another provider — that is the "last way to sign in" rule.
+
+- **`users.email` is unique only where it exists, and `AuthService.onModuleInit` makes the index
+  partial.** A Reddit account has no address, and MongoDB indexes a missing field as `null`, so
+  the former unique index allowed exactly one such user. `autoIndex` never changes the options of
+  an existing index, which is why the drop and the create happen in code on every start.
+
+- **`login` answers 400 naming the provider buttons when the account has no password, and e-mail
+  two-factor answers 400 when the account has no address.** OAuth-created accounts have neither,
+  and `bcrypt.compare` against a missing hash throws.
+
+- **The OAuth callback answers a `302` for every outcome, errors included, instead of throwing.**
+  It serves a top-level browser navigation, which cannot show `{ statusCode, message }`; the web's
+  `/auth/oauth` page turns `error=<code>` into the sentence. The provider avatar is not imported
+  either: `users.avatar` is a Space URL that `next/image` loads.
+
 ## Game sign-in
 
 - **Game tokens are signed with `JWT_SECRET + ":game"`, never with the plain `JWT_SECRET`.**

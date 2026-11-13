@@ -23,7 +23,11 @@ export class JwtRefreshStrategy extends PassportStrategy(
     });
   }
 
-  async validate(payload: { id: string }) {
+  async validate(payload: { id: string; scope?: string }) {
+    if (payload?.scope) {
+      throw new UnauthorizedException("Login first to access this endpoint");
+    }
+
     const { id } = payload;
     const user = await this.userModel.findById(id);
     if (!user) {

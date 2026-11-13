@@ -3,7 +3,8 @@
 The sign-in / sign-up form shown in a modal. It switches between registration and login,
 validates with `createAuthSchema` (zod) and calls `login`/`signup` from the shared `useAuth`
 hook. A successful sign-up does not sign the user in: the modal moves to a code step that
-confirms the e-mail, and a sign-in on a two-factor account moves to a code step as well.
+confirms the e-mail, and a sign-in on a two-factor account moves to a code step as well. Under
+the form sit the provider buttons, which leave the site for the API.
 
 ## When to use
 
@@ -23,6 +24,8 @@ confirms the e-mail, and a sign-in on a two-factor account moves to a code step 
 | `isPage`   | `boolean` | `false` | Sign in only, as a bare form for a page to frame: stacked labelled fields, the error line and a full-width submit; no modal frame, background, close button or sign-up switch. |
 | `initialStep` | `"form" \| "verify-email" \| "two-factor"` | `"form"` | Which step to render first. Meant for Storybook: the code steps are otherwise reached only after a submit. |
 | `initialEmail` | `string` | `""` | The address the code steps say the code was sent to; Storybook only, like `initialStep`. |
+| `initialTwoFactorMethod` | `"email" \| "app"` | `"email"` | Which two-factor code the step asks for; the OAuth callback passes the method the API named. |
+| `twoFactorTicket` | `string` | – | Set with `initialStep: "two-factor"`: the code is confirmed against `POST /auth/two-factor/ticket` instead of e-mail + code. The OAuth callback renders it this way after the account turns out to have two-factor sign-in. |
 
 `openAuthModal(props?)` passes the same props.
 
@@ -73,9 +76,14 @@ import { modal } from "@/src/lib/shared/ui/Modal";
 - Both code steps accept any non-empty value; the API decides whether a 6-digit code, an
   authenticator code or a backup code is valid. A step can go back to the form without
   clearing the typed e-mail.
+- The provider buttons are `Button href` links to `PUBLIC_API_URL/auth/oauth/<provider>`, not
+  requests: the API answers redirects and sets the cookies itself. They are hidden in `isPage`
+  mode, whose page carries a `next` target the provider redirect cannot keep.
+- Storybook shows them in `Inline` and `SignIn`; no story submits or follows a link.
 
 ## Storybook
 
-`Shared/AuthModal`: `Inline`, `SignIn`, `Page`, `InModal`, `CodeStep`, `TwoFactorStep`. The
-code steps are rendered through `initialStep`/`initialEmail`. No story submits — submitting
-would hit the auth API.
+`Shared/AuthModal`: `Inline`, `SignIn`, `Page`, `InModal`, `CodeStep`, `TwoFactorStep`,
+`TwoFactorTicketStep`. The code steps are rendered through `initialStep`/`initialEmail`, and
+the ticket step through `twoFactorTicket` — the shape `/auth/oauth` renders. No story submits —
+submitting would hit the auth API.

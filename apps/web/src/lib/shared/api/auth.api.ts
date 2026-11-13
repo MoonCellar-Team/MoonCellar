@@ -1,13 +1,15 @@
 import { IAuth } from "@/src/lib/shared/types/auth.type";
-import { API_URL } from "@/src/lib/shared/constants";
+import { API_URL, PUBLIC_API_URL } from "@/src/lib/shared/constants";
 import {
-  ILoginSuccessResponse,
+  IOAuthAccounts,
+  IOAuthProvider,
   IResendEmailCodeResponse,
   ITwoFactorAppSetupResponse,
   ITwoFactorConfirmResponse,
   ITwoFactorEmailSetupResponse,
   ITwoFactorRequiredResponse,
   ITwoFactorStatus,
+  ILoginSuccessResponse,
 } from "@mooncellar/schemas";
 import agent from "./agent.api";
 
@@ -70,6 +72,37 @@ const disableTwoFactor = (code: string) => {
   });
 };
 
+const getOAuthAccounts = () => {
+  return agent.get<IOAuthAccounts>(`${AUTH_URL}/oauth`);
+};
+
+const unlinkOAuth = (provider: IOAuthProvider) => {
+  return agent.delete<IOAuthAccounts>(`${AUTH_URL}/oauth/${provider}`);
+};
+
+const getOAuthStartUrl = (
+  provider: IOAuthProvider,
+  { link }: { link?: boolean } = {}
+) => `${PUBLIC_API_URL}/auth/oauth/${provider}${link ? "?link=1" : ""}`;
+
+const verifyTwoFactorTicket = (data: { ticket: string; code: string }) => {
+  return agent.post<{ userId: string }>(
+    `${AUTH_URL}/two-factor/ticket`,
+    data
+  );
+};
+
+const addEmail = (email: string) => {
+  return agent.post<{ email: string; resendInSeconds: number }>(
+    `${AUTH_URL}/email`,
+    { email }
+  );
+};
+
+const confirmAddedEmail = (code: string) => {
+  return agent.post<{ email: string }>(`${AUTH_URL}/email/confirm`, { code });
+};
+
 const logout = (userId: string) => {
   return agent.post<{ message: string }>(`${AUTH_URL}/${userId}/logout`);
 };
@@ -80,6 +113,12 @@ const refreshToken = () => {
 
 export const authAPI = {
   signup,
+  getOAuthAccounts,
+  unlinkOAuth,
+  getOAuthStartUrl,
+  verifyTwoFactorTicket,
+  addEmail,
+  confirmAddedEmail,
   verifyEmail,
   resendEmailCode,
   login,

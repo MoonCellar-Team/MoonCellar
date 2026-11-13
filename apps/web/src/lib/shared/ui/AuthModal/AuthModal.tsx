@@ -6,6 +6,11 @@ import { isAxiosError } from "axios";
 import { ChangeEvent, FC, useState } from "react";
 import { Resolver, SubmitHandler, useForm } from "react-hook-form";
 import { useAuth } from "@/src/lib/shared/hooks/auth";
+import { authAPI } from "@/src/lib/shared/api";
+import {
+  OAUTH_PROVIDER_LABELS,
+  OAUTH_PROVIDERS,
+} from "@/src/lib/shared/constants";
 import { Background } from "../Background";
 import { useMinimumLoading } from "@/src/lib/shared/hooks/useMinimumLoading";
 import { modal } from "../Modal";
@@ -28,6 +33,8 @@ interface IAuthModalProps {
   isPage?: boolean;
   initialStep?: TStep;
   initialEmail?: string;
+  initialTwoFactorMethod?: "email" | "app";
+  twoFactorTicket?: string;
 }
 
 type TStep = "form" | "verify-email" | "two-factor";
@@ -40,14 +47,22 @@ export const AuthModal: FC<IAuthModalProps> = ({
   isPage = false,
   initialStep = "form",
   initialEmail = "",
+  initialTwoFactorMethod = "email",
+  twoFactorTicket,
 }) => {
-  const { login, signup, verifyEmail, verifyTwoFactor, resendEmailCode } =
-    useAuth();
+  const {
+    login,
+    signup,
+    verifyEmail,
+    verifyTwoFactor,
+    verifyTwoFactorTicket,
+    resendEmailCode,
+  } = useAuth();
   const [isRegister, setIsRegister] = useState<boolean>(!isSignIn && !isPage);
   const [step, setStep] = useState<TStep>(initialStep);
   const [pendingEmail, setPendingEmail] = useState(initialEmail);
   const [twoFactorMethod, setTwoFactorMethod] = useState<"email" | "app">(
-    "email"
+    initialTwoFactorMethod
   );
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -157,7 +172,9 @@ export const AuthModal: FC<IAuthModalProps> = ({
     const verify =
       step === "verify-email"
         ? verifyEmail({ email: pendingEmail, code })
-        : verifyTwoFactor({ email: pendingEmail, code });
+        : twoFactorTicket
+          ? verifyTwoFactorTicket({ ticket: twoFactorTicket, code })
+          : verifyTwoFactor({ email: pendingEmail, code });
 
     verify
       .catch((err) => {
@@ -201,7 +218,9 @@ export const AuthModal: FC<IAuthModalProps> = ({
       ? `Enter the 6-digit code sent to ${pendingEmail}.`
       : twoFactorMethod === "app"
         ? "Enter the code from your authenticator app, or a backup code."
-        : `Enter the code sent to ${pendingEmail}.`;
+        : twoFactorTicket
+          ? "Enter the code sent to the email address of your account."
+          : `Enter the code sent to ${pendingEmail}.`;
 
   const form = (
     <form
@@ -266,6 +285,23 @@ export const AuthModal: FC<IAuthModalProps> = ({
           </p>
         )}
       </div>
+      {!isPage && (
+        <div className={styles.providers}>
+          <span className={styles.providers__label}>or continue with</span>
+          <div className={styles.providers__buttons}>
+            {OAUTH_PROVIDERS.map((provider) => (
+              <Button
+                key={provider}
+                href={authAPI.getOAuthStartUrl(provider)}
+                color={ButtonColor.DEFAULT}
+                aria-label={`Continue with ${OAUTH_PROVIDER_LABELS[provider]}`}
+              >
+                {OAUTH_PROVIDER_LABELS[provider]}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
     </form>
   );
 
