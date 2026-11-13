@@ -29,7 +29,9 @@ single Save that sends the changed fields.
   on unmount and on save.
 - The adult-content toggle exists only when `useGeoStore` resolved and the country is not
   blocked; do not render it otherwise.
-- The username field edits `userName` through the profile mutation, not the settings patch.
+- The username field is shown but not saved: `useUpdateProfileMutation` sends only the
+  description, the images and the settings, and a rename would move `/user/<name>`, so it needs
+  a flow of its own.
 
 ## Two-factor sign-in
 
