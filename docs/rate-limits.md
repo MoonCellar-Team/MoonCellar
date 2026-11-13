@@ -30,6 +30,9 @@ N seconds", which the site shows as a toast.
 | API and game service | every other route | 600 per minute |
 | API | `POST /auth/login` | 10 per 5 minutes |
 | API | `POST /auth/signup` | 10 per hour |
+| API | `GET /auth/oauth/:provider` (starting a sign-in) | 10 per 5 minutes |
+| API | `POST /auth/two-factor/ticket`, `POST /auth/email/confirm` | 10 per 5 minutes |
+| API | `POST /auth/email` | 10 per hour |
 | API | `POST /auth/game/device`, `GET /auth/game/device/:userCode`, `POST /auth/game/device/approve` | 10 per 10 minutes |
 | API | `POST /auth/game/device/token` (polled every 5 s) | 30 per minute |
 | API | `POST /auth/game/token/introspect` | 30 per minute |

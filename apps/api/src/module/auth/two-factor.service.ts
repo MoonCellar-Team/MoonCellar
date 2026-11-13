@@ -69,7 +69,16 @@ export class TwoFactorService {
       user.markModified("twoFactor");
       await user.save();
 
-      return { secret, otpauthUri: buildOtpauthUri(secret, user.email) };
+      return {
+        secret,
+        otpauthUri: buildOtpauthUri(secret, user.email ?? user.userName),
+      };
+    }
+
+    if (!user.email) {
+      throw new BadRequestException(
+        "Add an email address before turning on email codes"
+      );
     }
 
     this.assertEmailCodeCanResend(user);

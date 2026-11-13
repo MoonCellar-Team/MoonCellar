@@ -24,10 +24,13 @@ import { SignUpDto } from "./dto/signup.dto";
 import { JwtRefreshGuard } from "./jwt-refresh.guard";
 import { SIGN_IN_THROTTLE, SIGN_UP_THROTTLE } from "../../shared/throttle";
 import {
+  AddEmailDto,
+  ConfirmEmailDto,
   ResendEmailCodeDto,
   TwoFactorConfirmDto,
   TwoFactorDisableDto,
   TwoFactorSetupDto,
+  TwoFactorTicketDto,
   TwoFactorVerifyDto,
   VerifyEmailDto,
 } from "../../shared/zod/dto/auth.dto";
@@ -136,6 +139,49 @@ export class AuthController {
       headers?.origin
     );
     return res.status(HttpStatus.OK).json({ userId });
+  }
+
+  @Post("/two-factor/ticket")
+  @Throttle(SIGN_IN_THROTTLE)
+  @ApiOperation({
+    summary: "Finish an OAuth sign-in with a two-factor code",
+  })
+  @ApiResponse({ status: 200, description: "Auth successful" })
+  async verifyTwoFactorTicket(
+    @Body() dto: TwoFactorTicketDto,
+    @Res() res: Response,
+    @Headers() headers: any
+  ): Promise<Response> {
+    const { accessToken, refreshToken, userId } =
+      await this.authService.verifyTwoFactorTicket(dto);
+    this.authService.setCookies(
+      res,
+      accessToken,
+      refreshToken,
+      headers?.origin
+    );
+    return res.status(HttpStatus.OK).json({ userId });
+  }
+
+  @Post("/email")
+  @UseGuards(AuthGuard("jwt"))
+  @Throttle(SIGN_UP_THROTTLE)
+  @ApiOperation({ summary: "Add an email address to an account without one" })
+  @ApiResponse({ status: 200, description: "Code sent" })
+  addEmail(@Req() request: IAuthorizedRequest, @Body() dto: AddEmailDto) {
+    return this.authService.startEmailAdd(request.user, dto);
+  }
+
+  @Post("/email/confirm")
+  @UseGuards(AuthGuard("jwt"))
+  @Throttle(SIGN_IN_THROTTLE)
+  @ApiOperation({ summary: "Confirm the added email address with its code" })
+  @ApiResponse({ status: 200, description: "Email confirmed" })
+  confirmEmail(
+    @Req() request: IAuthorizedRequest,
+    @Body() dto: ConfirmEmailDto
+  ) {
+    return this.authService.confirmEmailAdd(request.user, dto);
   }
 
   @Get("/two-factor")

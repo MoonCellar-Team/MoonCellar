@@ -65,6 +65,15 @@ export const useAuth = () => {
     return response.data;
   };
 
+  const verifyTwoFactorTicket = async (data: {
+    ticket: string;
+    code: string;
+  }) => {
+    const response = await authAPI.verifyTwoFactorTicket(data);
+    authUpdate(response.data.userId);
+    return response.data;
+  };
+
   const resendEmailCode = async (email: string) => {
     const response = await authAPI.resendEmailCode(email);
     return response.data;
@@ -76,6 +85,7 @@ export const useAuth = () => {
     signup,
     verifyEmail,
     verifyTwoFactor,
+    verifyTwoFactorTicket,
     resendEmailCode,
     authUpdate,
   };

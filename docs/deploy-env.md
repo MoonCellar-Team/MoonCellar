@@ -223,7 +223,12 @@ deployment those fallbacks happen to be the production values.
 noted below, `NEXT_PUBLIC_LOKI_HOST` and `NEXT_PUBLIC_S3_HOST`, have since been dropped.
 
 **Backend — fifteen keys set:** everything in its table except `FRONT_URL`, `LOCAL_CONNECTION`,
-`INDEXNOW_KEY` and `STEAM_API_KEY` (added with the Steam import, not set on the host yet).
+`INDEXNOW_KEY`, `STEAM_API_KEY` (added with the Steam import, not set on the host yet) and the six
+provider sign-in keys `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET`
+and `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`. Those go into the repository secrets next to the other
+`HOST_ENV_API` values, and each provider app must list the callback URL from
+[OAuth callback URLs](#oauth-callback-urls). Until both are done, the matching button answers a
+redirect that says the provider is not set up on this server.
 
 | Unset in production | Falls back to | Verdict |
 |---|---|---|
@@ -317,6 +322,24 @@ pins the internal API address, so it stays a secret on both counts.
 | `SMTP_USER`, `SMTP_PASSWORD` | no | A login for a relay provider. Empty with the internal container, which allows the Docker networks and asks for no authentication |
 | `SMTP_FROM` | no | `MoonCellar <noreply@mooncellar.space>`. Its domain is what SPF and DMARC are checked against, so it must stay `mooncellar.space` |
 | `SMTP_REPLY_TO` | no | Optional `Reply-To`. Empty while nothing reads the replies |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | **yes** (secret) | The OAuth app behind the "Google" button ([oauth.md](oauth.md)). Without both, Google sign-in is not offered |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | **yes** (secret) | The GitHub OAuth app behind the "GitHub" button |
+| `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET` | **yes** (secret) | The Reddit app behind the "Reddit" button. Reddit returns no e-mail, so these accounts add one in Settings |
+
+### OAuth callback URLs
+
+Each provider app registers exactly one redirect URI per environment. The API derives it from the
+request (`X-Forwarded-Proto` and `Host`, both passed by `proxy_params`), so it is the public API
+origin plus `/auth/oauth/<provider>/callback`:
+
+| Provider | Production | Local development |
+|---|---|---|
+| Google | `https://api.mooncellar.space/auth/oauth/google/callback` | `http://localhost:3228/auth/oauth/google/callback` |
+| GitHub | `https://api.mooncellar.space/auth/oauth/github/callback` | `http://localhost:3228/auth/oauth/github/callback` |
+| Reddit | `https://api.mooncellar.space/auth/oauth/reddit/callback` | `http://localhost:3228/auth/oauth/reddit/callback` |
+
+A mismatch answers the provider's `redirect_uri_mismatch` before the browser ever reaches the API,
+so the button appears to do nothing: register the address before enabling a provider.
 
 ## `HOST_ENV_GAME` — contents
 
@@ -536,6 +559,14 @@ IGDB_AUTO_LINK=false
 RECRAFT_API_TOKEN=
 SITE_SESSIONS_KEY=
 STEAMGRIDDB_API_KEY=
+
+# Provider sign-in — a provider without both values is not offered
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+REDDIT_CLIENT_ID=
+REDDIT_CLIENT_SECRET=
 
 # Mail — SMTP_HOST unset disables the module; `mail` is the container on the mooncellar network
 # SMTP_HOST=mail

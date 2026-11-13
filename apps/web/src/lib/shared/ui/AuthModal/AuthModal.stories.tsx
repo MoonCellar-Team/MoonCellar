@@ -18,6 +18,14 @@ export const Inline: Story = {};
 
 export const SignIn: Story = {
   args: { isSignIn: true },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The sign-up and sign-in forms carry the Google, GitHub and Reddit buttons. They are plain links to the API, so a story never sends anyone anywhere.",
+      },
+    },
+  },
 };
 
 export const InModal: Story = {
@@ -45,4 +53,21 @@ export const TwoFactorStep: Story = {
     initialStep: "two-factor",
     initialEmail: "alex@example.com",
   },
+};
+
+export const TwoFactorTicketStep: Story = {
+  args: {
+    isPage: true,
+    isSignIn: true,
+    initialStep: "two-factor",
+    initialTwoFactorMethod: "app",
+    twoFactorTicket: "ticket",
+  },
+  decorators: [
+    (Story) => (
+      <Box wrapperStyle={{ width: "380px" }}>
+        <Story />
+      </Box>
+    ),
+  ],
 };

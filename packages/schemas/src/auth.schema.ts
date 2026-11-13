@@ -70,6 +70,43 @@ export const TwoFactorDisableRequestSchema = z.object({
   code: z.string().min(1).max(128),
 });
 
+export const TwoFactorTicketRequestSchema = z.object({
+  ticket: z.string().min(1),
+  code: z.string().min(1).max(128),
+});
+
+export const OAUTH_PROVIDERS = ["google", "github", "reddit"] as const;
+export const OAuthProviderSchema = z.enum(OAUTH_PROVIDERS);
+
+export const OAuthAccountSchema = z.object({
+  provider: OAuthProviderSchema,
+  providerId: z.string(),
+  providerUserName: z.string().nullable(),
+  linkedAt: z.string(),
+});
+
+export const OAuthAccountsSchema = z.object({
+  providers: OAuthProviderSchema.array().describe(
+    "Providers this server can sign in with"
+  ),
+  linked: OAuthAccountSchema.array(),
+  hasPassword: z.boolean(),
+  email: z.string().nullable(),
+});
+
+export const AddEmailRequestSchema = z.object({
+  email: emailSchema,
+});
+
+export const ConfirmEmailRequestSchema = z.object({
+  code: z.string().regex(/^\d{6}$/, "The code is 6 digits"),
+});
+
+export const AddEmailResponseSchema = z.object({
+  email: z.string(),
+  resendInSeconds: z.number().int().nonnegative(),
+});
+
 export type ITwoFactorMethod = z.infer<typeof TwoFactorMethodSchema>;
 export type ISignUpResponse = z.infer<typeof SignUpResponseSchema>;
 export type IVerifyEmailRequest = z.infer<typeof VerifyEmailRequestSchema>;
@@ -99,3 +136,12 @@ export type ITwoFactorConfirmResponse = z.infer<
 export type ITwoFactorDisableRequest = z.infer<
   typeof TwoFactorDisableRequestSchema
 >;
+export type ITwoFactorTicketRequest = z.infer<
+  typeof TwoFactorTicketRequestSchema
+>;
+export type IOAuthProvider = z.infer<typeof OAuthProviderSchema>;
+export type IOAuthAccount = z.infer<typeof OAuthAccountSchema>;
+export type IOAuthAccounts = z.infer<typeof OAuthAccountsSchema>;
+export type IAddEmailRequest = z.infer<typeof AddEmailRequestSchema>;
+export type IAddEmailResponse = z.infer<typeof AddEmailResponseSchema>;
+export type IConfirmEmailRequest = z.infer<typeof ConfirmEmailRequestSchema>;

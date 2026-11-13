@@ -9,7 +9,7 @@ export const settingsSchema = z.object({
     .string()
     .min(3, "Username must be at least 3 characters")
     .max(20, "Username must be less than 20 characters"),
-  email: z.email("Invalid email address"),
+  email: z.string().optional(),
   description: z
     .string()
     .max(450, "Description must be less than 450 characters")

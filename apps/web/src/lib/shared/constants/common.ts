@@ -1,7 +1,14 @@
+import type { IOAuthProvider } from "@mooncellar/schemas";
+
 export const API_URL =
   typeof window === "undefined"
     ? process.env.INTERNAL_API_URL || "http://host.containers.internal:3228"
     : process.env.NEXT_PUBLIC_API_URL || "https://api.mooncellar.space";
+
+// The browser reaches the API through this address only. A page that navigates there (the
+// provider sign-in) must never carry the container address API_URL takes on the server.
+export const PUBLIC_API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://api.mooncellar.space";
 
 export const FRONT_URL =
   process.env.NEXT_PUBLIC_FRONT_URL || "https://mooncellar.space";
@@ -82,6 +89,18 @@ export const gameCategoryNames: { [key: string]: string } = {
 export const coverRatio = 528 / 704;
 
 export const AUTH_MODAL_ID = "auth";
+
+export const OAUTH_PROVIDER_LABELS: Record<IOAuthProvider, string> = {
+  google: "Google",
+  github: "GitHub",
+  reddit: "Reddit",
+};
+
+export const OAUTH_PROVIDERS = [
+  "google",
+  "github",
+  "reddit",
+] as const satisfies readonly IOAuthProvider[];
 
 export const STATUS_SEGMENT = "status";
 export const STATUS_HOST_PREFIX = "status.";
