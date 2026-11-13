@@ -70,6 +70,26 @@ an instance of Module)`. Use a default import; tsc reports the call as `TS2349`.
   web profile keeps treating that browser as its owner. `JwtRefreshGuard` and the refresh handler
   clear them on `UnauthorizedException` only — a database error must not log everyone out.
 
+- **A new sign-up is not signed in: it gets a code, and the account stays unusable until the
+  code is confirmed.** `emailVerified` defaults to `true`, so every account that existed before
+  the change keeps signing in; only `signUp` sets it to `false`. `login` refuses an account whose
+  `emailVerified === false` with `403` ("Confirm your email before signing in"), and
+  `POST /auth/verify-email` issues the cookies after the code matches.
+
+- **A code is stored as a `sha256` hash with a ten-minute TTL, five attempts and a one-minute
+  resend cooldown.** Two holders exist — `verificationCode` (sign-up) and `twoFactorCode`
+  (e-mail two-factor) — and neither is ever returned: `UserSchema` strips `verificationCode`,
+  `twoFactorCode` and `twoFactor` in `toJSON`/`toObject`, because `GET /user/:id` and the update
+  routes serialize the document.
+
+- **A two-factor sign-in answers a challenge, not the cookies.** When `twoFactor.method` is
+  `email` or `app`, `POST /auth/login` sends the e-mail code (e-mail method) and returns
+  `{ twoFactorRequired: true, method }`; `POST /auth/two-factor` verifies an e-mail code, a TOTP
+  code or a one-time backup code and only then issues the cookies. The TOTP secret is encrypted
+  (AES-256-GCM) with a key derived from `JWT_SECRET`; a backup code is removed from the account
+  when it is used. Game device sign-in does not change: it approves a device from the already
+  signed-in site, so it does not ask for a second factor.
+
 ## Game sign-in
 
 - **Game tokens are signed with `JWT_SECRET + ":game"`, never with the plain `JWT_SECRET`.**

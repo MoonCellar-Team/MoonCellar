@@ -14,10 +14,6 @@ export const useAuth = () => {
   const { setPlaythroughs } = useUserStore();
   const { push } = useRouter();
 
-  /**
-   * Signs out and goes to `/`, or loads `href` as a whole page: a server layout that read the
-   * session cookies (the status hub's gate) re-reads them only on a full load.
-   */
   const logout = (id: string, { href }: { href?: string } = {}) => {
     unsubscribePush()
       .then(() => authAPI.logout(id))
@@ -42,16 +38,45 @@ export const useAuth = () => {
   };
 
   const login = async (data: Omit<IAuth, "userName">) => {
-    return authAPI.login(data).then((response) => {
-      authUpdate(response.data.userId);
-    });
+    const response = await authAPI.login(data);
+
+    if ("twoFactorRequired" in response.data) {
+      return response.data;
+    }
+
+    authUpdate(response.data.userId);
+    return response.data;
   };
 
   const signup = async (data: IAuth) => {
-    return authAPI.signup(data).then((response) => {
-      authUpdate(response.data.userId);
-    });
+    const response = await authAPI.signup(data);
+    return response.data;
   };
 
-  return { logout, login, signup, authUpdate };
+  const verifyEmail = async (data: { email: string; code: string }) => {
+    const response = await authAPI.verifyEmail(data);
+    authUpdate(response.data.userId);
+    return response.data;
+  };
+
+  const verifyTwoFactor = async (data: { email: string; code: string }) => {
+    const response = await authAPI.verifyTwoFactor(data);
+    authUpdate(response.data.userId);
+    return response.data;
+  };
+
+  const resendEmailCode = async (email: string) => {
+    const response = await authAPI.resendEmailCode(email);
+    return response.data;
+  };
+
+  return {
+    logout,
+    login,
+    signup,
+    verifyEmail,
+    verifyTwoFactor,
+    resendEmailCode,
+    authUpdate,
+  };
 };

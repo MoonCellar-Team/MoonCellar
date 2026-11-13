@@ -282,7 +282,7 @@ pins the internal API address, so it stays a secret on both counts.
 | Variable | Secret | Description |
 |---|---|---|
 | `MONGO_CONNECTION_STRING` | **yes** | Full MongoDB URI including credentials, database `games` — `mongodb://<MONGO_ROOT_USERNAME>:<MONGO_ROOT_PASSWORD>@mongodb:27017/games?authSource=admin` against the compose MongoDB |
-| `JWT_SECRET` | **yes** | Signing key for access and refresh tokens. Rotating it logs every user out |
+| `JWT_SECRET` | **yes** | Signing key for access and refresh tokens, and the source of the key that encrypts two-factor secrets (`<secret>:two-factor`). Rotating it logs every user out and makes every authenticator app code invalid, so those users must set two-factor up again |
 | `JWT_EXPIRE` | no | Access token lifetime, e.g. `15m` — consumed via `ConfigService` in `auth.module.ts` |
 | `FRONT_URL` | no | Public frontend URL. Drives CORS and links in generated content; must match the frontend's `NEXT_PUBLIC_FRONT_URL` |
 | `LOCAL_CONNECTION` | no | Extra comma-separated origins allowed by CORS. Development convenience — leave empty in production |

@@ -23,6 +23,7 @@ import {
 import { RaAccount } from "@/src/lib/features/user/ui/RaAccount";
 import { SteamAccount } from "@/src/lib/features/user/ui/SteamAccount";
 import { GameDevices } from "@/src/lib/features/user/ui/GameDevices";
+import { TwoFactorSettings } from "@/src/lib/features/user/ui/TwoFactorSettings";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FC, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -228,6 +229,12 @@ export const Settings: FC<SettingsProps> = ({}) => {
                 {...register("description")}
               />
             </div>
+          </div>
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Two-factor sign-in">
+          <div className={styles.section}>
+            <TwoFactorSettings />
           </div>
         </CollapsibleSection>
 

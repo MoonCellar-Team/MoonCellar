@@ -2,7 +2,8 @@
 
 The sign-in / sign-up form shown in a modal. It switches between registration and login,
 validates with `createAuthSchema` (zod) and calls `login`/`signup` from the shared `useAuth`
-hook, which stores the profile and closes the modal on success.
+hook. A successful sign-up does not sign the user in: the modal moves to a code step that
+confirms the e-mail, and a sign-in on a two-factor account moves to a code step as well.
 
 ## When to use
 
@@ -20,6 +21,8 @@ hook, which stores the profile and closes the modal on success.
 | ---------- | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `isSignIn` | `boolean` | `false` | Open in login mode instead of sign-up; the user can still switch.                                                                                                              |
 | `isPage`   | `boolean` | `false` | Sign in only, as a bare form for a page to frame: stacked labelled fields, the error line and a full-width submit; no modal frame, background, close button or sign-up switch. |
+| `initialStep` | `"form" \| "verify-email" \| "two-factor"` | `"form"` | Which step to render first. Meant for Storybook: the code steps are otherwise reached only after a submit. |
+| `initialEmail` | `string` | `""` | The address the code steps say the code was sent to; Storybook only, like `initialStep`. |
 
 `openAuthModal(props?)` passes the same props.
 
@@ -61,8 +64,18 @@ import { modal } from "@/src/lib/shared/ui/Modal";
   message stays next to the form.
 - The username field is unmounted in login mode; the login schema keeps `userName` optional
   for that reason.
+- A successful sign-up moves to the `verify-email` step without signing in: the API sends a
+  6-digit code and the modal asks for it, with a "Resend code" action. `verifyEmail` signs in
+  only after the code is confirmed.
+- A sign-in on an account with two-factor moves to the `two-factor` step: it asks for the
+  e-mail code or the authenticator/backup code, whichever the API names in the challenge. A
+  successful code signs in and closes the modal through `authUpdate`.
+- Both code steps accept any non-empty value; the API decides whether a 6-digit code, an
+  authenticator code or a backup code is valid. A step can go back to the form without
+  clearing the typed e-mail.
 
 ## Storybook
 
-`Shared/AuthModal`: `Inline`, `SignIn`, `Page`, `InModal`. Neither story submits — submitting would hit the
-auth API.
+`Shared/AuthModal`: `Inline`, `SignIn`, `Page`, `InModal`, `CodeStep`, `TwoFactorStep`. The
+code steps are rendered through `initialStep`/`initialEmail`. No story submits — submitting
+would hit the auth API.

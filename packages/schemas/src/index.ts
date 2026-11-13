@@ -9,6 +9,7 @@ export * from "./mail.schema";
 export * from "./site-sessions.schema";
 export * from "./comments-socket.schema";
 export * from "./activity-socket.schema";
+export * from "./auth.schema";
 export * from "./comments.schema";
 export * from "./comments.utils";
 export * from "./conflicts-socket.schema";

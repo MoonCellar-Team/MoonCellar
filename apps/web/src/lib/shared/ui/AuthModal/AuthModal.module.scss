@@ -114,3 +114,23 @@
     width: 100%;
   }
 }
+
+.codeHeading {
+  margin: 0;
+  font-size: 18px;
+  text-align: center;
+  color: var(--color-text-primary);
+}
+
+.codeHint {
+  margin: 0;
+  font-size: 13px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.notice {
+  max-width: 80%;
+  color: var(--color-accent);
+  text-align: center;
+}

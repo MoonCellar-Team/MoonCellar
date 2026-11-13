@@ -469,6 +469,12 @@ break silently when ignored:
   `UserProfile` accepts the server's `authUserId` only when the store's profile has the same id
   (the server render, which has no store, keeps the cookie's answer, and so does the hydration render through `useIsAuthHydrated` — a `typeof window` check there made the owner's Lists tab exist only on the server and failed hydration), and on disagreement calls
   `refreshAuth`, which either restores the session or gets the stale cookies cleared.
+- **Sign-up and a two-factor sign-in are multi-step: the cookies arrive only on the last step.**
+  `useAuth().signup` returns `{ userId, email }` and does not fill the store; `AuthModal` then
+  moves to the e-mail code step, and `useAuth().verifyEmail` fills it. `useAuth().login` returns
+  `{ twoFactorRequired, method }` instead of a `userId` for a two-factor account, and
+  `verifyTwoFactor` is the step that fills the store. TOTP setup renders its QR code with
+  `qrcode.react`; the e-mail sign-in code is never part of the profile payload.
 
 ## Sockets
 

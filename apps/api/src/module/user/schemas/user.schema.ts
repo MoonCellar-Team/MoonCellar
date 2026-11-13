@@ -29,6 +29,36 @@ export class UserSteamAccount {
 export const UserSteamAccountSchema =
   SchemaFactory.createForClass(UserSteamAccount);
 
+@Schema({ _id: false })
+export class UserEmailCode {
+  @Prop({ type: String, default: null })
+  codeHash: string | null;
+  @Prop({ type: Date, default: null })
+  expiresAt: Date | null;
+  @Prop({ type: Number, default: 0 })
+  attempts: number;
+  @Prop({ type: Date, default: null })
+  resendAt: Date | null;
+}
+
+export const UserEmailCodeSchema = SchemaFactory.createForClass(UserEmailCode);
+
+@Schema({ _id: false })
+export class UserTwoFactor {
+  @Prop({ type: String, enum: ["off", "email", "app"], default: "off" })
+  method: string;
+  @Prop({ type: String, enum: ["email", "app"], default: null })
+  pendingMethod: string | null;
+  @Prop({ type: String, default: null })
+  totpSecretEncrypted: string | null;
+  @Prop({ type: [String], default: [] })
+  backupCodes: string[];
+  @Prop({ type: Date, default: null })
+  backupCodesGeneratedAt: Date | null;
+}
+
+export const UserTwoFactorSchema = SchemaFactory.createForClass(UserTwoFactor);
+
 @Schema({
   timestamps: true,
 })
@@ -41,6 +71,14 @@ export class User extends Document {
   password: string;
   @Prop()
   refreshToken?: string;
+  @Prop({ type: Boolean, default: true })
+  emailVerified: boolean;
+  @Prop({ type: UserEmailCodeSchema, default: null })
+  verificationCode?: UserEmailCode | null;
+  @Prop({ type: UserEmailCodeSchema, default: null })
+  twoFactorCode?: UserEmailCode | null;
+  @Prop({ type: UserTwoFactorSchema, default: null })
+  twoFactor?: UserTwoFactor | null;
   @Prop({ type: [{ type: mongoose.Types.ObjectId, ref: "User" }], default: [] })
   followings: mongoose.Types.ObjectId[];
   @Prop({ type: [{ type: mongoose.Types.ObjectId, ref: "User" }], default: [] })
@@ -118,3 +156,13 @@ UserSchema.index(
     partialFilterExpression: { "steam.steamId": { $exists: true } },
   }
 );
+
+const stripAuthSecrets = (_doc: unknown, ret: any): any => {
+  delete ret.verificationCode;
+  delete ret.twoFactorCode;
+  delete ret.twoFactor;
+  return ret;
+};
+
+UserSchema.set("toJSON", { transform: stripAuthSecrets });
+UserSchema.set("toObject", { transform: stripAuthSecrets });

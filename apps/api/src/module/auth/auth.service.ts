@@ -3,8 +3,8 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
-  InternalServerErrorException,
   Logger,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { SignUpDto } from "./dto/signup.dto";
@@ -13,6 +13,7 @@ import { User } from "../user/schemas/user.schema";
 import { Model } from "mongoose";
 import * as bcrypt from "bcryptjs";
 import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
 import { BusinessMetricsService } from "../metrics/business-metrics.service";
 import { LoginDto } from "./dto/login.dto";
 import { type Response } from "express";
@@ -25,6 +26,37 @@ import {
 } from "../../shared/constants";
 import { IndexNowService } from "../indexnow/indexnow.service";
 import { clearAuthCookies, getAuthCookieOptions } from "./auth-cookies";
+import { MailService } from "../mail/mail.service";
+import {
+  buildTwoFactorCodeLetter,
+  buildVerificationCodeLetter,
+} from "../mail/mail.letter";
+import { decryptSecret, sha256, twoFactorKey } from "./two-factor-crypto";
+import { verifyTotpCode } from "./totp";
+import {
+  EMAIL_CODE_RESEND_COOLDOWN_MS,
+  buildEmailCodeFields,
+  emailCodeAttemptsExhausted,
+  emailCodeIsExpired,
+  emailCodeMatches,
+  newEmailCode,
+} from "./auth-codes";
+import type {
+  IResendEmailCodeRequest,
+  IResendEmailCodeResponse,
+  ITwoFactorVerifyRequest,
+  IVerifyEmailRequest,
+} from "@mooncellar/schemas";
+
+type TSignedIn = {
+  accessToken: string;
+  refreshToken: string;
+  userId: string;
+};
+
+type TLoginResult =
+  | TSignedIn
+  | { twoFactorRequired: true; method: "email" | "app" };
 
 @Injectable()
 export class AuthService {
@@ -32,8 +64,10 @@ export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private jwtService: JwtService,
+    private readonly config: ConfigService,
     private readonly metrics: BusinessMetricsService,
-    private readonly indexNow: IndexNowService
+    private readonly indexNow: IndexNowService,
+    private readonly mail: MailService
   ) {}
 
   private async generateTokensAndUpdateUser(
@@ -64,9 +98,7 @@ export class AuthService {
     }
   }
 
-  async signUp(
-    signUpDto: SignUpDto
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async signUp(signUpDto: SignUpDto): Promise<{ userId: string; email: string }> {
     try {
       const { userName, email, password } = signUpDto;
       const isEmailExists = await this.userModel.findOne({ email });
@@ -76,17 +108,21 @@ export class AuthService {
       if (isUserExists) throw new ConflictException("UserName already exists");
 
       const hashedPassword = await bcrypt.hash(password, 10);
+      const code = newEmailCode();
 
       const user = await this.userModel.create({
         userName,
         email,
         password: hashedPassword,
+        emailVerified: false,
+        verificationCode: buildEmailCodeFields(code),
       });
 
       this.metrics.recordRegistration();
       this.indexNow.submitUrl(`${FRONT_URL}/user/${user.userName}`);
+      this.sendVerificationEmail(user.email, code);
 
-      return this.generateTokensAndUpdateUser(user);
+      return { userId: String(user._id), email: user.email };
     } catch (err) {
       if (
         err instanceof ConflictException ||
@@ -101,20 +137,205 @@ export class AuthService {
     }
   }
 
-  async login(
-    loginDto: LoginDto
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async verifyEmail({
+    email,
+    code,
+  }: IVerifyEmailRequest): Promise<TSignedIn> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new BadRequestException("Email does not exist");
+    if (user.emailVerified !== false) {
+      throw new BadRequestException("Email is already confirmed");
+    }
+
+    if (
+      emailCodeIsExpired(user.verificationCode) ||
+      emailCodeAttemptsExhausted(user.verificationCode)
+    ) {
+      throw new BadRequestException(
+        "The code has expired or was tried too many times. Request a new one."
+      );
+    }
+
+    const record = user.verificationCode!;
+    const matches = emailCodeMatches(record, code);
+    record.attempts += 1;
+    user.markModified("verificationCode");
+    await user.save();
+
+    if (!matches) throw new BadRequestException("The code does not match");
+
+    user.emailVerified = true;
+    user.verificationCode = null;
+    user.markModified("verificationCode");
+
+    const tokens = await this.generateTokensAndUpdateUser(user);
+    return { ...tokens, userId: String(user._id) };
+  }
+
+  async resendVerificationCode({
+    email,
+  }: IResendEmailCodeRequest): Promise<IResendEmailCodeResponse> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new BadRequestException("Email does not exist");
+    if (user.emailVerified !== false) {
+      throw new BadRequestException("Email is already confirmed");
+    }
+
+    const resendAt = user.verificationCode?.resendAt;
+    if (resendAt && resendAt.getTime() > Date.now()) {
+      const seconds = Math.ceil((resendAt.getTime() - Date.now()) / 1000);
+      throw new BadRequestException(`Try again in ${seconds} seconds`);
+    }
+
+    const code = newEmailCode();
+    user.verificationCode = buildEmailCodeFields(code);
+    user.markModified("verificationCode");
+    await user.save();
+    this.sendVerificationEmail(user.email, code);
+
+    return {
+      email: user.email,
+      resendInSeconds: EMAIL_CODE_RESEND_COOLDOWN_MS / 1000,
+    };
+  }
+
+  async login(loginDto: LoginDto): Promise<TLoginResult> {
     const { email, password } = loginDto;
     const user = await this.userModel.findOne({ email });
 
     if (!user) throw new BadRequestException("Email does not exists");
+
+    if (user.emailVerified === false) {
+      throw new ForbiddenException(
+        "Confirm your email before signing in. Check your inbox for the code."
+      );
+    }
 
     const isPasswordMatched = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatched)
       throw new BadRequestException("Password does not match");
 
-    return this.generateTokensAndUpdateUser(user);
+    const method = user.twoFactor?.method ?? "off";
+    if (method === "email" || method === "app") {
+      if (method === "email") {
+        const code = newEmailCode();
+        user.twoFactorCode = buildEmailCodeFields(code);
+        user.markModified("twoFactorCode");
+        await user.save();
+        this.sendTwoFactorEmail(user.email, code);
+      }
+
+      return { twoFactorRequired: true, method: method as "email" | "app" };
+    }
+
+    const tokens = await this.generateTokensAndUpdateUser(user);
+    return { ...tokens, userId: String(user._id) };
+  }
+
+  async verifyTwoFactor({
+    email,
+    code,
+  }: ITwoFactorVerifyRequest): Promise<TSignedIn> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new BadRequestException("Email does not exist");
+
+    const method = user.twoFactor?.method ?? "off";
+    if (method === "off") {
+      throw new BadRequestException("Two-factor sign-in is not enabled");
+    }
+
+    const valid = await this.verifyTwoFactorCode(
+      user,
+      method as "email" | "app",
+      code
+    );
+    if (!valid) throw new BadRequestException("The code does not match");
+
+    const tokens = await this.generateTokensAndUpdateUser(user);
+    return { ...tokens, userId: String(user._id) };
+  }
+
+  private async verifyTwoFactorCode(
+    user: User,
+    method: "email" | "app",
+    code: string
+  ): Promise<boolean> {
+    if (method === "email") {
+      if (
+        emailCodeIsExpired(user.twoFactorCode) ||
+        emailCodeAttemptsExhausted(user.twoFactorCode)
+      ) {
+        return false;
+      }
+
+      const record = user.twoFactorCode!;
+      const matches = emailCodeMatches(record, code);
+      record.attempts += 1;
+      user.markModified("twoFactorCode");
+      await user.save();
+      if (!matches) return false;
+
+      user.twoFactorCode = null;
+      user.markModified("twoFactorCode");
+      await user.save();
+      return true;
+    }
+
+    const encrypted = user.twoFactor?.totpSecretEncrypted;
+    if (
+      encrypted &&
+      verifyTotpCode(decryptSecret(encrypted, this.twoFactorSecretKey()), code)
+    ) {
+      return true;
+    }
+
+    const normalized = code.replace(/[\s-]/g, "").toUpperCase();
+    const hash = sha256(normalized);
+    const codes = user.twoFactor?.backupCodes ?? [];
+    const index = codes.indexOf(hash);
+    if (index !== -1) {
+      user.twoFactor!.backupCodes.splice(index, 1);
+      user.markModified("twoFactor");
+      await user.save();
+      return true;
+    }
+
+    return false;
+  }
+
+  private twoFactorSecretKey(): string {
+    const secret = this.config.get<string>("JWT_SECRET");
+    if (!secret) {
+      throw new ServiceUnavailableException(
+        "Two-factor authentication is not configured on this server"
+      );
+    }
+    return twoFactorKey(secret);
+  }
+
+  private sendVerificationEmail(to: string, code: string): void {
+    this.mail
+      .send({
+        to,
+        subject: "Confirm your email",
+        letter: buildVerificationCodeLetter(code),
+      })
+      .catch((err) =>
+        this.logger.error(err, `Failed to send a verification code to ${to}`)
+      );
+  }
+
+  private sendTwoFactorEmail(to: string, code: string): void {
+    this.mail
+      .send({
+        to,
+        subject: "Your sign-in code",
+        letter: buildTwoFactorCodeLetter(code),
+      })
+      .catch((err) =>
+        this.logger.error(err, `Failed to send a sign-in code to ${to}`)
+      );
   }
 
   async refreshToken(userId: string) {
