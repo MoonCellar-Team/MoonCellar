@@ -180,9 +180,11 @@ export class ImagesService {
       name: "elements",
       schema: ELEMENTS_SCHEMA,
     });
-    const { elements } = JSON.parse(text) as ISuggestImageElementsResponse;
+    const { elements } = JSON.parse(
+      text
+    ) as Partial<ISuggestImageElementsResponse>;
 
-    return { elements: elements.slice(0, IMAGE_ELEMENTS_MAX) };
+    return { elements: (elements ?? []).slice(0, IMAGE_ELEMENTS_MAX) };
   }
 
   private getToken(provider: IImageProvider) {

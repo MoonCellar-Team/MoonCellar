@@ -4,7 +4,7 @@ import type { IConflictAiVerdict } from "@mooncellar/schemas";
 import { HowLongToBeatService } from "howlongtobeat-ts";
 import { Model } from "mongoose";
 import { generateJson } from "../../../shared/ai";
-import { openAiModel } from "../../../shared/openai";
+import { deepSeekModel } from "../../../shared/deepseek";
 import {
   ConflictsAiService,
   type TUndecidedConflict,
@@ -40,7 +40,7 @@ export class HltbAiService implements OnModuleInit {
     conflict: TUndecidedConflict,
     platformNames: Map<string, string>
   ): Promise<IConflictAiVerdict> {
-    const model = openAiModel();
+    const model = deepSeekModel();
     const entry = {
       ...(conflict.externalData as HltbSearchEntry),
       id: Number(conflict.externalId),

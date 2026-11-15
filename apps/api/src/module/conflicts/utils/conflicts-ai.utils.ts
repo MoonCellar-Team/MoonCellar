@@ -115,16 +115,18 @@ export const toConflictAiVerdict = (
   gameIds: string[],
   model: string
 ): IConflictAiVerdict => {
-  const answer = JSON.parse(text) as Pick<
-    IConflictAiVerdict,
-    "gameIds" | "confidence" | "reason"
+  const answer = JSON.parse(text) as Partial<
+    Pick<IConflictAiVerdict, "gameIds" | "confidence" | "reason">
   >;
   const allowed = new Set(gameIds);
 
   return {
-    gameIds: [...new Set(answer.gameIds)].filter((id) => allowed.has(id)),
-    confidence: answer.confidence,
-    reason: answer.reason,
+    gameIds: [...new Set(answer.gameIds ?? [])].filter((id) => allowed.has(id)),
+    confidence:
+      answer.confidence === "high" || answer.confidence === "medium"
+        ? answer.confidence
+        : "low",
+    reason: answer.reason?.trim() || "The AI gave no reason.",
     model,
     judgedAt: new Date().toISOString(),
   };

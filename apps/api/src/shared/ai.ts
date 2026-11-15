@@ -1,13 +1,33 @@
-import { ServiceUnavailableException } from "@nestjs/common";
-import { callOpenAi, openAiModel, outputText } from "./openai";
+import {
+  BadGatewayException,
+  ServiceUnavailableException,
+} from "@nestjs/common";
+import {
+  callDeepSeek,
+  deepSeekKey,
+  deepSeekModel,
+  messageText,
+} from "./deepseek";
+
+const JSON_MAX_TOKENS = 16_384;
 
 export const assertAiKey = () => {
-  if (!process.env.OPENAI_API_KEY) {
+  if (!deepSeekKey()) {
     throw new ServiceUnavailableException(
-      "AI features are unavailable. Configure the OpenAI API key on the server."
+      "AI features are unavailable. Configure the DeepSeek API key on the server."
     );
   }
 };
+
+const jsonInstructions = (
+  instructions: string,
+  name: string,
+  schema: Record<string, unknown>
+) =>
+  `${instructions}
+
+Return one json object that matches the "${name}" JSON schema below, with no text beside it:
+${JSON.stringify(schema)}`;
 
 export const generateJson = async ({
   instructions,
@@ -23,23 +43,38 @@ export const generateJson = async ({
   schema: Record<string, unknown>;
 }): Promise<{ text: string; model: string }> => {
   assertAiKey();
-  const model = openAiModel();
-  const response = await callOpenAi(process.env.OPENAI_API_KEY!, {
+  const model = deepSeekModel();
+  const response = await callDeepSeek(deepSeekKey()!, {
     model,
-    instructions,
-    input: image
-      ? [
-          {
-            role: "user",
-            content: [
-              { type: "input_text", text: input },
-              { type: "input_image", image_url: image },
-            ],
-          },
-        ]
-      : input,
-    text: { format: { type: "json_schema", name, strict: true, schema } },
+    messages: [
+      { role: "system", content: jsonInstructions(instructions, name, schema) },
+      {
+        role: "user",
+        content: image
+          ? [
+              { type: "text", text: input },
+              { type: "image_url", image_url: { url: image } },
+            ]
+          : input,
+      },
+    ],
+    response_format: { type: "json_object" },
+    max_tokens: JSON_MAX_TOKENS,
   });
 
-  return { text: outputText(response.output), model };
+  if (response.choices[0]?.finish_reason === "length") {
+    throw new BadGatewayException(
+      "DeepSeek ran out of output tokens before it finished the answer. Retry the request."
+    );
+  }
+
+  const text = messageText(response).trim();
+
+  if (!text) {
+    throw new BadGatewayException(
+      "DeepSeek returned an empty answer. Retry the request."
+    );
+  }
+
+  return { text, model };
 };

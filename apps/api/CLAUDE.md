@@ -1054,12 +1054,27 @@ Module` before a single test runs. `comments.controller.spec.ts` mocks it with `
 
 ## AI providers
 
-- **Every text AI call uses OpenAI through `shared/openai.ts`.** Use `generateJson` from
-  `shared/ai.ts` for a single structured answer and `callOpenAi` for research with tools or web
-  search. `OPENAI_API_KEY` is required; `OPENAI_MODEL` defaults to `gpt-5-mini`. Check the key with
-  `assertAiKey` before starting an admin AI operation so a missing key answers 503.
-- **Image generation uses OpenAI and Recraft.** Recraft models require `RECRAFT_API_TOKEN`;
-  text generation and image element extraction use only OpenAI.
+- **Every text AI call goes to DeepSeek through `shared/deepseek.ts`.** Use `generateJson` from
+  `shared/ai.ts` for a single structured answer and `callDeepSeek` for research with tools or the
+  web tools. `DEEPSEEK_API_KEY` is required; `DEEPSEEK_MODEL` defaults to `deepseek-flash`. Check
+  the key with `assertAiKey` before starting an admin AI operation so a missing key answers 503.
+- **DeepSeek speaks chat completions, not OpenAI's Responses API:** the conversation is one
+  `messages` array, a structured answer is `response_format: { type: "json_object" }` with the
+  schema written into the system message (DeepSeek has no `json_schema` format and does not
+  enforce a schema), and a tool loop appends the assistant `tool_calls` and the matching `tool`
+  results instead of sending `previous_response_id`. Because nothing enforces the schema,
+  `generateJson` answers 502 on an empty content or `finish_reason: "length"` (json mode replaces
+  unparseable output with spaces), and the parsers tolerate a missing field.
+- **Thinking mode is switched off in `callDeepSeek`.** DeepSeek enables it by default, bills the
+  reasoning as output, and requires every earlier turn's `reasoning_content` back in a tool loop;
+  the drafts do their searching themselves, so non-thinking is what we want.
+- **The web-search fallback uses DeepSeek's `deepseek_web_search` server tool, and such a request
+  must not carry `response_format`** (any format but `text` answers 400). The tool runs on
+  DeepSeek's side, the answer arrives as the message content, and `tool_choice` cannot name a
+  server tool, so the model decides whether to search.
+- **Image generation stays on Recraft and OpenAI** (`OPENAI_API_KEY`); the text calls never read
+  that key. The one vision call — image element extraction — goes to DeepSeek, whose
+  `deepseek-flash` accepts images.
 
 ## AI drafts
 

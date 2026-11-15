@@ -300,8 +300,9 @@ pins the internal API address, so it stays a secret on both counts.
 | `METRICS_TOKEN` | **yes** | Bearer token guarding `/metrics`. Prometheus must be configured with the same value |
 | `INDEXNOW_KEY` | **yes** | IndexNow key used to submit new game pages to search engines |
 | `SEARXNG_URL` | no | SearXNG the admin "Fill with AI" draft searches through — `http://searxng:8080`, the `searxng` service of `infra/docker-compose.prod.yml`. The default, `http://localhost:8891`, is empty inside the container: every search step then fails |
-| `OPENAI_API_KEY` | **yes** | OpenAI key for admin AI drafts, their web-search fallback, AI conflict reviews, image element extraction and OpenAI image generation in the Images tab. Without it `POST /games/ai-drafts` and `POST /conflicts/:source/ai` answer 503 |
-| `OPENAI_MODEL` | no | Model for text and image analysis calls, `gpt-5-mini` by default |
+| `DEEPSEEK_API_KEY` | **yes** | DeepSeek API key for the admin AI: game and character drafts, their web-search fallback, AI conflict reviews and image element extraction. Without it `POST /games/ai-drafts` and `POST /conflicts/:source/ai` answer 503 |
+| `DEEPSEEK_MODEL` | no | DeepSeek model for those calls, `deepseek-flash` by default |
+| `OPENAI_API_KEY` | **yes** | OpenAI key for the OpenAI image models in the admin Images tab only; the text AI calls do not read it. Without it only the Recraft models generate (`RECRAFT_API_TOKEN`) |
 | `SITE_SESSIONS_KEY` | **yes** | Any long random string; the cookies of the admin Sites tab are encrypted with its SHA-256. Must be the same wherever the same database is used, or stored cookies cannot be read. Without it saving a site answers 503 |
 | `RECRAFT_API_TOKEN` | **yes** | Recraft API token for the admin Images tab (recraft.ai → Profile → API). Without it generating with a Recraft model answers 503; OpenAI models keep working through `OPENAI_API_KEY` |
 | `STEAMGRIDDB_API_KEY` | **yes** | SteamGridDB API key (steamgriddb.com → Preferences → API) the draft takes covers and hero banners from. Without it that step fails and the draft falls back to images found elsewhere |
@@ -527,12 +528,14 @@ METRICS_TOKEN=
 # IndexNow submission key
 INDEXNOW_KEY=
 
-# AI game draft — in production SEARXNG_URL=http://searxng:8080
+# AI game draft — in production SEARXNG_URL=http://searxng:8080; text AI calls go to DeepSeek
 SEARXNG_URL=http://localhost:8891
-OPENAI_API_KEY=
-OPENAI_MODEL=gpt-5-mini
+DEEPSEEK_API_KEY=
+DEEPSEEK_MODEL=deepseek-flash
 # IGDB sync: link confident matches instead of queueing them in Conflicts
 IGDB_AUTO_LINK=false
+# The Images tab generates through Recraft and OpenAI
+OPENAI_API_KEY=
 RECRAFT_API_TOKEN=
 SITE_SESSIONS_KEY=
 STEAMGRIDDB_API_KEY=
