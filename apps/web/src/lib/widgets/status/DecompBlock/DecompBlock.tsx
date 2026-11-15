@@ -1,13 +1,14 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import classNames from "classnames";
-import { IDecompBlock, IDecompUnit } from "@mooncellar/schemas";
+import { IDecompArea, IDecompBlock, IDecompUnit } from "@mooncellar/schemas";
 import { formatPercent } from "@/src/lib/entities/project/model";
 import { Badge } from "@/src/lib/shared/ui/Badge";
 import { Box } from "@/src/lib/shared/ui/Box";
 import { ProgressBar } from "@/src/lib/shared/ui/ProgressBar";
 import { StatTile } from "@/src/lib/shared/ui/StatTile";
+import { SvgChevron } from "@/src/lib/shared/ui/svg";
 import { Table } from "@/src/lib/shared/ui/Table";
 import { Tabs } from "@/src/lib/shared/ui/Tabs";
 import { commonUtils } from "@/src/lib/shared/utils/common.utils";
@@ -63,6 +64,12 @@ const UnitState: FC<{ unit: IDecompUnit }> = ({ unit }) => {
   );
 };
 
+interface ICategoryArea {
+  area: IDecompArea;
+  functions: number;
+  done: number;
+}
+
 interface IDecompBlockProps {
   slug: string;
   decomp: IDecompBlock;
@@ -71,8 +78,59 @@ interface IDecompBlockProps {
 export const DecompBlock: FC<IDecompBlockProps> = ({ slug, decomp }) => {
   const [filter, setFilter] = useState<IFilesFilter>("work");
   const [mapOrder, setMapOrder] = useState<IFunctionMapOrder>("status");
+  const [collapsedCategories, setCollapsedCategories] = useState<string[]>([]);
   const { totals } = decomp;
   const units = decomp.units.filter((unit) => matchesFilter(unit, filter));
+
+  const { areasByCategory, orphanAreas } = useMemo(() => {
+    const sums = new Map<
+      string,
+      Map<string, { functions: number; done: number }>
+    >();
+
+    for (const unit of decomp.units) {
+      if (!unit.area) continue;
+
+      const byArea =
+        sums.get(unit.category) ??
+        new Map<string, { functions: number; done: number }>();
+      const areaTotals = byArea.get(unit.area) ?? { functions: 0, done: 0 };
+
+      areaTotals.functions += unit.functions;
+      areaTotals.done += unit.done;
+      byArea.set(unit.area, areaTotals);
+      sums.set(unit.category, byArea);
+    }
+
+    const used = new Set<string>();
+    const grouped = new Map<string, ICategoryArea[]>();
+
+    for (const [categoryId, byArea] of sums) {
+      grouped.set(
+        categoryId,
+        decomp.areas.flatMap((area) => {
+          const areaTotals = byArea.get(area.id);
+
+          if (!areaTotals) return [];
+
+          used.add(area.id);
+          return [{ area, ...areaTotals }];
+        })
+      );
+    }
+
+    return {
+      areasByCategory: grouped,
+      orphanAreas: decomp.areas.filter((area) => !used.has(area.id)),
+    };
+  }, [decomp.units, decomp.areas]);
+
+  const toggleCategory = (id: string) =>
+    setCollapsedCategories((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id]
+    );
 
   return (
     <>
@@ -102,53 +160,97 @@ export const DecompBlock: FC<IDecompBlockProps> = ({ slug, decomp }) => {
         </div>
       </Box>
 
-      <div className={styles.split}>
-        <Box title="Categories" isTitleStart>
-          <div className={styles.categories}>
-            {decomp.categories.map((category) => (
-              <div key={category.id} className={styles.category}>
-                <span className={styles.category__name}>{category.id}</span>
-                <ProgressBar
-                  value={category.done}
-                  max={Math.max(category.functions, 1)}
-                  tone="positive"
-                  aria-label={`${category.id}: ${category.done} of ${category.functions}`}
-                />
-                <span className={styles.category__count}>
-                  {category.done.toLocaleString("en")} /{" "}
-                  {category.functions.toLocaleString("en")}
-                </span>
+      <Box
+        title="Categories"
+        isTitleStart
+        titleAction={
+          <span className={styles.hint}>functions done · by module</span>
+        }
+      >
+        <div className={styles.categories}>
+          {decomp.categories.map((category) => {
+            const areas = areasByCategory.get(category.id) ?? [];
+            const isOpen =
+              areas.length > 0 && !collapsedCategories.includes(category.id);
+
+            return (
+              <div key={category.id} className={styles.categoryBlock}>
+                <div className={styles.category}>
+                  {areas.length > 0 ? (
+                    <button
+                      type="button"
+                      className={styles.category__toggle}
+                      aria-expanded={isOpen}
+                      aria-controls={`category-areas-${category.id}`}
+                      aria-label={`${isOpen ? "Hide" : "Show"} areas in ${category.id}`}
+                      onClick={() => toggleCategory(category.id)}
+                    >
+                      <SvgChevron
+                        size="16"
+                        className={classNames(styles.category__chevron, {
+                          [styles.category__chevron_open]: isOpen,
+                        })}
+                        style={{ color: "var(--color-text-muted)" }}
+                      />
+                    </button>
+                  ) : (
+                    <span
+                      className={styles.category__toggle}
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className={styles.category__name}>{category.id}</span>
+                  <ProgressBar
+                    value={category.done}
+                    max={Math.max(category.functions, 1)}
+                    tone="positive"
+                    aria-label={`${category.id}: ${category.done} of ${category.functions}`}
+                  />
+                  <span className={styles.category__count}>
+                    {category.done.toLocaleString("en")} /{" "}
+                    {category.functions.toLocaleString("en")}
+                    {areas.length === 0 && (
+                      <span className={styles.category__none}>
+                        no areas yet
+                      </span>
+                    )}
+                  </span>
+                </div>
+
+                <div
+                  id={`category-areas-${category.id}`}
+                  className={styles.category__areas}
+                  hidden={!isOpen}
+                >
+                  <div className={styles.areasHead}>
+                    <span>Area</span>
+                    <span>Led by</span>
+                    <span className={styles.areasDone}>Done</span>
+                  </div>
+                  {areas.map(({ area, functions, done }) => (
+                    <div key={area.id} className={styles.areasRow}>
+                      <span>{area.title ?? area.id}</span>
+                      <span className={styles.areasOwners}>
+                        {area.owners.join(", ") || "—"}
+                      </span>
+                      <span className={styles.areasDone}>
+                        {formatPercent(done, functions)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
-        </Box>
-        <Box title="Areas" isTitleStart>
-          <Table
-            mobileHeadField="area"
-            isWithoutMobileSorting
-            initialSortingKey="area"
-            initialSortingOrder="asc"
-            columnStyles={{
-              area: { width: "1fr", minWidth: "100px" },
-              owners: { width: "1fr", minWidth: "120px" },
-              done: { width: "104px", minWidth: "104px" },
-            }}
-            headers={{
-              area: { content: "Area" },
-              owners: { content: "Led by" },
-              done: { content: "Done" },
-            }}
-            rows={decomp.areas.map((area) => ({
-              area: { content: area.title ?? area.id, sortingValue: area.id },
-              owners: { content: area.owners.join(", ") || "—" },
-              done: {
-                content: formatPercent(area.done, area.functions),
-                sortingValue: area.functions ? area.done / area.functions : 0,
-              },
-            }))}
-          />
-        </Box>
-      </div>
+            );
+          })}
+
+          {orphanAreas.length > 0 && (
+            <p className={styles.orphans}>
+              No files match:{" "}
+              {orphanAreas.map((area) => area.title ?? area.id).join(", ")}
+            </p>
+          )}
+        </div>
+      </Box>
 
       <Box
         title="Function map"
