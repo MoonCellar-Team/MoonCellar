@@ -45,9 +45,21 @@ export const ProjectTokenInfoSchema = z.object({
 });
 export type IProjectTokenInfo = z.infer<typeof ProjectTokenInfoSchema>;
 
+export const PROJECT_GROUP_MAX_LENGTH = 40;
+
+export const ProjectGroupSchema = z
+  .string()
+  .trim()
+  .max(
+    PROJECT_GROUP_MAX_LENGTH,
+    `Use up to ${PROJECT_GROUP_MAX_LENGTH} characters`
+  )
+  .describe("Group the project is listed under in the hub's menu");
+
 export const ProjectSchema = z.object({
   slug: ProjectSlugSchema,
   name: z.string(),
+  group: ProjectGroupSchema.optional(),
   blocks: z.array(ProjectBlockSchema),
   defaultBlock: ProjectBlockSchema,
   uploads: z.array(ProjectUploadSchema),
@@ -66,6 +78,7 @@ const ProjectBlocksFieldSchema = z
 export const CreateProjectRequestSchema = z.object({
   name: z.string().trim().min(1).max(60),
   slug: ProjectSlugSchema,
+  group: ProjectGroupSchema.optional(),
   blocks: ProjectBlocksFieldSchema,
   defaultBlock: ProjectBlockSchema.optional(),
 });
@@ -73,6 +86,7 @@ export type ICreateProjectRequest = z.input<typeof CreateProjectRequestSchema>;
 
 export const UpdateProjectRequestSchema = z.object({
   name: z.string().trim().min(1).max(60).optional(),
+  group: ProjectGroupSchema.optional(),
   blocks: ProjectBlocksFieldSchema.optional(),
   defaultBlock: ProjectBlockSchema.optional(),
 });
