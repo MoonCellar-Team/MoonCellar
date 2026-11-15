@@ -16,8 +16,10 @@ when it is done and a size (S — a day or less, M — a few days, L — a week 
 
 By running this command the user allows you to take, release, finish and add tasks in the hub
 (`bun scripts/tasks.ts`), and to commit the task's work to a branch and open a pull request for it.
-Never push to `main`. Merge only when the user's rules allow it, and only a PR with passing checks,
-as a merge commit; otherwise the PR waits for a person.
+Never push to `main`. **Never merge a PR until the user has explicitly confirmed that this one should
+be merged** — a green check run, an approved review or the fact that they asked for the task is not
+that confirmation. Merge a PR only then, only with passing checks, and as a merge commit; otherwise
+it waits.
 
 Preparation: `bun scripts/tasks.ts list --free` answers "No hub token" — ask the user to run `$hub`
 (or `bun scripts/hub-connect.ts mooncellar`) and stop.
@@ -40,8 +42,8 @@ Preparation: `bun scripts/tasks.ts list --free` answers "No hub token" — ask t
 6. Commit with a Conventional Commits header in Latin letters only (commitlint), push the branch and
    open a PR to `main` (`gh pr create`); its description names the task ("Task: H6 in the status
    hub") and what was checked.
-7. When the PR is merged (by you, if the user's rules allow it, or by a person) and deployed if it
-   ships something: `bun scripts/tasks.ts done <id>`.
+7. When the PR is merged (by you, after the user's explicit confirmation, or by a person) and
+   deployed if it ships something: `bun scripts/tasks.ts done <id>`.
 8. Found a new task on the way — add it and say so:
    `bun scripts/tasks.ts add <section> "<task>"` with `--where`, `--depends <ids>`, `--done-when`
    and `--size S|M|L`; the hub picks the number. A new section:

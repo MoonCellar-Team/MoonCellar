@@ -139,6 +139,12 @@ This project uses **bun** exclusively. Using `npm` is forbidden.
   comes from `.claude/status-hub.json`, never from a default.
 - The agent commands live in `.claude/commands/` (`/hub`, `/task`). A command that changes how work
   is done (branches, PRs, checks) is updated together with `CONTRIBUTING.md` and this file.
+- **Never merge a pull request into `main` without an explicit confirmation from the person who
+  asked for the work.** Opening the PR is where the agent's part ends; a merge is a separate
+  decision, so a green CI run, an approved review or a request to "do the task" is not one. Merge
+  as a merge commit, only a PR whose checks pass, and only once that confirmation arrives —
+  otherwise the PR waits. This repository keeps the rule even where a broader agent instruction
+  would allow an automatic merge.
 - **Codex uses the same instructions through `AGENTS.md` and the `CLAUDE.md` fallback in
   `.codex/config.toml`.** Its `$hub` and `$task` skills in `.agents/skills/` mirror the Claude
   commands; keep both workflows consistent. Shared MCP changes update both `.mcp.json` and
