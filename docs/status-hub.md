@@ -206,25 +206,24 @@ is gone now): read and change it on the site or with `bun scripts/tasks.ts`.
 The hub is reached by host, and the session cookie is set for the domain the site and the API share
 (`getCookieDomain` in `apps/api/src/module/auth/auth-cookies.ts`). `localhost` has no such domain —
 Chromium refuses a cookie whose `Domain` is `.localhost` — so a local visit needs two names under a
-domain of their own:
+domain of their own. `bun run dev:hub` sets that up and starts both apps:
 
 ```sh
-# once, as root
-127.0.0.1 status.mooncellar.test api.mooncellar.test   >> /etc/hosts
-
-# the API, on its own database, with the hub allowed as an origin
-LOCAL_CONNECTION=http://status.mooncellar.test:3000,http://localhost:3000 bun run dev:api
-
-# the web, talking to the API on the second name
-NEXT_PUBLIC_API_URL=http://api.mooncellar.test:3228 \
-INTERNAL_API_URL=http://api.mooncellar.test:3228 bun run dev:web
+bun run dev:hub            # the hub on http://status.mooncellar.test:3000
+bun run dev:hub -- --check # only the checks, nothing is started
 ```
 
-Then `http://status.mooncellar.test:3000` opens the hub, and signing in puts a real cookie on
-`mooncellar.test` — nothing is copied into the browser by hand. The API sets it for
-`api.mooncellar.test` and the hub reads it on `status.mooncellar.test`, because both end in the same
-registrable domain; `allowedDevOrigins` in `next.config.mjs` already lists the host.
+It looks for both names in `/etc/hosts` and offers to add `127.0.0.1 status.mooncellar.test
+api.mooncellar.test` (the write asks for your `sudo` password), refuses to start when port 3000 or
+3228 is taken, and starts the API with the hub allowed as a CORS origin and the web with
+`NEXT_PUBLIC_API_URL` on the API's name. Signing in then puts a real cookie on `mooncellar.test`:
+the API sets it for `api.mooncellar.test`, the hub reads it on `status.mooncellar.test`, and
+`allowedDevOrigins` in `next.config.mjs` lists the host so the dev server serves its chunks there.
+Chrome caches a failed lookup, so a browser that already refused the address needs a restart.
 
-Never point a local API at the production database for this: `autoIndex` builds the new indexes
-there. A dump of `projects`, `projectplans`, `projectplanevents` and `users` into a local database
-is enough to click through the hub, and it is the only way to try it without writing to production.
+It expects a MongoDB on `127.0.0.1:27017`. `bun run mongo` opens the tunnel to it, and that tunnel
+is the production database: the API then reads and writes there, which is what `DISABLE_CRONS=true`
+in `apps/api/.env` keeps from spreading to the crons. `autoIndex` is on as well, so the first local
+boot builds any index production is missing. A dump of `projects`, `projectplans`,
+`projectplanevents` and `users` into a local database is enough to click through the hub without
+touching production — point `MONGO_CONNECTION_STRING` at it and nothing else changes.
