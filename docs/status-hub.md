@@ -195,9 +195,28 @@ is gone now): read and change it on the site or with `bun scripts/tasks.ts`.
 
 ## Trying it locally
 
-Chromium refuses a cookie with `Domain=.localhost`, which is what the API sets for a localhost
-origin, so signing in on `status.localhost` does not stick. To click through the hub locally, run
-the API against a throwaway database and the web with `NEXT_PUBLIC_API_URL` on a same-site host pair
-(for example `status.mooncellar.test` and `api.mooncellar.test` mapped to 127.0.0.1), allow that
-origin in `allowedDevOrigins` for the session, and put the session cookies into the browser by hand.
-Never point a local API at the production database for this: `autoIndex` builds the new indexes there.
+The hub is reached by host, and the session cookie is set for the domain the site and the API share
+(`getCookieDomain` in `apps/api/src/module/auth/auth-cookies.ts`). `localhost` has no such domain —
+Chromium refuses a cookie whose `Domain` is `.localhost` — so a local visit needs two names under a
+domain of their own:
+
+```sh
+# once, as root
+127.0.0.1 status.mooncellar.test api.mooncellar.test   >> /etc/hosts
+
+# the API, on its own database, with the hub allowed as an origin
+LOCAL_CONNECTION=http://status.mooncellar.test:3000,http://localhost:3000 bun run dev:api
+
+# the web, talking to the API on the second name
+NEXT_PUBLIC_API_URL=http://api.mooncellar.test:3228 \
+INTERNAL_API_URL=http://api.mooncellar.test:3228 bun run dev:web
+```
+
+Then `http://status.mooncellar.test:3000` opens the hub, and signing in puts a real cookie on
+`mooncellar.test` — nothing is copied into the browser by hand. The API sets it for
+`api.mooncellar.test` and the hub reads it on `status.mooncellar.test`, because both end in the same
+registrable domain; `allowedDevOrigins` in `next.config.mjs` already lists the host.
+
+Never point a local API at the production database for this: `autoIndex` builds the new indexes
+there. A dump of `projects`, `projectplans`, `projectplanevents` and `users` into a local database
+is enough to click through the hub, and it is the only way to try it without writing to production.

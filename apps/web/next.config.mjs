@@ -7,6 +7,9 @@ const monorepoRoot = join(projectRoot, "../..");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  // The hub is reached by host, so a local visit needs a second name beside `localhost`:
+  // `/etc/hosts` maps it to 127.0.0.1 and this lets the dev server serve its chunks there.
+  allowedDevOrigins: ["status.mooncellar.test", "api.mooncellar.test"],
   turbopack: {
     root: monorepoRoot,
   },
