@@ -64,6 +64,13 @@ fix(api): keep partial settings updates from wiping other keys
 One change per pull request. If a fix needs a refactor to make room for it, the refactor is
 easier to review as its own commit inside the same pull request than mixed into the fix.
 
+## Merging
+
+A pull request goes into `main` only after an explicit confirmation that this one should be
+merged. A green CI run, an approved review or a request to do the work are not confirmations:
+whoever asked for the change says when it goes in, and until then the pull request waits. Agents
+open the pull request and stop there — see the rule in [`CLAUDE.md`](CLAUDE.md).
+
 Repository-wide conventions that reviewers will check are collected in
 [`CLAUDE.md`](CLAUDE.md) — the monorepo rules, the shared `@mooncellar/schemas` package, and the
 constraints that are not visible from the code that breaks when they are violated.
