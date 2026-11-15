@@ -48,11 +48,12 @@ import {
 import { toReleaseDate } from "../../../shared/release-date";
 import { uniqueSlug } from "../../../shared/utils";
 import {
-  callOpenAi,
-  type IOpenAiOutput,
-  openAiModel,
-  outputText,
-} from "../../../shared/openai";
+  callDeepSeek,
+  deepSeekKey,
+  deepSeekModel,
+  type IDeepSeekMessage,
+  messageText,
+} from "../../../shared/deepseek";
 import { assertAiKey } from "../../../shared/ai";
 import { normalizeTitle } from "../utils/title-match.utils";
 import { FRONT_URL, RA_MAIN_USER_NAME } from "../../../shared/constants";
@@ -224,7 +225,10 @@ const TOOLS = [
       "Fetch a web page and return its title, text and image URLs. Use it on the link the admin gave and on store/wiki pages found by search.",
     parameters: object({ url: str }),
   },
-].map((tool) => ({ type: "function", strict: true, ...tool }));
+].map(({ name, description, parameters }) => ({
+  type: "function",
+  function: { name, description, parameters },
+}));
 
 const INSTRUCTIONS = `You research one video game and fill a database record for it, the way a careful editor would.
 The admin gives either a game name or a link to a page about the game. When it is a link, fetch it first.
@@ -246,7 +250,7 @@ Rules:
 - Image URLs must be direct links to image files, taken from tool results.
 - Research in few rounds: call several tools at once whenever the calls do not depend on each other, and answer as soon as the main fields are covered. You have at most ${MAX_TURNS} rounds of tool calls.`;
 
-const CHARACTER_TOOLS = TOOLS.filter(({ name }) =>
+const CHARACTER_TOOLS = TOOLS.filter(({ function: { name } }) =>
   ["search_web", "search_images", "fetch_page"].includes(name)
 );
 
@@ -339,55 +343,60 @@ type IResearchTurn = (
   text: string;
 }>;
 
-const openAiTurns = ({
+const deepSeekTurns = ({
   instructions,
   input,
   tools,
   schemaName,
   schema,
 }: IResearch): IResearchTurn => {
-  let body: Record<string, unknown> = {
-    model: openAiModel(),
-    instructions,
-    input,
-    tools,
-    text: {
-      format: { type: "json_schema", name: schemaName, strict: true, schema },
+  const messages: IDeepSeekMessage[] = [
+    {
+      role: "system",
+      content: `${instructions}
+
+Return one json object that matches the "${schemaName}" JSON schema below, with no text beside it:
+${JSON.stringify(schema)}`,
     },
-  };
+    { role: "user", content: input },
+  ];
+  let assistant: IDeepSeekMessage | null = null;
 
   return async (outputs, isLastTurn) => {
-    if (outputs.length) {
-      body = {
-        ...body,
-        input: outputs.map(({ id, output }) => ({
-          type: "function_call_output",
-          call_id: id,
-          output,
-        })),
-      };
+    if (assistant) {
+      messages.push(assistant);
+      messages.push(
+        ...outputs.map(({ id, output }): IDeepSeekMessage => ({
+          role: "tool",
+          tool_call_id: id,
+          content: output,
+        }))
+      );
     }
 
-    const response = await callOpenAi(process.env.OPENAI_API_KEY!, {
-      ...body,
+    const response = await callDeepSeek(deepSeekKey()!, {
+      model: deepSeekModel(),
+      messages,
+      tools,
       tool_choice: isLastTurn ? "none" : "auto",
+      response_format: isLastTurn ? { type: "json_object" } : undefined,
     });
 
-    body = { ...body, previous_response_id: response.id };
+    const message = response.choices[0]?.message;
+    const toolCalls = message?.tool_calls ?? [];
+    const calls = toolCalls.map((call) => ({
+      id: call.id,
+      name: call.function.name,
+      arguments: call.function.arguments,
+    }));
 
-    return {
-      calls: response.output
-        .filter(
-          (item): item is Extract<IOpenAiOutput, { type: "function_call" }> =>
-            item.type === "function_call"
-        )
-        .map((call) => ({
-          id: call.call_id,
-          name: call.name,
-          arguments: call.arguments,
-        })),
-      text: outputText(response.output),
+    assistant = {
+      role: "assistant",
+      content: message?.content ?? null,
+      ...(toolCalls.length ? { tool_calls: toolCalls } : {}),
     };
+
+    return { calls, text: messageText(response) };
   };
 };
 
@@ -809,7 +818,7 @@ export class GameAiDraftService implements OnModuleInit {
   }): Promise<T> {
     assertAiKey();
 
-    return this.runResearch<T>(openAiTurns(research), addStep);
+    return this.runResearch<T>(deepSeekTurns(research), addStep);
   }
 
   private async runResearch<T>(
@@ -826,14 +835,20 @@ export class GameAiDraftService implements OnModuleInit {
           ? "Out of research rounds, asking for the draft"
           : turn
             ? "Reading the results"
-            : "Asking OpenAI"
+            : "Asking DeepSeek"
       );
       const { calls, text } = await nextTurn(outputs, isLastTurn);
 
       if (!calls.length) {
-        if (!text) throw new BadGatewayException("OpenAI returned no draft");
+        if (!text) throw new BadGatewayException("DeepSeek returned no draft");
 
-        return JSON.parse(text) as T;
+        try {
+          return JSON.parse(text) as T;
+        } catch {
+          throw new BadGatewayException(
+            "DeepSeek returned a draft that is not valid JSON. Retry the draft."
+          );
+        }
       }
 
       outputs = await Promise.all(
@@ -877,7 +892,7 @@ export class GameAiDraftService implements OnModuleInit {
       }
     }
 
-    throw new BadGatewayException("OpenAI did not finish the research");
+    throw new BadGatewayException("DeepSeek did not finish the research");
   }
 
   private async searchWebWithFallback(query = "") {
@@ -893,20 +908,19 @@ export class GameAiDraftService implements OnModuleInit {
       reason = (err as Error).message;
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!deepSeekKey() || !query.trim()) {
       throw new Error(`SearXNG: ${reason}`);
     }
 
-    const text = outputText(
-      (
-        await callOpenAi(process.env.OPENAI_API_KEY, {
-          model: openAiModel(),
-          instructions: AI_SEARCH_INSTRUCTIONS,
-          input: query,
-          tools: [{ type: "web_search" }],
-          tool_choice: "required",
-        })
-      ).output
+    const text = messageText(
+      await callDeepSeek(deepSeekKey()!, {
+        model: deepSeekModel(),
+        messages: [
+          { role: "system", content: AI_SEARCH_INSTRUCTIONS },
+          { role: "user", content: query },
+        ],
+        tools: [{ type: "deepseek_web_search" }],
+      })
     );
 
     return `${AI_SEARCH_PREFIX} (SearXNG: ${reason})\n${text.trim() || "Nothing found."}`;

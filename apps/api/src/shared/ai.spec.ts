@@ -1,10 +1,10 @@
 import { ServiceUnavailableException } from "@nestjs/common";
 import { assertAiKey, generateJson } from "./ai";
-import { callOpenAi } from "./openai";
+import { callDeepSeek } from "./deepseek";
 
-jest.mock("./openai", () => ({
-  ...jest.requireActual("./openai"),
-  callOpenAi: jest.fn(),
+jest.mock("./deepseek", () => ({
+  ...jest.requireActual("./deepseek"),
+  callDeepSeek: jest.fn(),
 }));
 
 describe("AI generation", () => {
@@ -20,73 +20,71 @@ describe("AI generation", () => {
       additionalProperties: false,
     },
   };
+  const answer = (content: string) => ({
+    id: "chatcmpl",
+    choices: [{ finish_reason: "stop", message: { content } }],
+  });
 
   beforeEach(() => {
-    process.env = { ...originalEnv, OPENAI_API_KEY: "test" };
-    delete process.env.OPENAI_MODEL;
+    process.env = { ...originalEnv, DEEPSEEK_API_KEY: "test" };
+    delete process.env.DEEPSEEK_MODEL;
     jest
-      .mocked(callOpenAi)
+      .mocked(callDeepSeek)
       .mockReset()
-      .mockResolvedValue({
-        id: "response",
-        output: [
-          {
-            type: "message",
-            content: [{ type: "output_text", text: '{"name":"Game"}' }],
-          },
-        ],
-      });
+      .mockResolvedValue(answer('{"name":"Game"}'));
   });
 
   afterEach(() => {
     process.env = originalEnv;
   });
 
-  it("rejects missing OpenAI credentials before making a request", async () => {
-    delete process.env.OPENAI_API_KEY;
+  it("rejects missing DeepSeek credentials before making a request", async () => {
+    delete process.env.DEEPSEEK_API_KEY;
 
     expect(assertAiKey).toThrow(ServiceUnavailableException);
     await expect(generateJson(request)).rejects.toMatchObject({ status: 503 });
-    expect(callOpenAi).not.toHaveBeenCalled();
+    expect(callDeepSeek).not.toHaveBeenCalled();
   });
 
-  it("requests strict JSON from OpenAI and returns the model used", async () => {
+  it("asks for a JSON object and returns the model used", async () => {
     await expect(generateJson(request)).resolves.toEqual({
       text: '{"name":"Game"}',
-      model: "gpt-5-mini",
+      model: "deepseek-flash",
     });
-    expect(callOpenAi).toHaveBeenCalledWith("test", {
-      model: "gpt-5-mini",
-      instructions: request.instructions,
-      input: request.input,
-      text: {
-        format: {
-          type: "json_schema",
-          name: request.name,
-          strict: true,
-          schema: request.schema,
-        },
-      },
-    });
+    expect(callDeepSeek).toHaveBeenCalledWith(
+      "test",
+      expect.objectContaining({
+        model: "deepseek-flash",
+        messages: [
+          expect.objectContaining({
+            role: "system",
+            content: expect.stringContaining('"game" JSON schema'),
+          }),
+          { role: "user", content: request.input },
+        ],
+        response_format: { type: "json_object" },
+      })
+    );
   });
 
   it("includes the image for analysis and respects the configured model", async () => {
-    process.env.OPENAI_MODEL = "configured-model";
+    process.env.DEEPSEEK_MODEL = "configured-model";
     const image = "data:image/png;base64,aW1hZ2U=";
 
     await expect(generateJson({ ...request, image })).resolves.toMatchObject({
       model: "configured-model",
     });
-    expect(callOpenAi).toHaveBeenCalledWith(
+    expect(callDeepSeek).toHaveBeenCalledWith(
       "test",
       expect.objectContaining({
         model: "configured-model",
-        input: [
+        messages: [
+          expect.objectContaining({ role: "system" }),
           {
             role: "user",
             content: [
-              { type: "input_text", text: request.input },
-              { type: "input_image", image_url: image },
+              { type: "text", text: request.input },
+              { type: "image_url", image_url: { url: image } },
             ],
           },
         ],
@@ -94,11 +92,26 @@ describe("AI generation", () => {
     );
   });
 
-  it("propagates OpenAI errors without retrying", async () => {
-    const error = new Error("OpenAI is unavailable");
-    jest.mocked(callOpenAi).mockRejectedValue(error);
+  it("propagates DeepSeek errors without retrying", async () => {
+    const error = new Error("DeepSeek is unavailable");
+    jest.mocked(callDeepSeek).mockRejectedValue(error);
 
     await expect(generateJson(request)).rejects.toBe(error);
-    expect(callOpenAi).toHaveBeenCalledTimes(1);
+    expect(callDeepSeek).toHaveBeenCalledTimes(1);
+  });
+
+  it("answers 502 when the model returns no JSON", async () => {
+    jest.mocked(callDeepSeek).mockResolvedValue(answer("   "));
+
+    await expect(generateJson(request)).rejects.toMatchObject({ status: 502 });
+  });
+
+  it("answers 502 when the answer was cut off", async () => {
+    jest.mocked(callDeepSeek).mockResolvedValue({
+      id: "chatcmpl",
+      choices: [{ finish_reason: "length", message: { content: '{"name":' } }],
+    });
+
+    await expect(generateJson(request)).rejects.toMatchObject({ status: 502 });
   });
 });

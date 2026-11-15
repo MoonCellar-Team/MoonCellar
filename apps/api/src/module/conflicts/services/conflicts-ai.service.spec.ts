@@ -4,7 +4,7 @@ import {
   type IConflictAiVerdict,
   type IConflictItem,
 } from "@mooncellar/schemas";
-import { callOpenAi } from "../../../shared/openai";
+import { callDeepSeek } from "../../../shared/deepseek";
 import {
   buildConflictAiInput,
   isConflictAiMatch,
@@ -12,9 +12,9 @@ import {
 } from "../utils/conflicts-ai.utils";
 import { ConflictsAiService } from "./conflicts-ai.service";
 
-jest.mock("../../../shared/openai", () => ({
-  ...jest.requireActual("../../../shared/openai"),
-  callOpenAi: jest.fn(),
+jest.mock("../../../shared/deepseek", () => ({
+  ...jest.requireActual("../../../shared/deepseek"),
+  callDeepSeek: jest.fn(),
 }));
 
 const PLATFORM_ID = String(new mongoose.Types.ObjectId());
@@ -23,11 +23,11 @@ const GAME_B = String(new mongoose.Types.ObjectId());
 const ADMIN = { _id: new mongoose.Types.ObjectId(), userName: "admin" };
 
 const answer = (body: Record<string, unknown>) => ({
-  id: "resp",
-  output: [
+  id: "chatcmpl",
+  choices: [
     {
-      type: "message",
-      content: [{ type: "output_text", text: JSON.stringify(body) }],
+      finish_reason: "stop",
+      message: { content: JSON.stringify(body) },
     },
   ],
 });
@@ -38,7 +38,7 @@ const verdict = (
   gameIds: [GAME_A],
   confidence: "high",
   reason: "Same game.",
-  model: "gpt-5-mini",
+  model: "deepseek-flash",
   judgedAt: "2026-10-14T00:00:00.000Z",
   ...overrides,
 });
@@ -143,8 +143,8 @@ const buildService = (undecided: unknown[]) => {
 
 describe("Conflicts AI review", () => {
   beforeEach(() => {
-    process.env.OPENAI_API_KEY = "test";
-    jest.mocked(callOpenAi).mockReset();
+    process.env.DEEPSEEK_API_KEY = "test";
+    jest.mocked(callDeepSeek).mockReset();
   });
 
   it("keeps only candidate ids in a verdict and applies only confident matches", () => {
@@ -155,7 +155,7 @@ describe("Conflicts AI review", () => {
         reason: "r",
       }),
       ["a", "b"],
-      "gpt-5-mini"
+      "deepseek-flash"
     );
 
     expect(parsed.gameIds).toEqual(["a"]);
@@ -189,7 +189,7 @@ describe("Conflicts AI review", () => {
 
   it("stores verdicts and decides nothing on a dry run", async () => {
     jest
-      .mocked(callOpenAi)
+      .mocked(callDeepSeek)
       .mockResolvedValue(
         answer({ gameIds: [GAME_A], confidence: "high", reason: "r" }) as never
       );
@@ -204,7 +204,7 @@ describe("Conflicts AI review", () => {
       ADMIN
     );
 
-    expect(callOpenAi).toHaveBeenCalledTimes(1);
+    expect(callDeepSeek).toHaveBeenCalledTimes(1);
     expect(conflicts.setExternalData).toHaveBeenCalledWith("steam", [
       {
         externalId: "1",
@@ -219,7 +219,7 @@ describe("Conflicts AI review", () => {
 
   it("applies confident stored and new verdicts, never weak ones", async () => {
     jest
-      .mocked(callOpenAi)
+      .mocked(callDeepSeek)
       .mockResolvedValueOnce(
         answer({ gameIds: [GAME_B], confidence: "high", reason: "r" }) as never
       )
@@ -255,7 +255,7 @@ describe("Conflicts AI review", () => {
 
     await service.review("vndb", { limit: 0, apply: true }, ADMIN);
 
-    expect(callOpenAi).not.toHaveBeenCalled();
+    expect(callDeepSeek).not.toHaveBeenCalled();
     expect(conflicts.decide.mock.calls.map(([, id]) => id)).toEqual(["1"]);
   });
 
@@ -268,7 +268,7 @@ describe("Conflicts AI review", () => {
 
     expect(judge).toHaveBeenCalledTimes(1);
     expect(conflicts.getItem).not.toHaveBeenCalled();
-    expect(callOpenAi).not.toHaveBeenCalled();
+    expect(callDeepSeek).not.toHaveBeenCalled();
   });
 
   it("undoes every match the AI made, and goes on past a failure", async () => {
@@ -285,7 +285,7 @@ describe("Conflicts AI review", () => {
 
   it("counts every source before it starts, then reviews them in turn", async () => {
     jest
-      .mocked(callOpenAi)
+      .mocked(callDeepSeek)
       .mockResolvedValue(
         answer({ gameIds: [GAME_A], confidence: "high", reason: "r" }) as never
       );
@@ -505,7 +505,7 @@ describe("Conflicts AI review", () => {
   });
 
   it("stops when a whole batch fails", async () => {
-    jest.mocked(callOpenAi).mockRejectedValue(new Error("429"));
+    jest.mocked(callDeepSeek).mockRejectedValue(new Error("429"));
     const { service, conflicts } = buildService([conflict("1"), conflict("2")]);
 
     await expect(

@@ -9,7 +9,7 @@ import {
 import { Model } from "mongoose";
 import { withDbLock } from "../../../shared/cron-mutex";
 import { assertAiKey, generateJson } from "../../../shared/ai";
-import { openAiModel } from "../../../shared/openai";
+import { deepSeekModel } from "../../../shared/deepseek";
 import { parsePartialDate } from "../../../shared/release-date";
 import { GameMatcherService } from "../../games/matching/game-matcher.service";
 import { Game, type GameDocument } from "../../games/schemas/game.schema";
@@ -505,7 +505,7 @@ export class ConflictsAiService {
 
   private judgeItem(source: IConflictSource): TConflictJudge {
     return async (conflict, platformNames) => {
-      const model = openAiModel();
+      const model = deepSeekModel();
       const item = await this.conflicts.getItem(source, conflict.externalId);
 
       if (!item?.subject) {
