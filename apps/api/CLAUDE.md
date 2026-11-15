@@ -63,6 +63,13 @@ an instance of Module)`. Use a default import; tsc reports the call as `TS2349`.
 
 ## Auth
 
+- **The session cookie's domain is derived from the request's `Origin` (`getCookieDomain`), never
+  hard-coded.** The site, the hub and the API share one session, so the cookie is set for the
+  domain they have in common — `mooncellar.space` in production, `mooncellar.test` for the local
+  pair of test hosts — and a new deploy host therefore needs no code change. On `localhost` the
+  cookie is host-only: Chromium refuses one whose `Domain` is `.localhost`, which is why a local
+  sign-in on a `status.*` host needs that pair rather than a subdomain of `localhost`.
+
 - **Every path that ends a session clears the cookies in its own response, before anything
   that can throw.** The browser cannot drop the `httpOnly` cookies itself, so a logout that
   fails on the user update, or a refresh rejected because a logout elsewhere nulled
