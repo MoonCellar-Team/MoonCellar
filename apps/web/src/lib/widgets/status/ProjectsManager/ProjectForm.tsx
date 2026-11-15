@@ -14,6 +14,7 @@ import styles from "./ProjectsManager.module.scss";
 export interface IProjectFormValues {
   name: string;
   slug: string;
+  group: string;
   blocks: IProjectBlock[];
   defaultBlock: IProjectBlock;
 }
@@ -38,6 +39,7 @@ export const ProjectForm: FC<IProjectFormProps> = ({
 }) => {
   const isSlugLocked = !!project || !!defaults?.slug;
   const [name, setName] = useState(project?.name ?? defaults?.name ?? "");
+  const [group, setGroup] = useState(project?.group ?? defaults?.group ?? "");
   const [slug, setSlug] = useState(
     project?.slug ?? defaults?.slug ?? toSlug(defaults?.name ?? "")
   );
@@ -51,6 +53,7 @@ export const ProjectForm: FC<IProjectFormProps> = ({
   const parsed = CreateProjectRequestSchema.safeParse({
     name,
     slug,
+    group,
     blocks,
     defaultBlock,
   });
@@ -86,6 +89,14 @@ export const ProjectForm: FC<IProjectFormProps> = ({
             setSlug(value);
           }}
         />
+        <div className={styles.form__group}>
+          <TextField
+            label="Group"
+            placeholder="Ungrouped"
+            value={group}
+            onChange={setGroup}
+          />
+        </div>
       </div>
       <div className={styles.form__blocks}>
         {PROJECT_BLOCKS.map((block) => (
@@ -128,6 +139,7 @@ export const ProjectForm: FC<IProjectFormProps> = ({
             parsed.success &&
             onSubmit({
               ...parsed.data,
+              group: parsed.data.group ?? "",
               defaultBlock: parsed.data.defaultBlock ?? defaultBlock,
             })
           }

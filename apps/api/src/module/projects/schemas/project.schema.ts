@@ -42,6 +42,8 @@ export class Project {
   slug: string;
   @Prop({ type: String, required: true })
   name: string;
+  @Prop({ type: String, default: null })
+  group?: string | null;
   @Prop({ type: [String], required: true })
   blocks: IProjectBlock[];
   @Prop({ type: String, enum: ["decomp", "plan"] })

@@ -67,7 +67,7 @@ export const findProjectToken = (token: string, tokens: ProjectToken[]) =>
 
 type IStoredProject = Pick<
   Project,
-  "slug" | "name" | "blocks" | "createdAt"
+  "slug" | "name" | "group" | "blocks" | "createdAt"
 > & {
   defaultBlock?: IProjectBlock;
   uploads?: Project["uploads"];
@@ -80,6 +80,7 @@ const toIso = (date: Date | string | null | undefined) =>
 export const toProject = (project: IStoredProject): IProject => ({
   slug: project.slug,
   name: project.name,
+  ...(project.group ? { group: project.group } : {}),
   blocks: project.blocks,
   defaultBlock:
     project.defaultBlock && project.blocks.includes(project.defaultBlock)
@@ -192,6 +193,7 @@ export class ProjectsService implements OnModuleInit {
     const project = await this.projects.create({
       slug: dto.slug,
       name: dto.name,
+      group: dto.group || null,
       blocks: dto.blocks,
       defaultBlock,
       tokens: [],
@@ -218,7 +220,12 @@ export class ProjectsService implements OnModuleInit {
       .findOneAndUpdate(
         { slug },
         {
-          $set: { name: dto.name ?? project.name, blocks, defaultBlock },
+          $set: {
+            name: dto.name ?? project.name,
+            blocks,
+            defaultBlock,
+            ...(dto.group !== undefined && { group: dto.group || null }),
+          },
           $pull: { uploads: { block: { $in: dropped } } },
         },
         { new: true }

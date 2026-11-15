@@ -1,0 +1,1309 @@
+<title>Status hub projects menu</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* mooncellar-tokens:start */
+/* Generated from apps/web/src/lib/app/styles/vars by
+   `bun --filter web sync:tokens`. Do not edit by hand. */
+:root {
+  /* vars/_colors.scss */
+  --color-neutral-5: #080a0b;
+  --color-neutral-10: #0d1011;
+  --color-neutral-15: #121516;
+  --color-neutral-20: #161b1d;
+  --color-neutral-25: #1a2022;
+  --color-neutral-30: #1f2628;
+  --color-neutral-35: #262d2f;
+  --color-neutral-40: #2f3537;
+  --color-neutral-45: #383e40;
+  --color-neutral-50: #3f4750;
+  --color-neutral-55: #50575d;
+  --color-neutral-60: #5e6a6e;
+  --color-neutral-70: #747d82;
+  --color-neutral-80: #9192a1;
+  --color-neutral-85: #b0b2bc;
+  --color-neutral-90: #d9d9d9;
+  --color-neutral-95: #eaeaea;
+  --color-neutral-100: #ffffff;
+  --color-blue: #3d6bff;
+  --color-blue-light: #00d4ff;
+  --color-cyan: #48cae4;
+  --color-gray: #afb3b9;
+  --color-white: #e8edf5;
+  --color-yellow: #ffc451;
+  --color-yellow-light: #f9f871;
+  --color-orange: #ff8862;
+  --color-pink: #ff4b8f;
+  --color-violet: #9b5de5;
+  --color-green: #2dc653;
+  --color-red: #e5383b;
+  --color-positive: #00c292;
+  --color-negative: #d02729;
+  --color-primary: var(--color-neutral-30);
+  --color-secondary: var(--color-neutral-90);
+  --color-contrast: var(--color-neutral-100);
+  --color-contrast-reverse: var(--color-neutral-5);
+  --color-attention: #ffc451;
+  --color-text-primary: var(--color-neutral-100);
+  --color-text-secondary: var(--color-neutral-90);
+  --color-text-muted: var(--color-neutral-85);
+  --color-accent: #6951ee;
+  --color-bg-primary: #191d24;
+  --color-bg-secondary: #212731;
+  --color-bg-tertiary: #2c3340;
+  --color-bg-accent: #6951ee;
+  --color-bg-hover: #374151;
+  --color-bg-positive: #00c292;
+  --color-bg-primary-tint: #191d24ee;
+  --color-bg-secondary-tint: #212731ee;
+  --color-bg-tertiary-tint: #2c3340ee;
+  --color-bg-accent-tint: #6951eeee;
+  --color-bg-positive-tint: #00c292ee;
+  --color-border-primary: var(--color-neutral-35);
+  --color-scrollbar-track: var(--color-neutral-15);
+  --color-scrollbar-thumb: var(--color-neutral-80);
+  --color-border-secondary: var(--color-neutral-85);
+
+  /* vars/_common.scss */
+  --padding-x05: calc(var(--padding-x1) * 0.5);
+  --padding-x1: 4px;
+  --padding-x2: calc(var(--padding-x1) * 2);
+  --padding-x3: calc(var(--padding-x1) * 3);
+  --padding-x4: calc(var(--padding-x1) * 4);
+  --padding-x5: calc(var(--padding-x1) * 5);
+  --padding-x6: calc(var(--padding-x1) * 6);
+  --padding-x7: calc(var(--padding-x1) * 7);
+  --padding-x8: calc(var(--padding-x1) * 8);
+  --padding-x9: calc(var(--padding-x1) * 9);
+  --padding-x10: calc(var(--padding-x1) * 10);
+  --padding-x11: calc(var(--padding-x1) * 11);
+  --padding-x12: calc(var(--padding-x1) * 12);
+  --padding-x13: calc(var(--padding-x1) * 13);
+  --padding-x14: calc(var(--padding-x1) * 14);
+  --padding-x15: calc(var(--padding-x1) * 15);
+  --padding-x16: calc(var(--padding-x1) * 16);
+  --padding-x17: calc(var(--padding-x1) * 17);
+  --padding-x18: calc(var(--padding-x1) * 18);
+  --padding-x19: calc(var(--padding-x1) * 19);
+  --padding-x20: calc(var(--padding-x1) * 20);
+  --padding-x25: calc(var(--padding-x1) * 25);
+  --radius-x1: 4px;
+  --radius-x2: calc(var(--radius-x1) * 2);
+  --radius-x3: calc(var(--radius-x1) * 3);
+  --radius-x4: calc(var(--radius-x1) * 4);
+  --radius-x5: calc(var(--radius-x1) * 5);
+  --radius-x6: calc(var(--radius-x1) * 6);
+  --radius-x7: calc(var(--radius-x1) * 7);
+  --radius-x8: calc(var(--radius-x1) * 8);
+  --radius-x9: calc(var(--radius-x1) * 9);
+  --radius-x10: calc(var(--radius-x1) * 10);
+  --radius-control: var(--radius-x4);
+  --radius-button: var(--radius-x3);
+  --gap-x05: calc(var(--gap-x1) * 0.5);
+  --gap-x1: 4px;
+  --gap-x2: calc(var(--gap-x1) * 2);
+  --gap-x3: calc(var(--gap-x1) * 3);
+  --gap-x4: calc(var(--gap-x1) * 4);
+  --gap-x5: calc(var(--gap-x1) * 5);
+  --gap-x6: calc(var(--gap-x1) * 6);
+  --gap-x7: calc(var(--gap-x1) * 7);
+  --gap-x8: calc(var(--gap-x1) * 8);
+  --gap-x9: calc(var(--gap-x1) * 9);
+  --gap-x10: calc(var(--gap-x1) * 10);
+  --gap-x11: calc(var(--gap-x1) * 11);
+  --gap-x12: calc(var(--gap-x1) * 12);
+  --blur-x1: 6px;
+  --rich-text-gap: 8px;
+  --duration-instant: 1ms;
+  --duration-fast: 160ms;
+  --duration-base: 280ms;
+  --duration-slow: 400ms;
+  --delay-stagger: 90ms;
+  --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --easing-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --reveal-offset: 12px;
+  --reveal-scale: 0.96;
+  --header-height: 45px;
+  --container-padding-top: calc(var(--header-height) + var(--padding-x3));
+  --container-padding-bottom: var(--padding-x3);
+  --page-height-available: calc(
+    100dvh - var(--container-padding-top) - var(--container-padding-bottom)
+  );
+
+  /* vars/_components.scss */
+  --game-completed-color: var(--color-green);
+  --game-dropped-color: var(--color-red);
+  --game-playing-color: var(--color-blue);
+  --game-wishlist-color: var(--color-violet);
+  --game-backlog-color: var(--color-white);
+  --game-played-color: var(--color-cyan);
+  --game-mastered-color: var(--color-yellow);
+  --cover-ratio: 528/704;
+  --shadow-basic: 0px 4px 4px var(--color-neutral-5);
+  --shadow-text: drop-shadow(0 1px 2px var(--color-neutral-5))
+    drop-shadow(0 0 6px var(--color-neutral-5));
+  --glow-accent: 0 0 0.4rem var(--color-accent);
+  --glow-accent-sm: 0 0 0.15rem var(--color-accent);
+  --avatar-size-sm: var(--padding-x6);
+  --navigation-progress-height: 1px;
+  --navigation-progress-z-index: 1002;
+  --bprogress-color: var(--color-accent) !important;
+  --bprogress-height: var(--navigation-progress-height) !important;
+  --bprogress-box-shadow: var(--glow-accent) !important;
+  --bprogress-z-index: var(--navigation-progress-z-index) !important;
+  --modal-text-width: min(720px, calc(100vw - var(--padding-x10)));
+  --rich-editor-image-width: 400px;
+  --rich-editor-separator-height: 18px;
+  --playthrough-modal-width: min(80vw, 400px);
+  --header-logo-height: 85%;
+  --header-logo-height-sm: 72%;
+  --tab-count-color: color-mix(in srgb, currentColor 60%, transparent);
+  --playthrough-modal-height: min(70dvh, 500px);
+  --playthrough-modal-width-lg: min(88vw, 760px);
+  --playthrough-modal-height-lg: min(86dvh, 780px);
+  --games-card-min-width: 180px;
+  --list-card-min-width: 180px;
+  --range-track-height: 6px;
+  --progress-bar-height: 6px;
+  --progress-bar-sweep-duration: 1200ms;
+  --range-thumb-size: 20px;
+  --range-thumb-width: 44px;
+  --range-thumb-height: 24px;
+  --scrollbar-horizontal-size: 6px;
+  --scrollbar-arrow-width: 32px;
+  --scrollbar-fade-width: 48px;
+  --game-keywords-collapsed-height: 66px;
+  --game-hero-artwork-height: 300px;
+  --game-hero-artwork-height-sm: 180px;
+  --game-hero-cover-width: 200px;
+  --game-hero-cover-offset: 104px;
+  --game-hero-counters-width: 360px;
+  --game-facts-label-width: 84px;
+  --game-rating-popover-width: 320px;
+  --popover-width: 320px;
+  --achievements-icon-size: 44px;
+  --achievements-icon-size-sm: 48px;
+  --port-achievement-icon-size-sm: 32px;
+  --port-game-card-width: 140px;
+  --port-game-card-width-sm: 96px;
+  --popover-max-height: 320px;
+  --popover-sheet-max-height: 85dvh;
+  --textarea-handle-size: 20px;
+  --image-generator-preview-width: 160px;
+  --ai-drafts-count-width: 88px;
+  --image-finder-portrait-width: 216px;
+  --image-finder-landscape-width: 320px;
+  --site-sessions-modal-width: min(560px, calc(100vw - var(--padding-x8)));
+  --image-generator-elements-width: min(640px, calc(100vw - var(--padding-x8)));
+  --popover-sheet-grabber-width: 40px;
+  --popover-sheet-grabber-height: 5px;
+  --drawer-width: max(20vw, 460px);
+  --drawer-z-index: 5;
+  --expandable-scroll-height: 132px;
+  --expandable-fade-height: 32px;
+  --date-picker-width: 300px;
+  --date-picker-field-min-width: 140px;
+  --game-card-min-width: 160px;
+  --playthrough-platform-min-width: 200px;
+  --playthrough-time-min-width: 120px;
+  --date-picker-cell-size: 34px;
+  --emoji-picker-width: 328px;
+  --emoji-picker-cell-size: 34px;
+  --emoji-picker-group-size: 28px;
+  --emoji-picker-grid-height: 238px;
+  --game-hero-scrim: linear-gradient(
+    180deg,
+    #191d248c 0%,
+    #191d2400 30%,
+    #212731d1 72%,
+    var(--color-bg-secondary) 100%
+  );
+  --spoiler-blur: 7px;
+  --community-avatar-size: 36px;
+  --community-reply-avatar-size: 28px;
+  --community-review-clamp-height: 132px;
+  --community-distribution-height: 8px;
+  --community-distribution-min-width: 240px;
+  --community-dot-size: 7px;
+  --community-loading-height: 96px;
+  --user-review-card-width: 170px;
+  --user-review-card-width-sm: 140px;
+  --user-review-rating-filter-width: 260px;
+  --vndb-review-height: max(360px, calc(100vh - 420px));
+  --vndb-cover-width: 120px;
+  --vndb-search-width: 320px;
+  --conflicts-state-filter-width: 240px;
+  --conflicts-ai-limit-width: 96px;
+  --vndb-candidate-cover-width: 64px;
+  --empty-state-image-size: 180px;
+  --empty-state-image-size-sm: 96px;
+  --empty-state-inline-text-min-width: 200px;
+  --empty-state-page-content-width: 420px;
+  --badge-negative-color: var(--color-orange);
+  --badge-tint-strength: 16%;
+  --stat-tile-bg: var(--color-bg-primary);
+  --not-found-image-height: 240px;
+  --not-found-backdrop-size: 400px;
+  --favorite-color: var(--color-pink);
+  --moon-phase-lit-color: var(--color-neutral-95);
+  --moon-phase-dark-color: var(--color-bg-hover);
+  --moon-phase-unknown-color: var(--color-text-muted);
+  --moon-phase-unknown-fill: var(--color-bg-secondary);
+  --release-calendar-card-width: 172px;
+  --release-calendar-card-width-sm: var(--game-card-min-width);
+  --release-calendar-month-height: 16px;
+  --release-calendar-node-size: 28px;
+  --release-calendar-axis-color: var(--color-bg-hover);
+  --game-controls-icon-size: 24px;
+  --game-controls-icon-size-sm: 20px;
+  --game-controls-badge-size: 15px;
+  --list-card-row-mosaic-size: 44px;
+  --list-card-count-height: 20px;
+  --list-search-width: 320px;
+  --list-row-cover-width: 40px;
+  --profile-hero-height: 168px;
+  --profile-avatar-size: 112px;
+  --profile-avatar-size-sm: 72px;
+  --activity-cover-width: 80px;
+  --people-avatar-size: 22px;
+  --character-card-width: 128px;
+  --character-card-width-sm: 104px;
+  --character-profile-portrait-width: 200px;
+  --character-editor-portrait-width: 150px;
+  --image-picker-thumb-width: 160px;
+  --game-images-modal-width: min(92vw, 960px);
+  --game-port-achievements-modal-width: min(92vw, 960px);
+  --requests-queue-width: 440px;
+  --list-sort-width: 280px;
+  --field-control-height: 40px;
+  --gauntlet-mode-cards-width: 300px;
+  --gauntlet-winner-cover-width: 200px;
+  --gauntlet-winner-cover-width-mobile: 220px;
+  --gauntlet-wheel-max-width: 50vw;
+  --gauntlet-fact-label-width: 110px;
+  --object-field-min-width: 160px;
+  --requests-panel-min-height: 240px;
+  --page-skeleton-crumbs-width: 160px;
+  --page-skeleton-title-width: 240px;
+  --search-modal-width: 900px;
+  --search-tab-height: 36px;
+  --article-page-width: 1080px;
+  --news-sidebar-width: 300px;
+  --article-row-thumb-width: 176px;
+  --article-row-thumb-width-sm: 96px;
+  --article-row-game-cover-width: 14px;
+  --article-game-cover-width: 92px;
+  --article-game-cover-width-sm: 64px;
+  --article-text-gap: 16px;
+  --article-box-padding: var(--padding-x6);
+  --game-stats-bar-height: 8px;
+  --game-stats-dot-size: 7px;
+  --reaction-active-color: var(--color-accent);
+  --tabs-muted-opacity: 0.55;
+  --burger-animation-duration: 600ms;
+  --status-menu-width: 248px;
+  --status-menu-row-height: 24px;
+  --status-menu-dot-size: 6px;
+  --status-menu-active-bg: color-mix(
+    in srgb,
+    var(--color-accent) 16%,
+    transparent
+  );
+  --status-pending-color: color-mix(
+    in srgb,
+    var(--color-positive) 38%,
+    var(--color-bg-primary)
+  );
+  --status-map-cell: 9px;
+  --status-card-width: min(380px, 100%);
+  --status-edit-modal-width: min(560px, calc(100vw - var(--padding-x8)));
+}
+/* mooncellar-tokens:end */
+
+  :root {
+    --mock-ui: "Hanken Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mock-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --mock-ground: var(--color-neutral-10);
+    --mock-hairline: var(--color-neutral-30);
+    --mock-row-height: 32px;
+    --mock-dot-size: 6px;
+    --mock-rail-width: 56px;
+    --mock-mark-ring: 36px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--mock-ground);
+    color: var(--color-text-primary);
+    font-family: var(--mock-ui);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .shell {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding-inline: var(--padding-x6);
+    padding-block: var(--padding-x14) var(--padding-x20);
+  }
+
+  @media (max-width: 520px) {
+    .shell {
+      padding-inline: var(--padding-x4);
+      padding-block: var(--padding-x9) var(--padding-x14);
+    }
+  }
+
+  h1, h2, h3 { margin: 0; text-wrap: balance; }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-gray);
+    margin: 0;
+  }
+
+  .masthead { display: flex; flex-direction: column; gap: var(--gap-x4); }
+  .masthead h1 { font-size: 34px; line-height: 1.15; font-weight: 700; letter-spacing: -0.5px; }
+  .lede { color: var(--color-text-secondary); max-width: 64ch; margin: 0; }
+
+  .box {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-x5);
+    padding: var(--padding-x5);
+  }
+
+  .note {
+    margin-top: var(--padding-x6);
+    font-size: 13px;
+    color: var(--color-gray);
+    border-left: 2px solid var(--color-border-primary);
+    padding-left: var(--padding-x3);
+  }
+
+  code.t { font-family: var(--mock-mono); font-size: 12px; color: var(--color-yellow); }
+
+  .svg { width: 15px; height: 15px; flex: none; }
+  .svg--10 { width: 10px; height: 10px; }
+  .svg--13 { width: 13px; height: 13px; }
+  .svg--14 { width: 14px; height: 14px; }
+  .svg--16 { width: 16px; height: 16px; }
+
+  .screen {
+    margin-top: var(--padding-x14);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-x3);
+  }
+
+  .screen__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--gap-x3);
+    flex-wrap: wrap;
+  }
+
+  .screen h2 { font-size: 21px; line-height: 1.3; letter-spacing: -0.2px; }
+  .screen__route { font-family: var(--mock-mono); font-size: 12px; color: var(--color-text-muted); }
+  .screen__thesis { margin: 0; max-width: 72ch; font-size: 14.5px; color: var(--color-text-secondary); }
+  .screen__trade { margin: 0; max-width: 72ch; font-size: 13.5px; color: var(--color-text-muted); }
+  .screen__trade b { color: var(--color-text-secondary); font-weight: 600; }
+
+  .stage {
+    border: 1px solid var(--mock-hairline);
+    border-radius: var(--radius-x5);
+    padding: var(--padding-x4);
+  }
+
+  .hub {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--status-menu-width) minmax(0, 1fr);
+    gap: var(--gap-x4);
+    align-items: start;
+  }
+
+  .hub_rail { grid-template-columns: var(--mock-rail-width) minmax(0, 1fr); }
+
+  @media (max-width: 640px) {
+    .hub, .hub_rail { grid-template-columns: 1fr; }
+  }
+
+  .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-x4); }
+  .pair > div { display: flex; flex-direction: column; gap: var(--gap-x2); min-width: 0; }
+  .pair__label { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-gray); }
+
+  @media (max-width: 760px) {
+    .pair { grid-template-columns: 1fr; }
+  }
+
+  .menu { display: flex; flex-direction: column; gap: var(--gap-x05); }
+
+  .menu_msn { padding: var(--padding-x3); }
+  .menu_edges { width: var(--status-menu-width); padding: var(--padding-x2); }
+
+  .menu__caption {
+    margin: 0;
+    padding: var(--padding-x1) var(--padding-x2);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-gray);
+  }
+
+  .menu__sep { height: 1px; margin-block: var(--padding-x2); background: var(--color-border-primary); }
+
+  .menu__item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px var(--gap-x2);
+    padding: var(--padding-x2) var(--padding-x3);
+    border-radius: var(--radius-x3);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+  }
+
+  .menu__item:hover { background: var(--color-bg-tertiary); color: var(--color-text-primary); }
+  .menu__item--current { background: var(--status-menu-active-bg); color: var(--color-text-primary); }
+  .menu__item--manage { align-items: center; }
+
+  .menu__name { font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .menu__kinds { display: flex; align-items: center; gap: var(--gap-x1); color: var(--color-text-muted); }
+  .menu__meta { grid-column: 1 / -1; font-size: 12px; color: var(--color-text-muted); }
+
+  .group { display: flex; flex-direction: column; gap: var(--gap-x05); margin-top: var(--padding-x1); }
+
+  .group__head {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-x2);
+    width: 100%;
+    padding: var(--padding-x1) var(--padding-x2);
+    border: 0;
+    border-radius: var(--radius-x3);
+    background: none;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .group__head:hover { background: var(--color-bg-tertiary); color: var(--color-text-primary); }
+  .group__head:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .group__chevron { transition: transform var(--duration-fast) var(--easing-out); }
+  .group__head[aria-expanded="false"] .group__chevron { transform: rotate(-90deg); }
+  .group__count { margin-left: auto; font-size: 11px; letter-spacing: 0.04em; color: var(--color-gray); font-variant-numeric: tabular-nums; }
+
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--gap-x2);
+    min-height: var(--mock-row-height);
+    padding: var(--padding-x1) var(--padding-x2);
+    border-radius: var(--radius-x3);
+    color: var(--color-text-secondary);
+    transition: background-color var(--duration-fast) var(--easing-out);
+  }
+
+  .row:hover, .row_hover { background: var(--color-bg-tertiary); color: var(--color-text-primary); }
+  .row_current, .row_current:hover { background: var(--status-menu-active-bg); color: var(--color-text-primary); }
+
+  .row__link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--gap-x2);
+    color: inherit;
+    text-decoration: none;
+    min-width: 0;
+  }
+
+  .row__link_dense { grid-template-columns: var(--mock-dot-size) minmax(0, 1fr); }
+  .stage_dense .row { min-height: 24px; padding-block: var(--padding-x05); }
+  .stage_dense .row__name { line-height: 1.4; }
+
+  .row__link:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: var(--radius-x2); }
+
+  .row__name { font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row__blocks { display: flex; align-items: center; gap: var(--gap-x1); color: var(--color-text-muted); }
+  .row__dot { width: var(--mock-dot-size); height: var(--mock-dot-size); border-radius: 50%; background: var(--color-positive); }
+  .row__dot_stale { background: var(--color-yellow); }
+  .row__dot_never { background: var(--color-text-muted); }
+
+  .star {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-x2);
+    background: none;
+    color: var(--color-text-muted);
+    opacity: 0;
+    cursor: pointer;
+    transition: opacity var(--duration-fast) var(--easing-out), color var(--duration-fast) var(--easing-out);
+  }
+
+  .row:hover .star, .row_hover .star, .row:focus-within .star, .star[aria-pressed="true"] { opacity: 1; }
+  .star:hover { color: var(--color-text-primary); }
+  .star[aria-pressed="true"] { color: var(--color-accent); }
+  .star:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+
+  .card {
+    position: absolute;
+    z-index: 5;
+    top: calc(var(--padding-x1) * -1);
+    left: calc(100% + var(--gap-x5));
+    width: var(--popover-width);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-x2);
+    padding: var(--padding-x3) var(--padding-x4);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-x4);
+    box-shadow: var(--shadow-basic);
+    color: var(--color-text-secondary);
+    font-size: 13px;
+  }
+
+  .card_static { position: static; width: auto; box-shadow: none; }
+
+  @media (max-width: 900px) {
+    .card { position: static; width: auto; grid-column: 1 / -1; margin-top: var(--gap-x1); }
+  }
+
+  .card__name { margin: 0; font-size: 14px; font-weight: 700; color: var(--color-text-primary); }
+  .card__block { display: grid; grid-template-columns: 15px minmax(0, 1fr) auto; gap: var(--gap-x2); align-items: center; }
+  .card__label { color: var(--color-text-muted); }
+  .card__value { color: var(--color-text-secondary); font-variant-numeric: tabular-nums; text-align: right; }
+
+  .card__foot {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-x1);
+    margin: 0;
+    padding-top: var(--gap-x2);
+    border-top: 1px solid var(--color-border-primary);
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+
+  .card__foot_stale { color: var(--color-yellow); }
+  .card__empty { margin: 0; font-size: 12.5px; color: var(--color-text-muted); }
+
+  .page { display: flex; flex-direction: column; gap: var(--gap-x3); min-width: 0; }
+  .page__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--gap-x3); flex-wrap: wrap; }
+  .page h3 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  .page__meta { display: flex; align-items: center; gap: var(--gap-x1); font-size: 12.5px; color: var(--color-text-muted); }
+
+  .page__tabs { display: flex; gap: var(--gap-x1); border-bottom: 1px solid var(--color-bg-hover); }
+  .page__tab { padding: var(--padding-x1) var(--padding-x3); font-size: 13.5px; font-weight: 600; color: var(--color-text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .page__tab[aria-selected="true"] { color: var(--color-text-primary); border-bottom-color: var(--color-accent); }
+  .page__count { font-size: 12px; color: var(--color-text-muted); font-weight: 500; }
+
+  .page__ph {
+    display: flex;
+    align-items: center;
+    min-height: 132px;
+    padding: var(--padding-x4);
+    border: 1px dashed var(--color-border-primary);
+    border-radius: var(--radius-x4);
+    font-size: 13px;
+    color: var(--color-text-muted);
+  }
+
+  .rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-x2);
+    padding: var(--padding-x2);
+  }
+
+  .mark { position: relative; display: grid; place-items: center; width: var(--mock-mark-ring); height: var(--mock-mark-ring); text-decoration: none; color: var(--color-text-secondary); }
+  .mark:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 50%; }
+
+  .mark__ring {
+    display: grid;
+    place-items: center;
+    width: var(--mock-mark-ring);
+    height: var(--mock-mark-ring);
+    border-radius: 50%;
+    background: conic-gradient(var(--color-accent) calc(var(--p, 0) * 1%), var(--color-bg-tertiary) 0);
+  }
+
+  .mark__ring > span {
+    display: grid;
+    place-items: center;
+    width: calc(var(--mock-mark-ring) - 6px);
+    height: calc(var(--mock-mark-ring) - 6px);
+    border-radius: 50%;
+    background: var(--color-bg-secondary);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .mark:hover .mark__ring > span { background: var(--color-bg-tertiary); color: var(--color-text-primary); }
+  .mark_current .mark__ring > span { background: var(--status-menu-active-bg); color: var(--color-text-primary); }
+  .mark_never .mark__ring { background: var(--color-bg-tertiary); }
+  .mark_manage .mark__ring { background: var(--color-bg-tertiary); }
+
+  .mark_fav::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--padding-x2) * -1);
+    top: 50%;
+    width: 2px;
+    height: 16px;
+    transform: translateY(-50%);
+    border-radius: var(--radius-x1);
+    background: var(--color-accent);
+  }
+
+  .rail__sep { width: 22px; height: 1px; background: var(--color-border-primary); }
+
+  .expand { position: absolute; top: 0; left: 0; z-index: 4; width: var(--status-menu-width); }
+  .menu_floating { box-shadow: var(--shadow-basic); }
+
+  .edges { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-x4); }
+  .edge { display: flex; flex-direction: column; gap: var(--gap-x2); min-width: 0; }
+  .edge__label { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-gray); }
+  .edge__note { margin: 0; font-size: 13px; color: var(--color-text-muted); }
+  .edge__cards { display: flex; flex-direction: column; gap: var(--gap-x2); }
+
+  @media (max-width: 720px) {
+    .edges { grid-template-columns: 1fr; }
+  }
+
+  .phone { max-width: 360px; display: flex; flex-direction: column; gap: var(--gap-x2); }
+
+  .field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap-x2);
+    height: 40px;
+    padding: var(--padding-x2) var(--padding-x3);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-control);
+    font-size: 14px;
+    color: var(--color-text-primary);
+  }
+
+  .field__chevron { color: var(--color-text-muted); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: var(--duration-instant) !important; }
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-code" viewBox="0 0 18 18"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="m6 4-4 5 4 5M12 4l4 5-4 5"/></symbol>
+  <symbol id="i-list" viewBox="0 0 18 18"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M6 4.5h10M6 9h10M6 13.5h10M2.6 4.5h.01M2.6 9h.01M2.6 13.5h.01"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 512 512"><path fill="currentColor" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.92 2.868a1.25 1.25 0 0 1 2.16 0l2.795 4.798l5.428 1.176a1.25 1.25 0 0 1 .667 2.054l-3.7 4.141l.56 5.525a1.25 1.25 0 0 1-1.748 1.27L12 19.592l-5.082 2.24a1.25 1.25 0 0 1-1.748-1.27l.56-5.525l-3.7-4.14a1.25 1.25 0 0 1 .667-2.055l5.428-1.176zM12 4.987L9.687 8.959a1.25 1.25 0 0 1-.816.592l-4.492.973l3.062 3.427c.234.262.347.61.312.959l-.463 4.573l4.206-1.854a1.25 1.25 0 0 1 1.008 0l4.206 1.854l-.463-4.573a1.25 1.25 0 0 1 .311-.959l3.063-3.427l-4.492-.973a1.25 1.25 0 0 1-.816-.592z"/></symbol>
+  <symbol id="i-star-fill" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.6l2.94 6.16l6.66.92l-4.85 4.7l1.2 6.62L12 17.82l-5.95 3.18l1.2-6.62L2.4 9.68l6.66-.92z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M12 3.5a8.5 8.5 0 1 0 0 17a8.5 8.5 0 0 0 0-17M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path fill="currentColor" d="M14.279 2.152C13.909 2 13.439 2 12.5 2s-1.408 0-1.779.152a2 2 0 0 0-1.09 1.083c-.094.223-.13.484-.145.863a1.62 1.62 0 0 1-.796 1.353a1.64 1.64 0 0 1-1.579.008c-.338-.178-.583-.276-.825-.308a2.03 2.03 0 0 0-1.49.396c-.318.242-.553.646-1.022 1.453c-.47.807-.704 1.21-.757 1.605c-.07.526.074 1.058.4 1.479c.148.192.357.353.68.555c.477.297.783.803.783 1.361s-.306 1.064-.782 1.36c-.324.203-.533.364-.682.556a2 2 0 0 0-.399 1.479c.053.394.287.798.757 1.605s.704 1.21 1.022 1.453c.424.323.96.465 1.49.396c.242-.032.487-.13.825-.308a1.64 1.64 0 0 1 1.58.008c.486.28.774.795.795 1.353c.015.38.051.64.145.863c.204.49.596.88 1.09 1.083c.37.152.84.152 1.779.152s1.409 0 1.779-.152a2 2 0 0 0 1.09-1.083c.094-.223.13-.483.145-.863c.02-.558.309-1.074.796-1.353a1.64 1.64 0 0 1 1.579-.008c.338.178.583.276.825.308c.53.07 1.066-.073 1.49-.396c.318-.242.553-.646 1.022-1.453c.47-.807.704-1.21.757-1.605a2 2 0 0 0-.4-1.479c-.148-.192-.357-.353-.68-.555c-.477-.297-.783-.803-.783-1.361s.306-1.064.782-1.36c.324-.203.533-.364.682-.556a2 2 0 0 0 .399-1.479c-.053-.394-.287-.798-.757-1.605s-.704-1.21-1.022-1.453a2.03 2.03 0 0 0-1.49-.396c-.242.032-.487.13-.825.308a1.64 1.64 0 0 1-1.58-.008a1.62 1.62 0 0 1-.795-1.353c-.015-.38-.051-.64-.145-.863a2 2 0 0 0-1.09-1.083M12.5 15c1.67 0 3.023-1.343 3.023-3S14.169 9 12.5 9s-3.023 1.343-3.023 3s1.354 3 3.023 3"/></symbol>
+</svg>
+
+<div class="shell">
+  <header class="masthead">
+    <p class="eyebrow">MoonCellar · status hub projects</p>
+    <h1>Status hub projects menu</h1>
+    <p class="lede">
+      The menu on the left is the hub's whole navigation, and today every project takes two lines:
+      its name and blocks, then its progress and the age of the last upload. Seven projects already
+      run past the page they sit next to, and nothing on the menu says which one is opened daily and
+      which one was abandoned in September. The update marks projects as favourites, folds them into
+      groups and moves the progress into a card that opens on hover. The three arrangements below all
+      carry those three ideas and differ in what stays on screen — the list, the row, or the column.
+    </p>
+  </header>
+
+  <section class="screen">
+    <div class="screen__head">
+      <h2>Current — every project is two lines</h2>
+      <span class="screen__route">status.mooncellar.space/rooftops</span>
+    </div>
+    <p class="screen__thesis">
+      The summary line is what makes the menu tall: it repeats the page's own totals in 12px next to
+      a name nobody needs to see them beside. Nothing here can be marked, ordered or put away, and
+      the API's order is the only order there is.
+    </p>
+    <div class="stage">
+      <div class="hub">
+        <nav class="box menu" aria-label="Projects">
+          <p class="menu__caption">Projects</p>
+          <a class="menu__item" href="#">
+            <span class="menu__name">MoonCellar</span>
+            <span class="menu__kinds"><svg class="svg"><use href="#i-list"/></svg></span>
+            <span class="menu__meta">Plan · 18 of 42 done · 12 min ago</span>
+          </a>
+          <a class="menu__item menu__item--current" href="#" aria-current="page">
+            <span class="menu__name">Rooftops</span>
+            <span class="menu__kinds"><svg class="svg"><use href="#i-code"/></svg><svg class="svg"><use href="#i-list"/></svg></span>
+            <span class="menu__meta">44.9% decompiled · 21 of 34 done · 3 min ago</span>
+          </a>
+          <a class="menu__item" href="#">
+            <span class="menu__name">Glassline</span>
+            <span class="menu__kinds"><svg class="svg"><use href="#i-code"/></svg><svg class="svg"><use href="#i-list"/></svg></span>
+            <span class="menu__meta">8.1% decompiled · 3 of 12 done · 6 h ago</span>
+          </a>
+          <a class="menu__item" href="#">
+            <span class="menu__name">Emberfall</span>
+            <span class="menu__kinds"><svg class="svg"><use href="#i-code"/></svg></span>
+            <span class="menu__meta">61.2% decompiled · 2 h ago</span>
+          </a>
+          <a class="menu__item" href="#">
+            <span class="menu__name">FSN Remastered Patch</span>
+            <span class="menu__kinds"><svg class="svg"><use href="#i-code"/></svg></span>
+            <span class="menu__meta">33.7% decompiled · 2 days ago</span>
+          </a>
+          <a class="menu__item" href="#">
+            <span class="menu__name">Tsukihime Patch</span>
+            <span class="menu__kinds"><svg class="svg"><use href="#i-code"/></svg></span>
+            <span class="menu__meta">Nothing uploaded yet</span>
+          </a>
+          <a class="menu__item" href="#">
+            <span class="menu__name">Grand Order Port</span>
+            <span class="menu__kinds"><svg class="svg"><use href="#i-code"/></svg></span>
+            <span class="menu__meta">12.4% decompiled · 3 days ago</span>
+          </a>
+          <div class="menu__sep"></div>
+          <a class="menu__item menu__item--manage" href="#">
+            <span class="menu__name">Manage projects</span>
+            <span class="menu__kinds"><svg class="svg svg--16"><use href="#i-settings"/></svg></span>
+          </a>
+        </nav>
+
+        <div class="box page">
+          <div class="page__head">
+            <h3>Rooftops</h3>
+            <span class="page__meta"><svg class="svg svg--14"><use href="#i-clock"/></svg>Updated 3 min ago</span>
+          </div>
+          <div class="page__tabs">
+            <span class="page__tab" aria-selected="true">Decompilation</span>
+            <span class="page__tab">Plan <span class="page__count">34</span></span>
+          </div>
+          <div class="page__ph">
+            Totals, categories, the function map and the feed. The block page is not part of this
+            proposal — only the menu beside it changes.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="screen__head">
+      <h2>A — Favourites pinned, groups fold in place</h2>
+      <span class="screen__route">row 32px · a caption per group</span>
+    </div>
+    <p class="screen__thesis">
+      A star at the end of the row, shown on hover or focus, pins a project into a Favourites block
+      above the list, and a star is a property of the project, not a copy: a starred project leaves
+      its group, so it appears once. Groups are captions with a chevron and a count, folded independently and remembered per
+      admin; the group a project belongs to is set where the project is edited. The second line is
+      gone — the summary waits in a card that opens when the pointer rests on the row's block icons,
+      or when they take keyboard focus.
+    </p>
+    <p class="screen__trade">
+      <b>Trade-off:</b> nothing is hidden and nothing is reordered, so the column is still exactly as
+      tall as its projects — a fourth group would push Manage projects below the fold.
+    </p>
+    <div class="stage">
+      <div class="hub">
+        <nav class="box menu menu_msn" aria-label="Favourites and groups">
+          <p class="menu__caption">Favourites</p>
+          <div class="row">
+            <a class="row__link" href="#">
+              <span class="row__name">MoonCellar</span>
+              <span class="row__blocks"><svg class="svg"><use href="#i-list"/></svg></span>
+            </a>
+            <button class="star" type="button" aria-pressed="true" aria-label="Remove MoonCellar from favourites"><svg class="svg svg--13"><use href="#i-star-fill"/></svg></button>
+          </div>
+          <div class="row row_current">
+            <a class="row__link" href="#" aria-current="page">
+              <span class="row__name">Rooftops</span>
+              <span class="row__blocks"><svg class="svg"><use href="#i-code"/></svg><svg class="svg"><use href="#i-list"/></svg></span>
+            </a>
+            <button class="star" type="button" aria-pressed="true" aria-label="Remove Rooftops from favourites"><svg class="svg svg--13"><use href="#i-star-fill"/></svg></button>
+          </div>
+
+          <div class="group">
+            <button class="group__head" type="button" aria-expanded="true">
+              <svg class="svg svg--10 group__chevron"><use href="#i-chevron"/></svg>
+              <span>Ongoing</span>
+              <span class="group__count">2</span>
+            </button>
+            <div class="row row_hover">
+              <a class="row__link" href="#">
+                <span class="row__name">Glassline</span>
+                <span class="row__blocks"><svg class="svg"><use href="#i-code"/></svg><svg class="svg"><use href="#i-list"/></svg></span>
+              </a>
+              <button class="star" type="button" aria-pressed="false" aria-label="Add Glassline to favourites"><svg class="svg svg--13"><use href="#i-star"/></svg></button>
+              <div class="card" role="tooltip">
+                <p class="card__name">Glassline</p>
+                <div class="card__block">
+                  <svg class="svg"><use href="#i-code"/></svg>
+                  <span class="card__label">Decompilation</span>
+                  <span class="card__value">8.1% · 612 of 7,540</span>
+                </div>
+                <div class="card__block">
+                  <svg class="svg"><use href="#i-list"/></svg>
+                  <span class="card__label">Plan</span>
+                  <span class="card__value">3 of 12 done</span>
+                </div>
+                <p class="card__foot"><svg class="svg svg--14"><use href="#i-clock"/></svg>Updated 6 h ago</p>
+              </div>
+            </div>
+            <div class="row">
+              <a class="row__link" href="#">
+                <span class="row__name">Emberfall</span>
+                <span class="row__blocks"><svg class="svg"><use href="#i-code"/></svg></span>
+              </a>
+              <button class="star" type="button" aria-pressed="false" aria-label="Add Emberfall to favourites"><svg class="svg svg--13"><use href="#i-star"/></svg></button>
+            </div>
+          </div>
+
+          <div class="group">
+            <button class="group__head" type="button" aria-expanded="true">
+              <svg class="svg svg--10 group__chevron"><use href="#i-chevron"/></svg>
+              <span>Fan patches</span>
+              <span class="group__count">3</span>
+            </button>
+            <div class="row">
+              <a class="row__link" href="#">
+                <span class="row__name">FSN Remastered Patch</span>
+                <span class="row__blocks"><svg class="svg"><use href="#i-code"/></svg></span>
+              </a>
+              <button class="star" type="button" aria-pressed="false" aria-label="Add FSN Remastered Patch to favourites"><svg class="svg svg--13"><use href="#i-star"/></svg></button>
+            </div>
+            <div class="row">
+              <a class="row__link" href="#">
+                <span class="row__name">Tsukihime Patch</span>
+                <span class="row__blocks"><svg class="svg"><use href="#i-code"/></svg></span>
+              </a>
+              <button class="star" type="button" aria-pressed="false" aria-label="Add Tsukihime Patch to favourites"><svg class="svg svg--13"><use href="#i-star"/></svg></button>
+            </div>
+            <div class="row">
+              <a class="row__link" href="#">
+                <span class="row__name">Grand Order Port</span>
+                <span class="row__blocks"><svg class="svg"><use href="#i-code"/></svg></span>
+              </a>
+              <button class="star" type="button" aria-pressed="false" aria-label="Add Grand Order Port to favourites"><svg class="svg svg--13"><use href="#i-star"/></svg></button>
+            </div>
+          </div>
+
+          <div class="menu__sep"></div>
+          <div class="row">
+            <a class="row__link" href="#">
+              <span class="row__name">Manage projects</span>
+              <span class="row__blocks"><svg class="svg svg--16"><use href="#i-settings"/></svg></span>
+            </a>
+          </div>
+        </nav>
+
+        <div class="box page">
+          <div class="page__head">
+            <h3>Rooftops</h3>
+            <span class="page__meta"><svg class="svg svg--14"><use href="#i-clock"/></svg>Updated 3 min ago</span>
+          </div>
+          <div class="page__tabs">
+            <span class="page__tab" aria-selected="true">Decompilation</span>
+            <span class="page__tab">Plan <span class="page__count">34</span></span>
+          </div>
+          <div class="page__ph">The same block page. The card floats over it and closes when the pointer leaves the row.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="screen__head">
+      <h2>B — One line per project, a dot for freshness</h2>
+      <span class="screen__route">row 24px · no block icons in the row</span>
+    </div>
+    <p class="screen__thesis">
+      The row keeps a name and a dot — green for an upload today, yellow once it is older than a day,
+      grey for a project that never uploaded — and gives up the block icons to the card. Favourites
+      and groups are as in A. This is the shortest the column gets without leaving the sidebar: the
+      whole list, groups and all, fits in seven lines, and the card answers what the second line used
+      to.
+    </p>
+    <p class="screen__trade">
+      <b>Trade-off:</b> the blocks a project has are no longer visible at a glance, and the freshness
+      dot asks a reader to learn three colours before it means anything.
+    </p>
+    <div class="stage stage_dense">
+      <div class="hub">
+        <nav class="box menu menu_msn" aria-label="Favourites and groups">
+          <p class="menu__caption">Favourites</p>
+          <div class="row">
+            <a class="row__link row__link_dense" href="#">
+              <span class="row__dot"></span>
+              <span class="row__name">MoonCellar</span>
+            </a>
+            <button class="star" type="button" aria-pressed="true" aria-label="Remove MoonCellar from favourites"><svg class="svg svg--13"><use href="#i-star-fill"/></svg></button>
+          </div>
+          <div class="row row_current">
+            <a class="row__link row__link_dense" href="#" aria-current="page">
+              <span class="row__dot"></span>
+              <span class="row__name">Rooftops</span>
+            </a>
+            <button class="star" type="button" aria-pressed="true" aria-label="Remove Rooftops from favourites"><svg class="svg svg--13"><use href="#i-star-fill"/></svg></button>
+          </div>
+
+          <div class="group">
+            <button class="group__head" type="button" aria-expanded="true">
+              <svg class="svg svg--10 group__chevron"><use href="#i-chevron"/></svg>
+              <span>Ongoing</span>
+              <span class="group__count">2</span>
+            </button>
+            <div class="row">
+              <a class="row__link row__link_dense" href="#">
+                <span class="row__dot"></span>
+                <span class="row__name">Glassline</span>
+              </a>
+              <button class="star" type="button" aria-pressed="false" aria-label="Add Glassline to favourites"><svg class="svg svg--13"><use href="#i-star"/></svg></button>
+            </div>
+            <div class="row">
+              <a class="row__link row__link_dense" href="#">
+                <span class="row__dot"></span>
+                <span class="row__name">Emberfall</span>
+              </a>
+              <button class="star" type="button" aria-pressed="false" aria-label="Add Emberfall to favourites"><svg class="svg svg--13"><use href="#i-star"/></svg></button>
+            </div>
+          </div>
+
+          <div class="group">
+            <button class="group__head" type="button" aria-expanded="true">
+              <svg class="svg svg--10 group__chevron"><use href="#i-chevron"/></svg>
+              <span>Fan patches</span>
+              <span class="group__count">3</span>
+            </button>
+            <div class="row row_hover">
+              <a class="row__link row__link_dense" href="#">
+                <span class="row__dot row__dot_stale"></span>
+                <span class="row__name">FSN Remastered Patch</span>
+              </a>
+              <button class="star" type="button" aria-pressed="false" aria-label="Add FSN Remastered Patch to favourites"><svg class="svg svg--13"><use href="#i-star"/></svg></button>
+              <div class="card" role="tooltip">
+                <p class="card__name">FSN Remastered Patch</p>
+                <div class="card__block">
+                  <svg class="svg"><use href="#i-code"/></svg>
+                  <span class="card__label">Decompilation</span>
+                  <span class="card__value">33.7% · 2,104 of 6,244</span>
+                </div>
+                <p class="card__foot card__foot_stale"><svg class="svg svg--14"><use href="#i-clock"/></svg>Updated 2 days ago</p>
+              </div>
+            </div>
+            <div class="row">
+              <a class="row__link row__link_dense" href="#">
+                <span class="row__dot row__dot_never"></span>
+                <span class="row__name">Tsukihime Patch</span>
+              </a>
+              <button class="star" type="button" aria-pressed="false" aria-label="Add Tsukihime Patch to favourites"><svg class="svg svg--13"><use href="#i-star"/></svg></button>
+            </div>
+            <div class="row">
+              <a class="row__link row__link_dense" href="#">
+                <span class="row__dot row__dot_stale"></span>
+                <span class="row__name">Grand Order Port</span>
+              </a>
+              <button class="star" type="button" aria-pressed="false" aria-label="Add Grand Order Port to favourites"><svg class="svg svg--13"><use href="#i-star"/></svg></button>
+            </div>
+          </div>
+
+          <div class="menu__sep"></div>
+          <div class="row">
+            <a class="row__link row__link_dense" href="#">
+              <span class="row__dot" style="background:none"></span>
+              <span class="row__name">Manage projects</span>
+            </a>
+          </div>
+        </nav>
+
+        <div class="box page">
+          <div class="page__head">
+            <h3>Rooftops</h3>
+            <span class="page__meta"><svg class="svg svg--14"><use href="#i-clock"/></svg>Updated 3 min ago</span>
+          </div>
+          <div class="page__tabs">
+            <span class="page__tab" aria-selected="true">Decompilation</span>
+            <span class="page__tab">Plan <span class="page__count">34</span></span>
+          </div>
+          <div class="page__ph">The same block page. A 24px row buys a third more projects above the fold.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="screen__head">
+      <h2>C — A rail of marks that opens on hover</h2>
+      <span class="screen__route">column 56px · menu 248px over the page</span>
+    </div>
+    <p class="screen__thesis">
+      The column shrinks to one 36px mark per project, a monogram inside a ring that fills with the
+      project's progress. Favourites sit at the top behind an accent bar, groups are the thin rules
+      between them, and hovering the rail slides the full menu — exactly the one from A — over the
+      page, where it stays while the pointer is inside it. The card still opens from a row.
+    </p>
+    <p class="screen__trade">
+      <b>Trade-off:</b> the block gets 190px back, but no project name is on screen at rest and the
+      hover surface is a 56px strip — a mis-aimed pointer either does nothing or covers the page.
+    </p>
+    <div class="pair">
+      <div>
+        <p class="pair__label">At rest</p>
+        <div class="stage">
+          <div class="hub hub_rail">
+            <nav class="box rail" aria-label="Projects">
+              <a class="mark mark_fav mark_current" href="#" aria-current="page" aria-label="Rooftops, 45% decompiled"><span class="mark__ring" style="--p:45"><span>R</span></span></a>
+              <a class="mark mark_fav" href="#" aria-label="MoonCellar, 43% of the plan done"><span class="mark__ring" style="--p:43"><span>M</span></span></a>
+              <div class="rail__sep"></div>
+              <a class="mark" href="#" aria-label="Glassline, 8% decompiled"><span class="mark__ring" style="--p:8"><span>G</span></span></a>
+              <a class="mark" href="#" aria-label="Emberfall, 61% decompiled"><span class="mark__ring" style="--p:61"><span>E</span></span></a>
+              <div class="rail__sep"></div>
+              <a class="mark" href="#" aria-label="FSN Remastered Patch, 34% decompiled"><span class="mark__ring" style="--p:34"><span>F</span></span></a>
+              <a class="mark mark_never" href="#" aria-label="Tsukihime Patch, nothing uploaded"><span class="mark__ring"><span>T</span></span></a>
+              <a class="mark" href="#" aria-label="Grand Order Port, 12% decompiled"><span class="mark__ring" style="--p:12"><span>O</span></span></a>
+              <div class="rail__sep"></div>
+              <a class="mark mark_manage" href="#" aria-label="Manage projects"><span class="mark__ring"><span><svg class="svg svg--16"><use href="#i-settings"/></svg></span></span></a>
+            </nav>
+
+            <div class="box page">
+              <div class="page__head">
+                <h3>Rooftops</h3>
+                <span class="page__meta"><svg class="svg svg--14"><use href="#i-clock"/></svg>Updated 3 min ago</span>
+              </div>
+              <div class="page__tabs">
+                <span class="page__tab" aria-selected="true">Decompilation</span>
+                <span class="page__tab">Plan <span class="page__count">34</span></span>
+              </div>
+              <div class="page__ph">The block page at the width the menu gave back.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="pair__label">Hovering the rail</p>
+        <div class="stage">
+          <div class="hub hub_rail">
+            <nav class="box rail" aria-label="Projects">
+              <a class="mark mark_fav mark_current" href="#" aria-current="page" aria-label="Rooftops, 45% decompiled"><span class="mark__ring" style="--p:45"><span>R</span></span></a>
+              <a class="mark mark_fav" href="#" aria-label="MoonCellar, 43% of the plan done"><span class="mark__ring" style="--p:43"><span>M</span></span></a>
+              <div class="rail__sep"></div>
+              <a class="mark" href="#" aria-label="Glassline, 8% decompiled"><span class="mark__ring" style="--p:8"><span>G</span></span></a>
+              <a class="mark" href="#" aria-label="Emberfall, 61% decompiled"><span class="mark__ring" style="--p:61"><span>E</span></span></a>
+              <div class="rail__sep"></div>
+              <a class="mark" href="#" aria-label="FSN Remastered Patch, 34% decompiled"><span class="mark__ring" style="--p:34"><span>F</span></span></a>
+              <a class="mark mark_never" href="#" aria-label="Tsukihime Patch, nothing uploaded"><span class="mark__ring"><span>T</span></span></a>
+              <a class="mark" href="#" aria-label="Grand Order Port, 12% decompiled"><span class="mark__ring" style="--p:12"><span>O</span></span></a>
+              <div class="rail__sep"></div>
+              <a class="mark mark_manage" href="#" aria-label="Manage projects"><span class="mark__ring"><span><svg class="svg svg--16"><use href="#i-settings"/></svg></span></span></a>
+            </nav>
+
+            <div class="box page">
+              <div class="page__head">
+                <h3>Rooftops</h3>
+                <span class="page__meta"><svg class="svg svg--14"><use href="#i-clock"/></svg>Updated 3 min ago</span>
+              </div>
+              <div class="page__tabs">
+                <span class="page__tab" aria-selected="true">Decompilation</span>
+                <span class="page__tab">Plan <span class="page__count">34</span></span>
+              </div>
+              <div class="page__ph">The menu slides over this panel and closes on the way out.</div>
+            </div>
+
+            <div class="expand">
+              <nav class="box menu menu_msn menu_floating" aria-label="Favourites and groups">
+                <p class="menu__caption">Favourites</p>
+                <div class="row">
+                  <a class="row__link" href="#">
+                    <span class="row__name">MoonCellar</span>
+                    <span class="row__blocks"><svg class="svg"><use href="#i-list"/></svg></span>
+                  </a>
+                  <button class="star" type="button" aria-pressed="true" aria-label="Remove MoonCellar from favourites"><svg class="svg svg--13"><use href="#i-star-fill"/></svg></button>
+                </div>
+                <div class="row row_current">
+                  <a class="row__link" href="#" aria-current="page">
+                    <span class="row__name">Rooftops</span>
+                    <span class="row__blocks"><svg class="svg"><use href="#i-code"/></svg><svg class="svg"><use href="#i-list"/></svg></span>
+                  </a>
+                  <button class="star" type="button" aria-pressed="true" aria-label="Remove Rooftops from favourites"><svg class="svg svg--13"><use href="#i-star-fill"/></svg></button>
+                </div>
+                <div class="group">
+                  <button class="group__head" type="button" aria-expanded="true">
+                    <svg class="svg svg--10 group__chevron"><use href="#i-chevron"/></svg>
+                    <span>Ongoing</span>
+                    <span class="group__count">2</span>
+                  </button>
+                  <div class="row">
+                    <a class="row__link" href="#">
+                      <span class="row__name">Glassline</span>
+                      <span class="row__blocks"><svg class="svg"><use href="#i-code"/></svg><svg class="svg"><use href="#i-list"/></svg></span>
+                    </a>
+                    <button class="star" type="button" aria-pressed="false" aria-label="Add Glassline to favourites"><svg class="svg svg--13"><use href="#i-star"/></svg></button>
+                  </div>
+                  <div class="row row_hover">
+                    <a class="row__link" href="#">
+                      <span class="row__name">Emberfall</span>
+                      <span class="row__blocks"><svg class="svg"><use href="#i-code"/></svg></span>
+                    </a>
+                    <button class="star" type="button" aria-pressed="false" aria-label="Add Emberfall to favourites"><svg class="svg svg--13"><use href="#i-star"/></svg></button>
+                  </div>
+                </div>
+                <div class="group">
+                  <button class="group__head" type="button" aria-expanded="false">
+                    <svg class="svg svg--10 group__chevron"><use href="#i-chevron"/></svg>
+                    <span>Fan patches</span>
+                    <span class="group__count">3</span>
+                  </button>
+                </div>
+                <div class="menu__sep"></div>
+                <div class="row">
+                  <a class="row__link" href="#">
+                    <span class="row__name">Manage projects</span>
+                    <span class="row__blocks"><svg class="svg svg--16"><use href="#i-settings"/></svg></span>
+                  </a>
+                </div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="screen__head">
+      <h2>Edges the build has to cover</h2>
+      <span class="screen__route">the states a component story would need</span>
+    </div>
+    <div class="edges">
+      <div class="edge">
+        <p class="edge__label">One project, nothing starred</p>
+        <div class="stage">
+          <nav class="box menu menu_edges" aria-label="Projects">
+            <p class="menu__caption">Projects</p>
+            <div class="row row_current">
+              <a class="row__link" href="#" aria-current="page">
+                <span class="row__name">Rooftops</span>
+                <span class="row__blocks"><svg class="svg"><use href="#i-code"/></svg><svg class="svg"><use href="#i-list"/></svg></span>
+              </a>
+              <button class="star" type="button" aria-pressed="false" aria-label="Add Rooftops to favourites"><svg class="svg svg--13"><use href="#i-star"/></svg></button>
+            </div>
+            <div class="menu__sep"></div>
+            <div class="row">
+              <a class="row__link" href="#">
+                <span class="row__name">Manage projects</span>
+                <span class="row__blocks"><svg class="svg svg--16"><use href="#i-settings"/></svg></span>
+              </a>
+            </div>
+          </nav>
+        </div>
+        <p class="edge__note">
+          No Favourites caption and no group captions until there is a second thing to put in them —
+          the plain list is the fallback, not a mode.
+        </p>
+      </div>
+
+      <div class="edge">
+        <p class="edge__label">A name that does not fit</p>
+        <div class="stage">
+          <nav class="box menu menu_edges" aria-label="Projects">
+            <p class="menu__caption">Favourites</p>
+            <div class="row">
+              <a class="row__link" href="#">
+                <span class="row__name">Fate/stay night Remastered Patch</span>
+                <span class="row__blocks"><svg class="svg"><use href="#i-code"/></svg></span>
+              </a>
+              <button class="star" type="button" aria-pressed="true" aria-label="Remove Fate/stay night Remastered Patch from favourites"><svg class="svg svg--13"><use href="#i-star-fill"/></svg></button>
+            </div>
+            <div class="card card_static">
+              <p class="card__name">Fate/stay night Remastered Patch</p>
+              <p class="card__empty">The row truncates with an ellipsis; the card carries the name in full.</p>
+            </div>
+          </nav>
+        </div>
+      </div>
+
+      <div class="edge">
+        <p class="edge__label">A card for every upload state</p>
+        <div class="stage edge__cards">
+          <div class="card card_static">
+            <p class="card__name">Emberfall</p>
+            <div class="card__block">
+              <svg class="svg"><use href="#i-code"/></svg>
+              <span class="card__label">Decompilation</span>
+              <span class="card__value">61.2% · 4,113 of 6,720</span>
+            </div>
+            <p class="card__foot"><svg class="svg svg--14"><use href="#i-clock"/></svg>Updated 2 h ago</p>
+          </div>
+          <div class="card card_static">
+            <p class="card__name">Grand Order Port</p>
+            <div class="card__block">
+              <svg class="svg"><use href="#i-code"/></svg>
+              <span class="card__label">Decompilation</span>
+              <span class="card__value">12.4% · 903 of 7,281</span>
+            </div>
+            <p class="card__foot card__foot_stale"><svg class="svg svg--14"><use href="#i-clock"/></svg>Updated 3 days ago</p>
+          </div>
+          <div class="card card_static">
+            <p class="card__name">Tsukihime Patch</p>
+            <p class="card__empty">Nothing uploaded yet</p>
+            <p class="card__foot"><svg class="svg svg--14"><use href="#i-list"/></svg>Waiting for the first merge</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="edge">
+        <p class="edge__label">Phone — the shared Dropdown</p>
+        <div class="stage">
+          <div class="phone">
+            <div class="field">
+              <span>Rooftops</span>
+              <svg class="svg svg--16 field__chevron"><use href="#i-chevron"/></svg>
+            </div>
+            <p class="edge__note">
+              Below 960px the menu is the shared <code class="t">Dropdown</code> and stays one: favourites
+              sort first, groups fall back to the list's order, and there is no hover card — the project
+              page already shows its progress. Showing groups in the list needs a header item type in
+              <code class="t">Dropdown</code>, which this proposal does not ask for.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">
+    Colours, spacing and radii are the project's own tokens: the <code class="t">:root</code> block above
+    is generated from <code class="t">apps/web/src/lib/app/styles/vars</code> by
+    <code class="t">bun --filter web sync:tokens</code>. The typeface is substituted — Hanken Grotesk
+    stands in for ApercuPro, whose licensed file cannot be served from a third-party host. Every icon is
+    the site's own <code class="t">Svg*</code> component; no new glyph is proposed. B shipped, and its
+    row height and dot size are the site's <code class="t">--status-menu-row-height</code> and
+    <code class="t">--status-menu-dot-size</code>; <code class="t">--mock-row-height</code>,
+    <code class="t">--mock-rail-width</code> and <code class="t">--mock-mark-ring</code> remain
+    proposals. The hover card is portalled in the build, so it is drawn here inside the row to keep its
+    anchor obvious.
+  </p>
+</div>

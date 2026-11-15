@@ -53,9 +53,17 @@ slower to refresh every minute. So a project uploads it beside the block, once p
 order — address, size, file as an index into `units`, name); the page reads it once, on the map's first
 hover. Without it the tooltip shows only the state. It goes away with the block.
 
-The project menu shows progress for every enabled block, then the age of the latest upload. It shows
-functions done for `decomp` and tasks done for `plan`. An upload older than a day turns the "Updated"
-line yellow.
+The project menu is a row per project: its name and a dot saying how fresh the last upload is — green
+for today, yellow once the newest upload is older than a day, grey for a project that never uploaded.
+The numbers are in a card that opens on hover or keyboard focus: functions done for `decomp`, tasks
+done for `plan`, and the age of the last upload, which turns yellow when stale.
+
+A project has an optional group (`ProjectSchema.group`, set in Manage projects). The menu lists
+favourites first, then the named groups alphabetically, then the projects without a group; a group
+folds and remembers its state. A starred project leaves its group rather than appearing twice.
+Favourites and folded groups belong to the reader and live in this browser's `localStorage`
+(`status-hub-favourites`, `status-hub-folded-groups`), so they do not follow an admin to another
+machine; the phone menu below 960px is the shared `Dropdown` and keeps the same order without groups.
 
 ## The plan lives in the hub
 

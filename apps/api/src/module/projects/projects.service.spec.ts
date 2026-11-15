@@ -68,7 +68,10 @@ const createService = (stored: Record<string, unknown> | null) => {
     findOneAndUpdate: jest.fn(
       (
         _filter: unknown,
-        _update: { $push?: { tokens?: Record<string, unknown> } },
+        _update: {
+          $push?: { tokens?: Record<string, unknown> };
+          $set?: Record<string, unknown>;
+        },
         _options?: unknown
       ) => chain(project)
     ),
@@ -132,6 +135,48 @@ describe("ProjectsService.create", () => {
     await expect(
       service.create({ name: "Again", slug: "mooncellar", blocks: ["plan"] })
     ).rejects.toThrow("already belongs to another project");
+  });
+
+  it("lists the project under the group it is given", async () => {
+    const { service } = createService(null);
+
+    await expect(
+      service.create({
+        name: "Glassline",
+        slug: "glassline",
+        group: "Ongoing",
+        blocks: ["plan"],
+      })
+    ).resolves.toMatchObject({ group: "Ongoing" });
+  });
+
+  it("leaves out a group that was cleared", async () => {
+    const { service } = createService(null);
+
+    const project = await service.create({
+      name: "Glassline",
+      slug: "glassline",
+      group: "",
+      blocks: ["plan"],
+    });
+
+    expect(project).not.toHaveProperty("group");
+  });
+});
+
+describe("ProjectsService.update", () => {
+  it("changes the group only when one is given", async () => {
+    const { service, projects } = createService({});
+
+    await service.update("mooncellar", { group: "Fan patches" });
+    await service.update("mooncellar", { name: "MoonCellar" });
+
+    expect(projects.findOneAndUpdate.mock.calls[0][1].$set.group).toBe(
+      "Fan patches"
+    );
+    expect(projects.findOneAndUpdate.mock.calls[1][1].$set).not.toHaveProperty(
+      "group"
+    );
   });
 });
 
