@@ -42,10 +42,15 @@ knows how to draw; a new project is data, a new block type is code.
 Choose the default page from the project's enabled blocks in its settings. Opening `/<project>` uses
 that choice; an explicit `/<project>/<block>` link always opens the selected block.
 
-| Block                    | Schema (`@mooncellar/schemas`) | Shows                                                                                                                     |
-| ------------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| `decomp` — Decompilation | `DecompBlockSchema`            | Totals, categories, areas, a map with one cell per function (hover or tap: name, address, size, state, file), files, feed |
-| `plan` — Plan            | `PlanBlockSchema`              | Totals, tasks by section with state, owner and what a task waits for; editable                                            |
+| Block                    | Schema (`@mooncellar/schemas`) | Shows                                                                                                                                         |
+| ------------------------ | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `decomp` — Decompilation | `DecompBlockSchema`            | Totals, categories that open into their areas, a map with one cell per function (hover or tap: name, address, size, state, file), files, feed |
+| `plan` — Plan            | `PlanBlockSchema`              | Totals, tasks by section with state, owner and what a task waits for; editable                                                                |
+
+Categories are the modules functions build into; areas are the hand-declared work split, each with
+a lead. A category row opens into the areas whose files build into that module — an area that spans
+modules appears under each — and a declared area whose globs match no file is named under the list
+instead of disappearing.
 
 The map's tooltip needs to know what each cell is, which would make the block ten times larger and
 slower to refresh every minute. So a project uploads it beside the block, once per merge, as
