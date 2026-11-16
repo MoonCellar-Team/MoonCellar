@@ -1,13 +1,10 @@
 .page {
   display: grid;
-  grid-template-columns:
-    minmax(0, var(--article-text-width))
-    var(--news-sidebar-width);
+  grid-template-columns: minmax(0, 1fr) var(--news-sidebar-width);
   grid-template-areas:
     "head side"
     "body side"
     "comments side";
-  justify-content: space-between;
   gap: var(--gap-x4);
   align-items: start;
   width: 100%;
