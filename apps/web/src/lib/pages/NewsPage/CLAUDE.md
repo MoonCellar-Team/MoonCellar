@@ -78,7 +78,7 @@ publication date and the game an article is about. Public.
   and in every browser.
 - **The feed fills the page container and takes no cap of its own, like every other page.**
   `.container` holds the one page width (`--page-width`, 1400px) and no page declares another; a
-  shorter line is a cap on the text (`--text-measure`, `--article-text-width`), not on the page.
+  shorter line is a cap on the text (`--text-measure`), not on the page.
   The feed used to stop at `--news-page-width` (1080px) while Games, Lists and the rest used the
   container's 1400px, so on a wide screen the list sat in a visibly narrower column.
 - **The sidebar sticks below the fixed header, not at the top of the scrollport.** The page
