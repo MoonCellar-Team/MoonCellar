@@ -16,7 +16,7 @@
 }
 
 .lede {
-  max-width: 65ch;
+  max-width: var(--text-measure);
   color: var(--color-text-secondary);
   @include font(14px, 20px, 400);
 }

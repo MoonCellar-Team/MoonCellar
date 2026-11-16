@@ -54,7 +54,7 @@
 }
 
 .description {
-  max-width: 70ch;
+  max-width: var(--text-measure);
   color: var(--color-text-secondary);
   white-space: pre-line;
 }

@@ -28,7 +28,7 @@ Publish, Unpublish and Delete. Admins only.
   the route's `Suspense` fallback and what the page renders while `isAdmin` is unknown or the post
   loads. It paints the page's frame — a `Box` with the `h1` bar over the crumbs line — over
   `ArticleEditorSkeleton`, which is built on `ArticleEditor.module.scss`: the `editor` column at
-  `--article-page-width`, the "Kind of post" pills, the field rows at `--field-control-height` and
+  `--page-width`, the "Kind of post" pills, the field rows at `--field-control-height` and
   the field's own `margin-bottom`, the image and hint block, the text area and the footer divided
   by its border.
 

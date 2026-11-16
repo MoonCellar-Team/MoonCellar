@@ -41,7 +41,7 @@ h3 {
   }
   width: 100%;
   height: fit-content;
-  max-width: 1400px;
+  max-width: var(--page-width);
   margin-inline: auto;
 
   @media (max-width: 768px) {

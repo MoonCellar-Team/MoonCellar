@@ -156,7 +156,7 @@ export const ArticlePage: FC<IArticlePageProps> = ({
                 alt=""
                 fill
                 priority
-                sizes="(max-width: 960px) 100vw, 720px"
+                sizes="(max-width: 960px) 100vw, 712px"
                 className={styles.hero__image}
               />
             </div>

@@ -32,7 +32,9 @@ news shows the latest posts there instead. Public.
 ## Composition
 
 1. `BGImage` with the game, or the default one for site news.
-2. A grid capped at `--article-page-width` with areas `head side / body side / comments side`;
+2. A grid that fills the page container, like every other page: a reading column capped at
+   `--article-text-width` and an `aside` of `--news-sidebar-width` pushed to the right edge
+   (`justify-content: space-between`), with areas `head side / body side / comments side`;
    below `media960` it stacks `head / side / body / comments` for a game article and
    `head / body / comments / side` for site news.
 3. Head `Box`: `Breadcrumbs`, a meta row (`Badge` with the kind, date, reading time; for admins
@@ -68,10 +70,13 @@ news shows the latest posts there instead. Public.
   scrolls `#page-scroll`, not the document, and the browser's own fragment jump left the post at
   the top. `scroll-margin-top: var(--container-padding-top)` on the panel keeps its heading clear
   of the header.
-- **The article is deliberately narrower than the news feed.** The grid is capped at
-  `--article-page-width` (1080px, the side panel included) so the text keeps a readable measure;
-  `NewsPage` has no cap and fills the page container. Do not reuse the token for a feed, and do
-  not drop the cap here — a post rendered at 1360px gives lines well past a comfortable measure.
+- **The page is as wide as the rest of the site; the reading column is what is capped.** The grid
+  fills the page container (`.container`, `--page-width`) and caps its first column at
+  `--article-text-width` (760px), so the head, the body and the comments share one measure and the
+  sidebar lines up with the right edge of every other page. The measure is a property of the text,
+  not of the page: capping the whole grid at `--article-page-width` (1080px) made a post the only
+  page narrower than the site, and any page that needs a shorter line caps its own text with
+  `--text-measure` instead.
 - **The side panel sticks below the header, not at the top of the scrollport.**
   `top: var(--container-padding-top)` is the container's own top padding (the header plus the
   gap), and it follows `.container_topMenu`/`.container_bare`. With `top: 0` the panel slid under

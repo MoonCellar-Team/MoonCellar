@@ -33,6 +33,14 @@ that is the form to put in CI.
 The sync is one-directional: **SCSS is the source, mockups are the output.** Editing the
 generated block inside a mockup is pointless; the next run overwrites it.
 
+### Page width
+
+`.container` caps every page at `--page-width` (1400px), declared once in `_common.scss`, and no
+page declares a width of its own. Text that would run past a comfortable line length is capped by
+the measure of its own column instead: `--text-measure` (65ch) for a page's lede or description,
+`--article-text-width` (760px) for the article's reading column. A page-level cap is the wrong
+tool for that — it narrows the whole screen, panels and sidebar included.
+
 ---
 
 ## Starting a mockup

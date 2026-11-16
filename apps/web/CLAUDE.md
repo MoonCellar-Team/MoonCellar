@@ -152,6 +152,12 @@ Rules that apply to the Next.js app. Repository-wide rules live in the root
 
 ## Layout
 
+- **A page never declares a width of its own: `.container` owns `--page-width` (1400px), and a
+  shorter line is a cap on the text, not on the page.** `--article-text-width` caps the article's
+  reading column and `--text-measure` (65ch) caps a lede or a description, so the panels still
+  line up with every other page and the sidebar still reaches its right edge. A page-level cap
+  (the old `--article-page-width`) narrows the panels and the sidebar with it, and the next page
+  has to invent a width of its own.
 - **Every content block on a page must sit inside the shared `Box` component from `src/lib/shared/ui/Box`** — not only large sections and cards, but small ones too: breadcrumbs, page headings, intro paragraphs, link rows. Nothing renders directly on the page background.
 - The reason is `BGImage`: pages render a full-bleed background image behind their content, and only `Box`'s semi-transparent panel keeps text legible over it. Text placed straight on the page background gets washed out by whatever artwork happens to be showing, and the result differs per game/user. If a block feels too small to deserve a panel, group it with the neighbouring block into one `Box` rather than leaving it outside.
 - If a `Box` instance needs a different visual appearance, do it through `Box`'s own props (`className`, `classNameContent`, `wrapperStyle`, `templateStyle`, `contentStyle`, `isWithoutBorder`, `isWithBlur`, etc.) — never by overriding `Box`'s internal styles from outside or duplicating its markup/styles in a custom wrapper.
