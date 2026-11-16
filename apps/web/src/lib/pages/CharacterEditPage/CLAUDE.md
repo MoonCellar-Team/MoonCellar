@@ -7,7 +7,7 @@ drafts. Reached from the Characters tab of the admin panel.
 
 - `/admin/characters/[id]` — `src/app/admin/characters/[id]/page.tsx`. `id === "new"` renders
   the create form (`characterId` undefined); any other value edits that character.
-- The route wraps the page in `Suspense` with `PageSkeleton`. Dynamic, no metadata.
+- The route wraps the page in `Suspense` with `CharacterEditPageSkeleton`. Dynamic, no metadata.
 - Gated by `src/app/admin/layout.tsx` (404 for a viewer without admin access, see `Admin`), and
   again on the client.
 
@@ -26,6 +26,17 @@ drafts. Reached from the Characters tab of the admin panel.
    editor through `onApply`.
 3. `widgets/admin/CharacterEditor` — the form itself; saves, and reports back through
    `onSaved` / `onClose`.
+
+## Loading state
+
+- `CharacterEditPageSkeleton` (`CharacterEditPageSkeleton.tsx`, its own `"use client"` module
+  sharing `CharacterEditPage.module.scss`) is both the route's `Suspense` fallback and the edit
+  mode's loading state (`!isCreate && isLoading`); create mode renders the editor at once. It
+  paints the page's `Box` and `content` column — the crumbs line over
+  `CharacterEditorSkeleton` — and the editor skeleton is built on `CharacterEditor.module.scss`:
+  the `editor` grid of `1.5fr / 1fr` at the panel's own `--padding-x4` and radius, the form's four
+  fields in `.editor__grid`, its field rows, the actions row, and the portrait column with the
+  `--character-editor-portrait-width` image at `aspect-ratio: 3 / 4`.
 
 ## Rules and gotchas
 

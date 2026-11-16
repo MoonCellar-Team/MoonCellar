@@ -10,7 +10,8 @@ games, size and last update, 24 per page. Public.
   (`features/lists/model/lists-query.utils`), fetches `listsAPI.getLists(params)` and passes
   `initialParams` + `initialData`. A failed fetch passes `undefined`.
 - Static metadata: title `Lists`, canonical `/lists`, own keywords. The route renders
-  `BreadcrumbList` JSON-LD and wraps the page in `Suspense` with `PageSkeleton`.
+  `BreadcrumbList` JSON-LD and wraps the page in `Suspense` with `ListsPageSkeleton`, handing it
+  `isFiltered={hasListsFilters(params)}`.
 
 ## Data
 
@@ -33,6 +34,19 @@ games, size and last update, 24 per page. Public.
    `ListCardsGrid` of `ListCard`s. While loading, `ListCardsGrid isLoading` holds
    `CUSTOM_LISTS_PAGE_SIZE` `ListCardSkeleton`s.
 
+## Loading state
+
+- `ListsPageSkeleton` (`ListsPageSkeleton.tsx`, its own `"use client"` module sharing
+  `ListsPage.module.scss`) is the route's `Suspense` fallback. It draws the page's own blocks —
+  `BGImage`, the `Box` at `--page-height-available`, the crumbs line, the `h1` bar with the
+  "Collections" action, the chip row and `ListCardsGrid isLoading` with
+  `CUSTOM_LISTS_PAGE_SIZE` (24) `ListCardSkeleton`s in the same grid — so the cards land where
+  the placeholders were.
+- The chip row is drawn only with `isFiltered`, computed by the route with `hasListsFilters`
+  from the query it already parsed: `AppliedFilters` renders nothing without filters.
+- `ListCardsGrid` announces the loading itself (`role="status"` on its grid), so the skeleton
+  wrapper carries no second one.
+
 ## Rules and gotchas
 
 - **The URL is the only filter state.** Chips are derived from `parseListsQuery` on every render
@@ -43,7 +57,4 @@ games, size and last update, 24 per page. Public.
 - **Seed `initialData` only for the server's key**, or a new filter shows the old results until
   `staleTime` runs out.
 - **"Clear all" keeps `sortBy`/`sortOrder`.** Sorting is not a filter.
-- **The grid's container-query thresholds duplicate tokens.** `ListsPage.module.scss` copies
-  `--list-card-min-width` and `--gap-x4` into `$listCardMinWidth`/`$listCardsGap`; change both
-  together, and keep every column count a divisor of `CUSTOM_LISTS_PAGE_SIZE` (24).
 - Gate the skeleton on `isLoading` (wrapped in `useMinimumLoading`), never on `isFetching`.

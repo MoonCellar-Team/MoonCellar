@@ -1,6 +1,8 @@
 import { Suspense } from "react";
-import { ArticleEditPage } from "@/src/lib/pages/ArticleEditPage";
-import { PageSkeleton } from "@/src/lib/shared/ui/PageSkeleton";
+import {
+  ArticleEditPage,
+  ArticleEditPageSkeleton,
+} from "@/src/lib/pages/ArticleEditPage";
 
 const AdminArticleEditPage = async ({
   params,
@@ -10,7 +12,7 @@ const AdminArticleEditPage = async ({
   const { id } = await params;
 
   return (
-    <Suspense fallback={<PageSkeleton />}>
+    <Suspense fallback={<ArticleEditPageSkeleton />}>
       <ArticleEditPage articleId={id === "new" ? undefined : id} />
     </Suspense>
   );

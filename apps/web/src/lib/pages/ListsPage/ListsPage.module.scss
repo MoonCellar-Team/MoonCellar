@@ -1,5 +1,16 @@
 .page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: var(--gap-x4);
+
   &__empty {
     margin-block: auto;
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-x2);
   }
 }

@@ -11,10 +11,10 @@ import {
   ADMIN_HREF,
   getAdminHref,
 } from "@/src/lib/shared/utils/admin-url.utils";
-import { Skeleton } from "@/src/lib/shared/ui/Skeleton";
 import { toast } from "@/src/lib/shared/utils/toast.utils";
 import { AiCharacterDrafts } from "@/src/lib/widgets/admin/AiCharacterDrafts";
 import { CharacterEditor } from "@/src/lib/widgets/admin/CharacterEditor";
+import { CharacterEditPageSkeleton } from "./CharacterEditPageSkeleton";
 import styles from "./CharacterEditPage.module.scss";
 
 interface ICharacterEditPageProps {
@@ -40,26 +40,7 @@ export const CharacterEditPage: FC<ICharacterEditPageProps> = ({
 
   if (!isAdmin) return;
 
-  if (!isCreate && isLoading) {
-    return (
-      <Box>
-        <div className={styles.content} role="status" aria-label="Loading">
-          <Skeleton shape="text" width="30%" />
-          <Skeleton
-            width="40%"
-            height="var(--padding-x8)"
-            radius="var(--radius-x2)"
-          />
-          <Skeleton
-            count={6}
-            height="var(--field-control-height)"
-            radius="var(--radius-control)"
-            gap="var(--gap-x4)"
-          />
-        </div>
-      </Box>
-    );
-  }
+  if (!isCreate && isLoading) return <CharacterEditPageSkeleton />;
 
   if (!isCreate && !character) notFound();
 

@@ -12,7 +12,8 @@ for adding games to lists and selecting several at once. Public.
   `undefined` and the client fetches instead.
 - Static metadata: title `Games`, canonical `/games`, own keywords. The route renders
   `BreadcrumbList` and, when there are results, `ItemList` JSON-LD.
-- The page sits inside a `Suspense` with `PageSkeleton` in the route (it reads `useSearchParams`).
+- The page sits inside a `Suspense` with `GamesPageSkeleton` in the route (it reads
+  `useSearchParams`), which the route hands `isFiltered={hasGameFilters(params)}`.
 
 ## Data
 
@@ -34,6 +35,19 @@ for adding games to lists and selecting several at once. Public.
    an `EmptyState` "Games not found" or `widgets/game/GamesCards` (6 columns, selectable in select
    mode). While loading, the same `GamesCards` gets `isLoading` and renders `takeGames` (60)
    `GameCardSkeleton`s in the same grid, so the cards land where the placeholders were.
+
+## Loading state
+
+- `GamesPageSkeleton` (`GamesPageSkeleton.tsx`, its own `"use client"` module sharing
+  `GamesPage.module.scss`) is the route's `Suspense` fallback. It draws the page's own blocks —
+  `BGImage`, the `Box` at `--page-height-available`, the crumbs line, the `h1` bar, the chip row
+  and `GamesCards isLoading` with `takeGames` (60) `GameCardSkeleton`s in the same 6-column grid
+  — so the cards land where the placeholders were.
+- The chip row is drawn only with `isFiltered`, computed by the route from the query it already
+  parsed: `AppliedFilters` renders nothing without filters, so a chip row drawn unconditionally
+  would move the grid up when the data arrived.
+- `GamesCards` announces the loading itself (`role="status"` on its grid), so the skeleton
+  wrapper carries no second one.
 
 ## Rules and gotchas
 

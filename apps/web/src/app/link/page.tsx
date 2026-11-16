@@ -1,7 +1,9 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
-import { GameLinkPage } from "@/src/lib/pages/GameLinkPage";
-import { PageSkeleton } from "@/src/lib/shared/ui/PageSkeleton";
+import {
+  GameLinkPage,
+  GameLinkPageSkeleton,
+} from "@/src/lib/pages/GameLinkPage";
 
 export const metadata: Metadata = {
   title: "Link a game",
@@ -10,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 const LinkRoute = () => (
-  <Suspense fallback={<PageSkeleton />}>
+  <Suspense fallback={<GameLinkPageSkeleton />}>
     <GameLinkPage />
   </Suspense>
 );

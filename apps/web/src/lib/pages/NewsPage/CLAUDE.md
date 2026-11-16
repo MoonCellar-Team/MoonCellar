@@ -52,11 +52,12 @@ publication date and the game an article is about. Public.
   jumps in width and shape on the swap.
 - The head is one panel with the same rows as the loaded page — crumbs, `h1`, the segmented tabs
   row and the compact filters (below `media960`) — so both heads are the same height and the list
-  starts at the same offset. `page__crumbs`, `page__tabs`, `page__field` and
+  starts at the same offset. `page__tabs`, `page__field` and
   `row__title_skeleton`/`row__summary_skeleton` exist only for it: they give the placeholders the
-  crumbs' 13px/1 line box (16px below `mediaSm`), the tab row's 32px pills inside its padding, a
-  label + field column, and the width a `shape="text"` bar needs inside `row__body` — that column
-  is `align-items: flex-start`, so a text bar without it collapses to zero width.
+  tab row's 32px pills inside its padding, a label + field column, and the width a `shape="text"`
+  bar needs inside `row__body` — that column is `align-items: flex-start`, so a text bar without
+  it collapses to zero width. The crumbs line is the shared `PageCrumbsSkeleton`, which carries
+  the 13px/1 line box (16px below `mediaSm`, where the row grows to the chevron).
 
 ## Rules and gotchas
 

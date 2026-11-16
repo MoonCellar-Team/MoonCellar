@@ -49,6 +49,13 @@
     justify-content: space-between;
     gap: var(--gap-x2);
   }
+
+  &__skeletonField {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-x1);
+    margin-bottom: var(--padding-x3);
+  }
 }
 
 .muted {

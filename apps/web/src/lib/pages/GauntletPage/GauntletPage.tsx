@@ -10,7 +10,7 @@ import { Filters } from "@/src/lib/features/filters/ui/Filters";
 import { BGImage } from "@/src/lib/shared/ui/BGImage";
 import { useWheelStore } from "@/src/lib/shared/store/wheel.store";
 import { GauntletModePanel } from "@/src/lib/widgets/gauntlet/GauntletModePanel";
-import { PageSkeleton } from "@/src/lib/shared/ui/PageSkeleton";
+import { GauntletPageSkeleton } from "./GauntletPageSkeleton";
 
 export const GauntletPage: FC = () => {
   const winner = useWheelStore((state) => state.winner);
@@ -18,7 +18,7 @@ export const GauntletPage: FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <Suspense fallback={<PageSkeleton />}>
+      <Suspense fallback={<GauntletPageSkeleton />}>
         <GauntletModePanel />
         <div className={styles.page}>
           {!isRoyal && (

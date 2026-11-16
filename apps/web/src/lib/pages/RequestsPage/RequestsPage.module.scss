@@ -20,3 +20,74 @@
   color: var(--color-text-secondary);
   @include font(14px, 20px, 400);
 }
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-x5);
+
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--gap-x6);
+    align-items: start;
+
+    @include mediaMd {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-x5);
+    min-width: 0;
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-x2);
+    padding-top: var(--padding-x4);
+    border-top: 1px solid var(--color-border-primary);
+
+    &:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+  }
+
+  &__switches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-x3);
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--gap-x3);
+
+    @include mediaSm {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  &__mine {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-x3);
+    padding: var(--padding-x4);
+    border-radius: var(--radius-x4);
+    background-color: var(--color-bg-secondary);
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-x1);
+    padding: var(--padding-x3);
+    border-radius: var(--radius-x3);
+    background-color: var(--color-bg-primary);
+  }
+}

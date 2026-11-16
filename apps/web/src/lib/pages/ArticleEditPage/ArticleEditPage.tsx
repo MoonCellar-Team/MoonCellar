@@ -8,12 +8,12 @@ import { useAuthStore } from "@/src/lib/shared/store/auth.store";
 import { Box } from "@/src/lib/shared/ui/Box";
 import { Breadcrumbs } from "@/src/lib/shared/ui/Breadcrumbs";
 import { EmptyState } from "@/src/lib/shared/ui/EmptyState";
-import { PageSkeleton } from "@/src/lib/shared/ui/PageSkeleton";
 import { SectionTitle } from "@/src/lib/shared/ui/SectionTitle";
 import {
   ADMIN_HREF,
   getAdminHref,
 } from "@/src/lib/shared/utils/admin-url.utils";
+import { ArticleEditPageSkeleton } from "./ArticleEditPageSkeleton";
 
 interface IArticleEditPageProps {
   articleId?: string;
@@ -30,7 +30,7 @@ export const ArticleEditPage: FC<IArticleEditPageProps> = ({ articleId }) => {
 
   if (isAuthChecked && !isAdmin) notFound();
 
-  if (!isAdmin || isLoading) return <PageSkeleton />;
+  if (!isAdmin || isLoading) return <ArticleEditPageSkeleton />;
 
   const title = articleId ? "Edit post" : "New post";
 

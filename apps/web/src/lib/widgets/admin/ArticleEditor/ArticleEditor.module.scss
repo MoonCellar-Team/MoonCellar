@@ -78,4 +78,20 @@
     flex-wrap: wrap;
     gap: var(--gap-x2);
   }
+
+  &__skeletonField {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-x1);
+    margin-bottom: var(--padding-x3);
+  }
+
+  &__skeletonTabs {
+    display: flex;
+    gap: var(--gap-x05);
+    width: fit-content;
+    padding: var(--padding-x05);
+    border-radius: var(--radius-x4);
+    background-color: var(--color-bg-tertiary);
+  }
 }
