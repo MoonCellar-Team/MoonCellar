@@ -4,8 +4,8 @@ import { notFound, useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/src/lib/shared/store/auth.store";
 import { Box } from "@/src/lib/shared/ui/Box";
 import { Breadcrumbs } from "@/src/lib/shared/ui/Breadcrumbs";
-import { PageSkeleton } from "@/src/lib/shared/ui/PageSkeleton";
 import { Tabs } from "@/src/lib/shared/ui/Tabs";
+import { AdminSkeleton } from "./AdminSkeleton";
 import { UserList } from "@/src/lib/widgets/admin/UserList";
 import { GameList } from "@/src/lib/widgets/admin/GameList";
 import { ReportList } from "@/src/lib/widgets/admin/ReportList";
@@ -58,7 +58,7 @@ export const Admin = ({ tab }: IAdminProps) => {
 
   if (isAuthChecked && !isAdmin) notFound();
 
-  if (!isAdmin) return <PageSkeleton />;
+  if (!isAdmin) return <AdminSkeleton tab={tab} />;
 
   const selectTab = (index: number) =>
     router.push(getAdminHref(ADMIN_TABS[index]));
