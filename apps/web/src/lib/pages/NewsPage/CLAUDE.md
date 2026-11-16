@@ -76,11 +76,11 @@ publication date and the game an article is about. Public.
 - Dates are formatted in UTC (`formatArticleDate`), the same zone the API groups the archive
   by, so a post published near midnight sits in the month the archive counts it in, on the server
   and in every browser.
-- **The feed fills the page container and takes no cap of its own.** It used to stop at
-  `--news-page-width` (1080px) while Games, Lists and the rest used the container's 1400px, so on
-  a wide screen the list sat in a visibly narrower column. That token is `--article-page-width`
-  now and belongs to `ArticlePage` and `ArticleEditor`: the article keeps a narrower reading
-  measure, a feed does not need one.
+- **The feed fills the page container and takes no cap of its own, like every other page.**
+  `.container` holds the one page width (`--page-width`, 1400px) and no page declares another; a
+  shorter line is a cap on the text (`--text-measure`, `--article-text-width`), not on the page.
+  The feed used to stop at `--news-page-width` (1080px) while Games, Lists and the rest used the
+  container's 1400px, so on a wide screen the list sat in a visibly narrower column.
 - **The sidebar sticks below the fixed header, not at the top of the scrollport.** The page
   scrolls `#page-scroll` while the header is `position: fixed` over it, so `top: 0` slid the
   archive card under the header and cut off its top. `top: var(--container-padding-top)` is the
