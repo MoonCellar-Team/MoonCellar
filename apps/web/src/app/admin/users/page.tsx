@@ -1,9 +1,8 @@
 import { Suspense } from "react";
-import { Admin } from "@/src/lib/pages/Admin";
-import { PageSkeleton } from "@/src/lib/shared/ui/PageSkeleton";
+import { Admin, AdminSkeleton } from "@/src/lib/pages/Admin";
 
 const AdminTabPage = () => (
-  <Suspense fallback={<PageSkeleton />}>
+  <Suspense fallback={<AdminSkeleton tab="users" />}>
     <Admin tab="users" />
   </Suspense>
 );

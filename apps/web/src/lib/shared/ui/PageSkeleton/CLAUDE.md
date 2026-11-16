@@ -5,12 +5,12 @@ rest of `--page-height-available`, all `Skeleton`s.
 
 ## When to use
 
-- As the `Suspense` fallback of a route (`app/games/page.tsx`, the admin pages, `/requests`,
-  `/lists`).
+- As the `Suspense` fallback of a route (`app/games/page.tsx`, `/requests`, `/lists`, the admin
+  editors under `app/admin/<tab>/[id]`).
 - Not for a page whose layout is distinctive enough that a generic panel visibly jumps into it —
-  that page gets its own skeleton next to it, as the profile has `UserProfileSkeleton`.
-- As the placeholder of a page that waits for something before it can render anything, such as
-  `Admin` until the viewer is known to be an admin.
+  that page gets its own skeleton next to it, as the profile has `UserProfileSkeleton` and the
+  admin tabs have `AdminSkeleton`.
+- As the placeholder of a page that waits for something before it can render anything.
 - Inside a section or a panel use `Skeleton`, shaped like that section; `PageSkeleton` is a full
   page tall and pushes everything below it off the screen.
 
