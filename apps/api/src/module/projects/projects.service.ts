@@ -12,11 +12,16 @@ import { InjectModel } from "@nestjs/mongoose";
 import type { Model } from "mongoose";
 import { ZodValidationException } from "nestjs-zod";
 import {
+  DECOMP_MAP_CELLS,
+  DecompBlockSchema,
   DecompFunctionsSchema,
+  DecompLiveSchema,
   PROJECT_BLOCK_SCHEMAS,
   ProjectBlockSchema,
   getProjectBlockProgress,
   type ICreateProjectRequest,
+  type IDecompBlock,
+  type IDecompFunctions,
   type IProject,
   type IProjectBlock,
   type IProjectConnectCode,
@@ -362,6 +367,96 @@ export class ProjectsService implements OnModuleInit {
       }
     );
     return { ...upload, updatedAt: new Date(upload.updatedAt).toISOString() };
+  }
+
+  /**
+   * Replaces the claims of the stored Decompilation block between uploads, so "In work" and the
+   * Files table do not wait for the next merge. The list is authoritative: a unit it does not name
+   * loses its claim. Units the block does not have and files that are already complete are
+   * ignored, exactly as the project's own block builder does; the upload's `updatedAt` does not
+   * move, because the block itself was not re-uploaded.
+   */
+  async patchDecompLive(
+    slug: string,
+    authorization: string | undefined,
+    body: unknown
+  ): Promise<{ claimed: number; pending: number }> {
+    const { project, token } = await this.authorizeToken(slug, authorization);
+    this.assertHasBlock(project, "decomp");
+    const parsed = DecompLiveSchema.safeParse(body);
+    if (!parsed.success) throw new ZodValidationException(parsed.error);
+    const stored = await this.data.findOne({ slug, block: "decomp" }).lean();
+    if (!stored) {
+      throw new NotFoundException(
+        `${project.name} has not uploaded its Decompilation block yet`
+      );
+    }
+    const block = DecompBlockSchema.parse(JSON.parse(stored.body));
+    const claims = new Map(
+      parsed.data.claims.map((claim) => [claim.unit, claim])
+    );
+    let claimed = 0;
+    for (const unit of block.units) {
+      const claim = claims.get(unit.id);
+      const isComplete = unit.functions > 0 && unit.done === unit.functions;
+      if (!claim || isComplete) {
+        if (unit.claimedBy) delete unit.note;
+        delete unit.claimedBy;
+        continue;
+      }
+      unit.claimedBy = claim.name || "?";
+      if (claim.note) unit.note = claim.note;
+      else delete unit.note;
+      claimed += 1;
+    }
+    block.totals.claimed = claimed;
+    if (parsed.data.pending !== undefined) {
+      block.totals.pending = parsed.data.pending;
+    }
+    await this.patchClaimedCells(slug, block);
+    await this.data.updateOne(
+      { slug, block: "decomp" },
+      { $set: { body: JSON.stringify(block) } }
+    );
+    await this.touchToken(slug, token.id);
+    return { claimed, pending: block.totals.pending };
+  }
+
+  /**
+   * What the map shows for the files changes with them: a cell of a claimed file nobody has
+   * touched becomes "claimed", and one whose claim is gone becomes empty again. The cells are
+   * addressed through what the map's functions are (`decomp/functions`), which a project uploads
+   * beside the block; without it, or from another commit, the map stays as uploaded.
+   */
+  private async patchClaimedCells(slug: string, block: IDecompBlock) {
+    const stored = await this.data
+      .findOne({ slug, block: DECOMP_FUNCTIONS })
+      .lean();
+    if (!stored) return;
+    const parsed = DecompFunctionsSchema.safeParse(JSON.parse(stored.body));
+    if (!parsed.success) return;
+    const functions: IDecompFunctions = parsed.data;
+    if (!block.commit || functions.commit !== block.commit) return;
+
+    const claimed = new Set(
+      block.units.filter((unit) => unit.claimedBy).map((unit) => unit.id)
+    );
+    const cells = block.map.split("");
+    for (
+      let index = 0;
+      index < cells.length && index < functions.functions.length;
+      index += 1
+    ) {
+      const unit = functions.units[functions.functions[index][2]];
+      if (claimed.has(unit)) {
+        if (cells[index] === DECOMP_MAP_CELLS.todo) {
+          cells[index] = DECOMP_MAP_CELLS.claimed;
+        }
+      } else if (cells[index] === DECOMP_MAP_CELLS.claimed) {
+        cells[index] = DECOMP_MAP_CELLS.todo;
+      }
+    }
+    block.map = cells.join("");
   }
 
   async getFunctions(slug: string): Promise<string> {

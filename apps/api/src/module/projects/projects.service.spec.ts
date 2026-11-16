@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { ZodValidationException } from "nestjs-zod";
+import type { IDecompBlock } from "@mooncellar/schemas";
 import {
   FIRST_TOKEN_NAME,
   ProjectsService,
@@ -465,5 +466,187 @@ describe("ProjectsService functions", () => {
     await expect(service.getFunctions("mooncellar")).rejects.toBeInstanceOf(
       NotFoundException
     );
+  });
+});
+
+describe("ProjectsService.patchDecompLive", () => {
+  const block = (): IDecompBlock => ({
+    commit: "3eecb3c",
+    totals: {
+      functions: 4,
+      done: 2,
+      pending: 5,
+      bytes: 400,
+      bytesDone: 200,
+      claimed: 0,
+    },
+    categories: [
+      {
+        id: "game",
+        functions: 4,
+        done: 2,
+        pending: 5,
+        bytes: 400,
+        bytesDone: 200,
+      },
+    ],
+    areas: [],
+    units: [
+      {
+        id: "src/game/a.cpp",
+        category: "game",
+        functions: 2,
+        done: 0,
+        pending: 0,
+        bytes: 200,
+        bytesDone: 0,
+      },
+      {
+        id: "src/game/b.cpp",
+        category: "game",
+        functions: 2,
+        done: 2,
+        pending: 0,
+        bytes: 200,
+        bytesDone: 200,
+      },
+    ],
+    map: "..dd",
+    events: [],
+  });
+
+  const functions = {
+    commit: "3eecb3c",
+    units: ["src/game/a.cpp", "src/game/b.cpp"],
+    functions: [
+      [0x1000, 100, 0, "A::run()"],
+      [0x1064, 100, 0, "A::stop()"],
+      [0x10c8, 100, 1, "B::run()"],
+      [0x112c, 100, 1, "B::stop()"],
+    ],
+  };
+
+  const createLiveService = (
+    stored: unknown,
+    mapFunctions: unknown | null = functions
+  ) => {
+    const context = createService({ blocks: ["decomp"] });
+    (context.data.findOne as jest.Mock).mockImplementation(
+      (filter: { block: string }) =>
+        chain(
+          stored && filter.block === "decomp"
+            ? { body: JSON.stringify(stored) }
+            : mapFunctions && filter.block === "decomp/functions"
+              ? { body: JSON.stringify(mapFunctions) }
+              : null
+        )
+    );
+    return context;
+  };
+
+  const storedBody = (data: { updateOne: jest.Mock }) =>
+    JSON.parse(data.updateOne.mock.calls[0][1].$set.body);
+
+  it("claims the files the block has and skips unknown and complete ones", async () => {
+    const { service, data } = createLiveService(block());
+
+    await expect(
+      service.patchDecompLive("mooncellar", `Bearer ${TOKEN}`, {
+        claims: [
+          { unit: "src/game/a.cpp", name: "sergeyhist", note: "menu" },
+          { unit: "src/game/b.cpp", name: "sergeyhist" },
+          { unit: "src/game/gone.cpp", name: "someone" },
+        ],
+      })
+    ).resolves.toEqual({ claimed: 1, pending: 5 });
+
+    const body = storedBody(data);
+    expect(body.totals.claimed).toBe(1);
+    expect(body.totals.pending).toBe(5);
+    expect(body.units[0]).toMatchObject({
+      claimedBy: "sergeyhist",
+      note: "menu",
+    });
+    expect(body.units[1]).not.toHaveProperty("claimedBy");
+    expect(body.map).toBe("ttdd");
+    expect(data.updateOne).toHaveBeenCalledWith(
+      { slug: "mooncellar", block: "decomp" },
+      { $set: { body: expect.any(String) } }
+    );
+  });
+
+  it("releases a claim, takes its cells out of the map and keeps the upload's progress", async () => {
+    const claimed = block();
+    claimed.totals.claimed = 1;
+    claimed.units[0].claimedBy = "sergeyhist";
+    claimed.units[0].note = "menu";
+    claimed.map = "ttdd";
+    const { service, data, projects } = createLiveService(claimed);
+
+    await expect(
+      service.patchDecompLive("mooncellar", `Bearer ${TOKEN}`, {
+        claims: [],
+        pending: 0,
+      })
+    ).resolves.toEqual({ claimed: 0, pending: 0 });
+
+    const body = storedBody(data);
+    expect(body.totals.claimed).toBe(0);
+    expect(body.totals.pending).toBe(0);
+    expect(body.units[0]).not.toHaveProperty("claimedBy");
+    expect(body.units[0]).not.toHaveProperty("note");
+    expect(body.map).toBe("..dd");
+    expect(
+      projects.updateOne.mock.calls.every(([, update]) => !update.$push)
+    ).toBe(true);
+  });
+
+  it("leaves the map alone when its functions came from another commit", async () => {
+    const { service, data } = createLiveService(block(), {
+      ...functions,
+      commit: "older123",
+    });
+
+    await service.patchDecompLive("mooncellar", `Bearer ${TOKEN}`, {
+      claims: [{ unit: "src/game/a.cpp", name: "sergeyhist" }],
+    });
+
+    expect(storedBody(data).map).toBe("..dd");
+  });
+
+  it("validates the body against DecompLiveSchema", async () => {
+    const { service, data } = createLiveService(block());
+    await expect(
+      service.patchDecompLive("mooncellar", `Bearer ${TOKEN}`, {
+        claims: "sergeyhist",
+      })
+    ).rejects.toBeInstanceOf(ZodValidationException);
+    expect(data.updateOne).not.toHaveBeenCalled();
+  });
+
+  it("needs the Decompilation block and something uploaded", async () => {
+    const withoutBlock = createService({});
+    await expect(
+      withoutBlock.service.patchDecompLive("mooncellar", `Bearer ${TOKEN}`, {
+        claims: [],
+      })
+    ).rejects.toThrow("MoonCellar has no Decompilation block");
+
+    const empty = createLiveService(null);
+    await expect(
+      empty.service.patchDecompLive("mooncellar", `Bearer ${TOKEN}`, {
+        claims: [],
+      })
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it("refuses a missing or wrong token", async () => {
+    const { service } = createLiveService(block());
+    await expect(
+      service.patchDecompLive("mooncellar", undefined, { claims: [] })
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(
+      service.patchDecompLive("mooncellar", "Bearer mcp_wrong", { claims: [] })
+    ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 });

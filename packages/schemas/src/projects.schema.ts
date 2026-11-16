@@ -276,6 +276,32 @@ export const DecompFunctionsSchema = z
   );
 export type IDecompFunctions = z.infer<typeof DecompFunctionsSchema>;
 
+/** One file someone is working on, as a project reports it between block uploads. */
+export const DecompClaimSchema = z.object({
+  unit: z.string().trim().min(1).max(300),
+  name: z.string().trim().max(64).optional(),
+  note: z.string().trim().max(300).optional(),
+});
+export type IDecompClaim = z.infer<typeof DecompClaimSchema>;
+
+/**
+ * The live claims of a Decompilation block (`PATCH /projects/:slug/data/decomp/live`): the whole
+ * list of files people hold right now, sent after someone takes or releases one so the hub does
+ * not wait for the next upload. The hub keeps only claims of units the block has and that are not
+ * complete; `pending` replaces the functions waiting in work branches when it is sent.
+ */
+export const DecompLiveSchema = z
+  .object({
+    claims: z.array(DecompClaimSchema).max(2_000),
+    pending: CountSchema.optional(),
+  })
+  .refine(
+    ({ claims }) =>
+      new Set(claims.map(({ unit }) => unit)).size === claims.length,
+    "List every claimed file once"
+  );
+export type IDecompLive = z.infer<typeof DecompLiveSchema>;
+
 export const PROJECT_BLOCK_SCHEMAS = {
   plan: PlanBlockSchema,
   decomp: DecompBlockSchema,

@@ -176,6 +176,24 @@ export class ProjectUploadsController {
     return this.projectsService.putFunctions(slug, authorization, body);
   }
 
+  @Patch(":slug/data/decomp/live")
+  @ApiOperation({
+    summary:
+      "Replace the Decompilation block's live claims with a project token, without waiting for the next upload",
+  })
+  @ApiBearerAuth()
+  @ApiBody({ description: "DecompLiveSchema from @mooncellar/schemas" })
+  @ApiOkResponse({
+    description: "The files in work and the functions waiting to merge",
+  })
+  patchLive(
+    @Param("slug") slug: string,
+    @Headers("authorization") authorization: string | undefined,
+    @Body() body: unknown
+  ) {
+    return this.projectsService.patchDecompLive(slug, authorization, body);
+  }
+
   @Put(":slug/data/:block")
   @ApiOperation({
     summary:
