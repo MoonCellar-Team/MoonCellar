@@ -171,6 +171,14 @@ an instance of Module)`. Use a default import; tsc reports the call as `TS2349`.
   (`@Header("Content-Type", "application/json")`). The menu's progress comes from `uploads` on the
   project, written with each upload by `getProjectBlockProgress`, so listing projects never reads a
   block.
+- **Between uploads a Decompilation block's claims are patched into that same stored block
+  (`PATCH /projects/:slug/data/decomp/live`), never into a second document or into `uploads`.**
+  The sent list is authoritative, and it is filtered against the block itself — a unit the block
+  does not have and a file whose `done` equals its `functions` are dropped, exactly as the project's
+  own block builder drops them — or "In work" would count a file the Files table cannot show. The
+  map's claimed cells are rewritten through `decomp/functions`, and only when that upload carries
+  the block's commit; without it the map stays as uploaded. The upload's `updatedAt` must not move:
+  it says when the block was uploaded, and the project menu's staleness dot reads the same value.
 - **`defaultBlock` must be one of the project's enabled blocks.** Older project documents have no
   value, so `toProject` exposes their first enabled block until settings save a new value; do not add a
   schema default that would change how existing projects open.

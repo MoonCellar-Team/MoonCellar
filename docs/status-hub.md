@@ -176,9 +176,20 @@ gzip -c plan.json | curl -X PUT https://api.mooncellar.space/projects/<project>/
 - A wrong token, a project that does not exist and a missing header all answer 401 with the same
   message, so the endpoint does not tell which projects exist.
 
+Between uploads a Decompilation block's claims change without a new block: after someone takes or
+releases a file, its tooling sends the whole current list with
+`PATCH /projects/:slug/data/decomp/live` (`DecompLiveSchema` — `claims` of `unit`, `name` and an
+optional `note`, and an optional `pending`). The hub then updates "In work", the files' `claimedBy`
+and the map's claimed cells at once, so the page does not wait for the next merge. A claim on a
+file the block does not have, or on a file that is already complete, is ignored — the block shows
+neither of them. The upload's `updatedAt` stays where it was, because the block itself was not
+uploaded again.
+
 Projects send their Decompilation blocks from their own tooling, usually right after a merge into
-their `main`. The MoonCellar project's plan lives in the hub (imported once from a markdown file that
-is gone now): read and change it on the site or with `bun scripts/tasks.ts`.
+their `main`, and their live claims after every take or release.
+
+The MoonCellar project's plan lives in the hub (imported once from a markdown file that is gone
+now): read and change it on the site or with `bun scripts/tasks.ts`.
 
 ## API
 
@@ -205,6 +216,7 @@ is gone now): read and change it on the site or with `bun scripts/tasks.ts`.
 | `POST /projects/:slug/plan/tasks/:id/<take, release, done, reopen>` | admin or token                 | Change the state (`as`, `note`, `force`)                  |
 | `GET /projects/:slug/plan/events?task=<id>`                         | admin or token                 | Recent changes, of the plan or of one task                |
 | `PUT /projects/:slug/data/:block`                                   | project token                  | Upload a block                                            |
+| `PATCH /projects/:slug/data/decomp/live`                            | project token                  | Live claims between uploads                               |
 
 ## Trying it locally
 

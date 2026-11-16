@@ -1,6 +1,7 @@
 import {
   CreateProjectRequestSchema,
   DecompBlockSchema,
+  DecompLiveSchema,
   PlanBlockSchema,
   ProjectSlugSchema,
   getProjectBlockProgress,
@@ -113,6 +114,20 @@ describe("project blocks", () => {
       ],
     };
     expect(PlanBlockSchema.safeParse(broken).success).toBe(false);
+  });
+
+  it("take the whole list of claims, with or without a pending count", () => {
+    expect(
+      DecompLiveSchema.parse({ claims: [{ unit: "a", name: "x" }] })
+    ).toEqual({ claims: [{ unit: "a", name: "x" }] });
+    expect(DecompLiveSchema.parse({ claims: [], pending: 3 }).pending).toBe(3);
+  });
+
+  it("list every claimed file once", () => {
+    expect(
+      DecompLiveSchema.safeParse({ claims: [{ unit: "a" }, { unit: "a" }] })
+        .success
+    ).toBe(false);
   });
 
   it("count progress per block", () => {
