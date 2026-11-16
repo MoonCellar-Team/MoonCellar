@@ -10,8 +10,8 @@ viewer — on the account for a signed-in user, in the browser for a guest.
 - Static metadata: title `Gauntlet`, canonical `/gauntlet`, own keywords. The route renders
   `BreadcrumbList` JSON-LD.
 - No server data fetch. The route renders the JSON-LD and `<GauntletPage />` from the barrel and
-  nothing else; the page owns its layout, its `Suspense` (with `PageSkeleton`, because the panel
-  and the filters read the query string) and its styles.
+  nothing else; the page owns its layout, its `Suspense` (with `GauntletPageSkeleton`, because the
+  panel and the filters read the query string) and its styles.
 
 ## Data
 
@@ -50,6 +50,20 @@ Then, in `.page`:
    take half the height above the wheel. After a spin it shows the winner (`GauntletWinner`), whose
    facts under the name are the game page's `entities/game/ui/GameFacts`; its "More about the game"
    no longer repeats genres and platforms.
+
+## Loading state
+
+- `GauntletPageSkeleton` (`GauntletPageSkeleton.tsx`, its own `"use client"` module sharing
+  `GauntletPage.module.scss`) is the fallback of the page's `Suspense`, which sits inside
+  `.wrapper`. It paints the toolbar `Box` (crumbs line, `h1` bar, the two segmented mode pills,
+  the "Filters" label and the match-count line) and, in `.page`, the wheel container's own grid —
+  the square wheel placeholder at `aspect-ratio: 1` and `--gauntlet-wheel-max-width`, and the
+  winner panel as a `Box` stretched to the bottom with the intro block's icon, title, two lede
+  lines and three step rows.
+- It carries the `role="status"` on the wheel/panel grid: the toolbar above it is decoration.
+- The skeleton shares `GauntletPage.module.scss`, so `.wrapper` and `.page` are the page's own —
+  including the `height: var(--page-height-available)` that the fallback would otherwise lose,
+  which is what made the wheel's page collapse and then grow to full height on the swap.
 
 ## Rules and gotchas
 

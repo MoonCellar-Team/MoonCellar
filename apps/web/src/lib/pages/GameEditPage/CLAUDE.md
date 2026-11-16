@@ -6,7 +6,7 @@ an AI draft). It also triggers IGDB / VNDB / HLTB re-parses and deletes games.
 ## Routes
 
 - `/admin/games/[id]` — `src/app/admin/games/[id]/page.tsx`. `id === "new"` is create mode
-  (`gameId` undefined). Wrapped in `Suspense` with `PageSkeleton`. Dynamic, no metadata.
+  (`gameId` undefined). Wrapped in `Suspense` with `GameEditPageSkeleton`. Dynamic, no metadata.
 - Gated by `src/app/admin/layout.tsx` (see `Admin`) and by the client
   `isAuthChecked && !isAdmin → notFound()`.
 
@@ -38,6 +38,17 @@ an AI draft). It also triggers IGDB / VNDB / HLTB re-parses and deletes games.
    `CollapsibleSection` per `GAME_SECTIONS` entry, then the Create/Save button.
 5. `ImageFinder` inside the cover and image-list fields — picked URLs are applied on submit
    (imported to storage in edit mode, stored as-is on create).
+
+## Loading state
+
+- `GameEditPageSkeleton` (`GameEditPageSkeleton.tsx`, its own `"use client"` module sharing
+  `GameEditPage.module.scss`) is both the route's `Suspense` fallback and what the page renders
+  while `isPageLoading` or the filter options are missing. It paints the page's `content` column —
+  the crumbs line, the `header` with the `h1` bar and the action row, a `section` row per
+  `GAME_SECTIONS` entry (the same count the loaded form has, so a new section is reflected there
+  without a second list) and the footer button.
+- The section rows are drawn collapsed; the form's first sections open by default, so the loaded
+  page is taller than the fallback.
 
 ## Rules and gotchas
 

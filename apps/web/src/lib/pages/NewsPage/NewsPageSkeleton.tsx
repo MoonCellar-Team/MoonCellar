@@ -4,6 +4,7 @@ import { FC } from "react";
 import { ArticleRowSkeleton } from "@/src/lib/entities/article/ui/ArticleRow";
 import { BGImage } from "@/src/lib/shared/ui/BGImage";
 import { Box } from "@/src/lib/shared/ui/Box";
+import { PageCrumbsSkeleton } from "@/src/lib/shared/ui/PageSkeleton";
 import { SectionTitle } from "@/src/lib/shared/ui/SectionTitle";
 import { Skeleton } from "@/src/lib/shared/ui/Skeleton";
 import styles from "./NewsPage.module.scss";
@@ -25,9 +26,7 @@ export const NewsPageSkeleton: FC = () => (
         className={styles.page__head}
         contentStyle={{ gap: "var(--gap-x4)" }}
       >
-        <div className={styles.page__crumbs}>
-          <Skeleton shape="text" width="var(--page-skeleton-crumbs-width)" />
-        </div>
+        <PageCrumbsSkeleton />
         <SectionTitle as="h1">
           <Skeleton shape="text" width="var(--page-skeleton-title-width)" />
         </SectionTitle>

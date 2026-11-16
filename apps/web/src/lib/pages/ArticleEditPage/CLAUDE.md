@@ -22,10 +22,20 @@ Publish, Unpublish and Delete. Admins only.
 2. `ArticleEditor`, keyed by the post id so a different post starts from a fresh draft — or
    `EmptyState` when the id does not exist.
 
+## Loading state
+
+- `ArticleEditPageSkeleton` (`ArticleEditPageSkeleton.tsx`, its own `"use client"` module) is both
+  the route's `Suspense` fallback and what the page renders while `isAdmin` is unknown or the post
+  loads. It paints the page's frame — a `Box` with the `h1` bar over the crumbs line — over
+  `ArticleEditorSkeleton`, which is built on `ArticleEditor.module.scss`: the `editor` column at
+  `--article-page-width`, the "Kind of post" pills, the field rows at `--field-control-height` and
+  the field's own `margin-bottom`, the image and hint block, the text area and the footer divided
+  by its border.
+
 ## Rules and gotchas
 
 - **Keep both gates, as `Admin` does:** the server layout, and `isAuthChecked && !isAdmin →
-  notFound()` with `PageSkeleton` until `isAdmin` is true.
+  notFound()` with `ArticleEditPageSkeleton` until `isAdmin` is true.
 - **The draft is plain component state validated with `SaveArticleRequestSchema` on save**, not a
   react-hook-form form, so none of the `isValid` traps in `apps/web/CLAUDE.md` apply. Errors map
   to the field by the first segment of the issue path.

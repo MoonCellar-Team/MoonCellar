@@ -6,8 +6,8 @@ and follows the requests they sent. Moderators review them in the admin panel. G
 
 ## Routes
 
-- `/requests` — `src/app/requests/page.tsx`, wrapped in `Suspense` with `PageSkeleton` (the page
-  reads `useSearchParams`).
+- `/requests` — `src/app/requests/page.tsx`, wrapped in `Suspense` with `RequestsPageSkeleton`
+  (the page reads `useSearchParams`).
 - Static metadata: title `Requests`, `robots: { index: false, follow: true }`.
 - Client-only content: the route fetches nothing.
 
@@ -28,6 +28,17 @@ and follows the requests they sent. Moderators review them in the admin panel. G
    Withdrawing a pending request asks for confirmation through `ConfirmModal` first. "My
    requests" pages through `GET /requests/mine` 20 at a time; the `Pagination` shows only when
    there is more than one page.
+
+## Loading state
+
+- `RequestsPageSkeleton` (`RequestsPageSkeleton.tsx`, its own `"use client"` module sharing
+  `RequestsPage.module.scss`) is the route's `Suspense` fallback. It paints the page's own frame:
+  the `Box` with its `page` padding and gaps, the crumbs line, the `h1` bar, the two-line lede at
+  65ch, then the same two columns the form and "My requests" take — `1.4fr / 1fr`, one column
+  below `mediaMd` — with a form of field rows and a queue card of three request rows at the
+  widgets' own `--field-control-height`, `--padding-x3` padding and `--radius-x3` cards.
+- The page skeleton carries the `role="status"` wrapper; neither the form nor the queue
+  announces a loading of its own.
 
 ## Rules and gotchas
 

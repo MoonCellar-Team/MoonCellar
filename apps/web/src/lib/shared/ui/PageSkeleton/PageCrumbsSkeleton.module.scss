@@ -1,0 +1,8 @@
+.crumbs {
+  font-size: 13px;
+  line-height: 1;
+
+  @include mediaSm {
+    font-size: 16px;
+  }
+}

@@ -1,10 +1,12 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
-import { ListsPage } from "@/src/lib/pages/ListsPage";
-import { parseListsQuery } from "@/src/lib/features/lists/model/lists-query.utils";
+import { ListsPage, ListsPageSkeleton } from "@/src/lib/pages/ListsPage";
+import {
+  hasListsFilters,
+  parseListsQuery,
+} from "@/src/lib/features/lists/model/lists-query.utils";
 import { listsAPI } from "@/src/lib/shared/api";
 import { JsonLd } from "@/src/lib/shared/ui/JsonLd";
-import { PageSkeleton } from "@/src/lib/shared/ui/PageSkeleton";
 import { getBreadcrumbJsonLd } from "@/src/lib/shared/utils/json-ld.utils";
 
 export const metadata: Metadata = {
@@ -62,7 +64,9 @@ const ListsPageIndex = async ({
           { name: "Lists", path: "/lists" },
         ])}
       />
-      <Suspense fallback={<PageSkeleton />}>
+      <Suspense
+        fallback={<ListsPageSkeleton isFiltered={hasListsFilters(params)} />}
+      >
         <ListsPage initialParams={params} initialData={initialData} />
       </Suspense>
     </>

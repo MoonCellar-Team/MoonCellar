@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { PageCrumbsSkeleton } from "./PageCrumbsSkeleton";
 import { PageSkeleton } from "./PageSkeleton";
 
 const meta = {
@@ -12,3 +13,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const Crumbs: Story = {
+  render: () => <PageCrumbsSkeleton />,
+};

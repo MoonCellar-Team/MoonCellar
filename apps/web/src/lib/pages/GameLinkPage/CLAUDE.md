@@ -9,8 +9,8 @@ a code a guest sees the "Log in" prompt and opens the modal with its button.
 
 ## Routes
 
-- `/link` — `src/app/link/page.tsx`, wrapped in `Suspense` with `PageSkeleton` (the page reads
-  `useSearchParams`).
+- `/link` — `src/app/link/page.tsx`, wrapped in `Suspense` with `GameLinkPageSkeleton` (the page
+  reads `useSearchParams`).
 - Static metadata: title `Link a game`, `robots: { index: false, follow: false }`.
 - Client-only content: the route fetches nothing.
 
@@ -30,6 +30,16 @@ a code a guest sees the "Log in" prompt and opens the modal with its button.
 2. Header: `SectionTitle as="h1"` "Link a game" and the lede.
 3. `GameDeviceLink` with `initialCode`, or, for guests, a compact `EmptyState` "Log in to link a
    game." whose Sign in action calls `openAuthModal`.
+
+## Loading state
+
+- `GameLinkPageSkeleton` (`GameLinkPageSkeleton.tsx`, its own `"use client"` module sharing
+  `GameLinkPage.module.scss`) is the route's `Suspense` fallback. It paints the page's own frame:
+  the `Box` with its `page` padding and gaps, the crumbs line, the `h1` bar, the two-line lede at
+  65ch, and the code form column at `--game-link-form-width` — the same token
+  `GameDeviceLink.module.scss` sizes the real form with — a label line, a
+  `--field-control-height` field and the confirm button.
+- The page skeleton carries the `role="status"` wrapper.
 
 ## Rules and gotchas
 
