@@ -1,6 +1,6 @@
 # Sockets
 
-MoonCellar keeps five real-time channels open over Socket.IO, all served by the API process:
+MoonCellar keeps six real-time channels open over Socket.IO, all served by the API process:
 
 | Namespace | Who connects | What it does |
 |---|---|---|
@@ -9,6 +9,7 @@ MoonCellar keeps five real-time channels open over Socket.IO, all served by the 
 | `/notifications` | Every signed-in user, on every page | **Notifications only.** Pushes a new or regrouped notification and the unread count to the user's tabs. The list and every change go through REST. |
 | `/activity` | Anyone with a profile's activity feed open | **Notifications only.** Tells open feeds that the user's activity log changed, so they refetch it. |
 | `/conflicts` | Admins with the Conflicts tab open | **Notifications only.** Tells other admins that a conflict was matched, skipped or undone, and when queued decisions were written to games. |
+| `/stream` | Admins on `/admin/stream` | **Signalling.** Carries the room code, SDP offers/answers and ICE candidates of MoonStream screen sharing. Media never reaches the server; see [stream.md](stream.md). |
 
 This document describes how they work, every event on the wire, what depends on the sockets and
 what deliberately does not.
@@ -23,7 +24,7 @@ Verified on 2026-09-15 with Bun 1.4.2, NestJS 11.2, Socket.IO 4.8.3, MongoDB 8.2
 | Library | Socket.IO 4.8 through `@nestjs/websockets` + `@nestjs/platform-socket.io` 11 |
 | Server | The API process itself, same port (3228), HTTP path `/socket.io/` |
 | Adapter | `SocketIoAdapter` (`apps/api/src/shared/socket-io.adapter.ts`), installed in `main.ts` |
-| Contract | `packages/schemas/src/comments-socket.schema.ts`, `packages/schemas/src/royal-games.schema.ts`, `packages/schemas/src/notifications.schema.ts`, `packages/schemas/src/conflicts-socket.schema.ts`, `packages/schemas/src/activity-socket.schema.ts` |
+| Contract | `packages/schemas/src/comments-socket.schema.ts`, `packages/schemas/src/royal-games.schema.ts`, `packages/schemas/src/notifications.schema.ts`, `packages/schemas/src/conflicts-socket.schema.ts`, `packages/schemas/src/activity-socket.schema.ts`, `packages/schemas/src/stream.schema.ts` |
 
 - **Transports.** Default Socket.IO behaviour: an HTTP long-polling handshake, then an upgrade to
   WebSocket. If the upgrade is blocked (see [Deployment](#deployment)) the connection keeps
@@ -643,15 +644,39 @@ Client: invalidates those conflict items, the summaries and the list.
    are, send ids and let the client refetch.
 6. Cover it in the gateway spec and update the tables in this document.
 
+## `/stream` — admin screen sharing
+
+`/stream` is the signalling channel of MoonStream, the admin-only screen-sharing page. Like
+`/conflicts`, it checks the role in the handshake: the middleware verifies
+`accessMoonToken`, loads the account and checks `roles` for `admin`, so a missing or expired token
+answers `Unauthorized` and a signed-in non-admin answers `Forbidden`. The room state, the code
+alphabet and the TURN credentials are in `apps/api/src/module/stream/`; the contract is
+`packages/schemas/src/stream.schema.ts`.
+
+| Client event | Ack / server event | What it does |
+|---|---|---|
+| `stream:host` | `{ ok: true, code, network, expiresAt }` | Starts a room and returns the relay configuration. One host per socket. |
+| `stream:join { code }` | `{ ok: true, network }`; host gets `stream:viewer-joined` | Connects the single viewer slot. |
+| `stream:signal { payload }` | `{ ok: true }` | Relays an offer, an answer or an ICE candidate. |
+| `stream:kick` | `{ ok: true }`; viewer gets `stream:closed { reason: "removed" }` | Frees the viewer slot. |
+| `stream:stop` | `{ ok: true }`; viewer gets `stream:closed { reason: "host-stopped" }` | Ends the room. |
+| `stream:leave` | `{ ok: true }` | A viewer leaves; a host leaving closes the room for the viewer. |
+
+`stream:closed` carries `host-left`, `host-stopped`, `removed` or `idle`. The gateway validates each
+payload with the schema because the global pipe does not run for gateways, and rooms expire after
+two hours without activity. Full flow and the TURN details are in [stream.md](stream.md).
+
 ## Testing and debugging
 
 - **Automated.** `bun run --cwd apps/api test src/module/comments src/module/user/gateways
-  src/module/conflicts/gateways src/module/notifications` runs `comments.gateway.spec.ts`,
-  `royal-games.gateway.spec.ts`, `conflicts.gateway.spec.ts` and `notifications.gateway.spec.ts`. Each boots its gateway on a real `IoAdapter` on a random port.
+  src/module/conflicts/gateways src/module/notifications src/module/stream` runs
+  `comments.gateway.spec.ts`, `royal-games.gateway.spec.ts`, `conflicts.gateway.spec.ts`,
+  `notifications.gateway.spec.ts` and the three `stream` specs. Each boots its gateway on a real `IoAdapter` on a random port.
   The comments spec checks delivery, room isolation, sender exclusion, leaving, validation and the
   room limit; the royal spec checks cookie authentication, sync, pushes to the same user's other
   sockets only, validation and failed updates; the conflicts spec checks that a missing cookie and
-  a non-admin are refused and that every admin receives a decision. Jest runs them
+  a non-admin are refused and that every admin receives a decision; the stream gateway spec checks
+  the same two refusals, a host/viewer room, relayed signalling and `stop`. Jest runs them
   on Node; the Bun path was checked against the running dev server.
 - **The update pipelines** need a real MongoDB and are not part of the Jest run. They were checked
   against MongoDB 8.2 through `UserRoyalGamesService` with the real models: a user without the

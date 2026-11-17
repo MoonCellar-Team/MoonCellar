@@ -33,6 +33,9 @@ const TabsRow: FC = () => (
           )}
         </span>
       ))}
+      <span className={styles.skeletonTabs__item}>
+        <Skeleton height="var(--padding-x8)" radius="var(--radius-x1)" />
+      </span>
     </div>
     <div className={styles.skeletonTabs__menu}>
       <Skeleton height="var(--padding-x8)" radius="var(--radius-button)" />
