@@ -31,12 +31,7 @@ export const StreamCode: FC<IStreamCodeProps> = ({
     <div className={className}>
       <div className={styles.head}>
         <span className={styles.label}>{label}</span>
-        <Button
-          color={ButtonColor.TRANSPARENT}
-          compact
-          onClick={copy}
-          tooltip="Copy code"
-        >
+        <Button color={ButtonColor.DEFAULT} onClick={copy} tooltip="Copy code">
           Copy
         </Button>
       </div>

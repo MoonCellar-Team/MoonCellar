@@ -1,0 +1,852 @@
+<title>MoonStream · getting to the viewer page</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* mooncellar-tokens:start */
+/* Generated from apps/web/src/lib/app/styles/vars by
+   `bun --filter web sync:tokens`. Do not edit by hand. */
+:root {
+  /* vars/_colors.scss */
+  --color-neutral-5: #080a0b;
+  --color-neutral-10: #0d1011;
+  --color-neutral-15: #121516;
+  --color-neutral-20: #161b1d;
+  --color-neutral-25: #1a2022;
+  --color-neutral-30: #1f2628;
+  --color-neutral-35: #262d2f;
+  --color-neutral-40: #2f3537;
+  --color-neutral-45: #383e40;
+  --color-neutral-50: #3f4750;
+  --color-neutral-55: #50575d;
+  --color-neutral-60: #5e6a6e;
+  --color-neutral-70: #747d82;
+  --color-neutral-80: #9192a1;
+  --color-neutral-85: #b0b2bc;
+  --color-neutral-90: #d9d9d9;
+  --color-neutral-95: #eaeaea;
+  --color-neutral-100: #ffffff;
+  --color-blue: #3d6bff;
+  --color-blue-light: #00d4ff;
+  --color-cyan: #48cae4;
+  --color-gray: #afb3b9;
+  --color-white: #e8edf5;
+  --color-yellow: #ffc451;
+  --color-yellow-light: #f9f871;
+  --color-orange: #ff8862;
+  --color-pink: #ff4b8f;
+  --color-violet: #9b5de5;
+  --color-green: #2dc653;
+  --color-red: #e5383b;
+  --color-positive: #00c292;
+  --color-negative: #d02729;
+  --color-primary: var(--color-neutral-30);
+  --color-secondary: var(--color-neutral-90);
+  --color-contrast: var(--color-neutral-100);
+  --color-contrast-reverse: var(--color-neutral-5);
+  --color-attention: #ffc451;
+  --color-text-primary: var(--color-neutral-100);
+  --color-text-secondary: var(--color-neutral-90);
+  --color-text-muted: var(--color-neutral-85);
+  --color-accent: #6951ee;
+  --color-bg-primary: #191d24;
+  --color-bg-secondary: #212731;
+  --color-bg-tertiary: #2c3340;
+  --color-bg-accent: #6951ee;
+  --color-bg-hover: #374151;
+  --color-bg-positive: #00c292;
+  --color-bg-primary-tint: #191d24ee;
+  --color-bg-secondary-tint: #212731ee;
+  --color-bg-tertiary-tint: #2c3340ee;
+  --color-bg-accent-tint: #6951eeee;
+  --color-bg-positive-tint: #00c292ee;
+  --color-border-primary: var(--color-neutral-35);
+  --color-scrollbar-track: var(--color-neutral-15);
+  --color-scrollbar-thumb: var(--color-neutral-80);
+  --color-border-secondary: var(--color-neutral-85);
+
+  /* vars/_common.scss */
+  --padding-x05: calc(var(--padding-x1) * 0.5);
+  --padding-x1: 4px;
+  --padding-x2: calc(var(--padding-x1) * 2);
+  --padding-x3: calc(var(--padding-x1) * 3);
+  --padding-x4: calc(var(--padding-x1) * 4);
+  --padding-x5: calc(var(--padding-x1) * 5);
+  --padding-x6: calc(var(--padding-x1) * 6);
+  --padding-x7: calc(var(--padding-x1) * 7);
+  --padding-x8: calc(var(--padding-x1) * 8);
+  --padding-x9: calc(var(--padding-x1) * 9);
+  --padding-x10: calc(var(--padding-x1) * 10);
+  --padding-x11: calc(var(--padding-x1) * 11);
+  --padding-x12: calc(var(--padding-x1) * 12);
+  --padding-x13: calc(var(--padding-x1) * 13);
+  --padding-x14: calc(var(--padding-x1) * 14);
+  --padding-x15: calc(var(--padding-x1) * 15);
+  --padding-x16: calc(var(--padding-x1) * 16);
+  --padding-x17: calc(var(--padding-x1) * 17);
+  --padding-x18: calc(var(--padding-x1) * 18);
+  --padding-x19: calc(var(--padding-x1) * 19);
+  --padding-x20: calc(var(--padding-x1) * 20);
+  --padding-x25: calc(var(--padding-x1) * 25);
+  --radius-x1: 4px;
+  --radius-x2: calc(var(--radius-x1) * 2);
+  --radius-x3: calc(var(--radius-x1) * 3);
+  --radius-x4: calc(var(--radius-x1) * 4);
+  --radius-x5: calc(var(--radius-x1) * 5);
+  --radius-x6: calc(var(--radius-x1) * 6);
+  --radius-x7: calc(var(--radius-x1) * 7);
+  --radius-x8: calc(var(--radius-x1) * 8);
+  --radius-x9: calc(var(--radius-x1) * 9);
+  --radius-x10: calc(var(--radius-x1) * 10);
+  --radius-control: var(--radius-x4);
+  --radius-button: var(--radius-x3);
+  --gap-x05: calc(var(--gap-x1) * 0.5);
+  --gap-x1: 4px;
+  --gap-x2: calc(var(--gap-x1) * 2);
+  --gap-x3: calc(var(--gap-x1) * 3);
+  --gap-x4: calc(var(--gap-x1) * 4);
+  --gap-x5: calc(var(--gap-x1) * 5);
+  --gap-x6: calc(var(--gap-x1) * 6);
+  --gap-x7: calc(var(--gap-x1) * 7);
+  --gap-x8: calc(var(--gap-x1) * 8);
+  --gap-x9: calc(var(--gap-x1) * 9);
+  --gap-x10: calc(var(--gap-x1) * 10);
+  --gap-x11: calc(var(--gap-x1) * 11);
+  --gap-x12: calc(var(--gap-x1) * 12);
+  --blur-x1: 6px;
+  --rich-text-gap: 8px;
+  --duration-instant: 1ms;
+  --duration-fast: 160ms;
+  --duration-base: 280ms;
+  --duration-slow: 400ms;
+  --delay-stagger: 90ms;
+  --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --easing-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --reveal-offset: 12px;
+  --reveal-scale: 0.96;
+  --header-height: 45px;
+  --page-width: 1400px;
+  --text-measure: 65ch;
+  --container-padding-top: calc(var(--header-height) + var(--padding-x3));
+  --container-padding-bottom: var(--padding-x3);
+  --page-height-available: calc(
+    100dvh - var(--container-padding-top) - var(--container-padding-bottom)
+  );
+
+  /* vars/_components.scss */
+  --game-completed-color: var(--color-green);
+  --game-dropped-color: var(--color-red);
+  --game-playing-color: var(--color-blue);
+  --game-wishlist-color: var(--color-violet);
+  --game-backlog-color: var(--color-white);
+  --game-played-color: var(--color-cyan);
+  --game-mastered-color: var(--color-yellow);
+  --cover-ratio: 528/704;
+  --shadow-basic: 0px 4px 4px var(--color-neutral-5);
+  --shadow-text: drop-shadow(0 1px 2px var(--color-neutral-5))
+    drop-shadow(0 0 6px var(--color-neutral-5));
+  --glow-accent: 0 0 0.4rem var(--color-accent);
+  --glow-accent-sm: 0 0 0.15rem var(--color-accent);
+  --avatar-size-sm: var(--padding-x6);
+  --navigation-progress-height: 1px;
+  --navigation-progress-z-index: 1002;
+  --bprogress-color: var(--color-accent) !important;
+  --bprogress-height: var(--navigation-progress-height) !important;
+  --bprogress-box-shadow: var(--glow-accent) !important;
+  --bprogress-z-index: var(--navigation-progress-z-index) !important;
+  --modal-text-width: min(720px, calc(100vw - var(--padding-x10)));
+  --rich-editor-image-width: 400px;
+  --rich-editor-separator-height: 18px;
+  --playthrough-modal-width: min(80vw, 400px);
+  --header-logo-height: 85%;
+  --header-logo-height-sm: 72%;
+  --tab-count-color: color-mix(in srgb, currentColor 60%, transparent);
+  --playthrough-modal-height: min(70dvh, 500px);
+  --playthrough-modal-width-lg: min(88vw, 760px);
+  --playthrough-modal-height-lg: min(86dvh, 780px);
+  --games-card-min-width: 180px;
+  --list-card-min-width: 180px;
+  --range-track-height: 6px;
+  --progress-bar-height: 6px;
+  --progress-bar-sweep-duration: 1200ms;
+  --range-thumb-size: 20px;
+  --range-thumb-width: 44px;
+  --range-thumb-height: 24px;
+  --scrollbar-horizontal-size: 6px;
+  --scrollbar-arrow-width: 32px;
+  --scrollbar-fade-width: 48px;
+  --game-keywords-collapsed-height: 66px;
+  --game-hero-artwork-height: 300px;
+  --game-hero-artwork-height-sm: 180px;
+  --game-hero-cover-width: 200px;
+  --game-hero-cover-offset: 104px;
+  --game-hero-counters-width: 360px;
+  --game-facts-label-width: 84px;
+  --game-rating-popover-width: 320px;
+  --popover-width: 320px;
+  --achievements-icon-size: 44px;
+  --achievements-icon-size-sm: 48px;
+  --port-achievement-icon-size-sm: 32px;
+  --port-game-card-width: 140px;
+  --port-game-card-width-sm: 96px;
+  --popover-max-height: 320px;
+  --popover-sheet-max-height: 85dvh;
+  --textarea-handle-size: 20px;
+  --image-generator-preview-width: 160px;
+  --ai-drafts-count-width: 88px;
+  --image-finder-portrait-width: 216px;
+  --image-finder-landscape-width: 320px;
+  --site-sessions-modal-width: min(560px, calc(100vw - var(--padding-x8)));
+  --image-generator-elements-width: min(640px, calc(100vw - var(--padding-x8)));
+  --popover-sheet-grabber-width: 40px;
+  --popover-sheet-grabber-height: 5px;
+  --drawer-width: max(20vw, 460px);
+  --drawer-z-index: 5;
+  --expandable-scroll-height: 132px;
+  --expandable-fade-height: 32px;
+  --date-picker-width: 300px;
+  --date-picker-field-min-width: 140px;
+  --game-card-min-width: 160px;
+  --playthrough-platform-min-width: 200px;
+  --playthrough-time-min-width: 120px;
+  --date-picker-cell-size: 34px;
+  --emoji-picker-width: 328px;
+  --emoji-picker-cell-size: 34px;
+  --emoji-picker-group-size: 28px;
+  --emoji-picker-grid-height: 238px;
+  --game-hero-scrim: linear-gradient(
+    180deg,
+    #191d248c 0%,
+    #191d2400 30%,
+    #212731d1 72%,
+    var(--color-bg-secondary) 100%
+  );
+  --spoiler-blur: 7px;
+  --community-avatar-size: 36px;
+  --community-reply-avatar-size: 28px;
+  --community-review-clamp-height: 132px;
+  --community-distribution-height: 8px;
+  --community-distribution-min-width: 240px;
+  --community-dot-size: 7px;
+  --community-loading-height: 96px;
+  --user-review-card-width: 170px;
+  --user-review-card-width-sm: 140px;
+  --user-review-rating-filter-width: 260px;
+  --vndb-review-height: max(360px, calc(100vh - 420px));
+  --vndb-cover-width: 120px;
+  --vndb-search-width: 320px;
+  --conflicts-state-filter-width: 240px;
+  --conflicts-ai-limit-width: 96px;
+  --vndb-candidate-cover-width: 64px;
+  --empty-state-image-size: 180px;
+  --empty-state-image-size-sm: 96px;
+  --empty-state-inline-text-min-width: 200px;
+  --empty-state-page-content-width: 420px;
+  --badge-negative-color: var(--color-orange);
+  --badge-tint-strength: 16%;
+  --stat-tile-bg: var(--color-bg-primary);
+  --not-found-image-height: 240px;
+  --not-found-backdrop-size: 400px;
+  --favorite-color: var(--color-pink);
+  --moon-phase-lit-color: var(--color-neutral-95);
+  --moon-phase-dark-color: var(--color-bg-hover);
+  --moon-phase-unknown-color: var(--color-text-muted);
+  --moon-phase-unknown-fill: var(--color-bg-secondary);
+  --release-calendar-card-width: 172px;
+  --release-calendar-card-width-sm: var(--game-card-min-width);
+  --release-calendar-month-height: 16px;
+  --release-calendar-node-size: 28px;
+  --release-calendar-axis-color: var(--color-bg-hover);
+  --game-controls-icon-size: 24px;
+  --game-controls-icon-size-sm: 20px;
+  --game-controls-badge-size: 15px;
+  --list-card-row-mosaic-size: 44px;
+  --list-card-count-height: 20px;
+  --list-search-width: 320px;
+  --list-row-cover-width: 40px;
+  --profile-hero-height: 168px;
+  --profile-avatar-size: 112px;
+  --profile-avatar-size-sm: 72px;
+  --activity-cover-width: 80px;
+  --people-avatar-size: 22px;
+  --character-card-width: 128px;
+  --character-card-width-sm: 104px;
+  --character-profile-portrait-width: 200px;
+  --character-editor-portrait-width: 150px;
+  --image-picker-thumb-width: 160px;
+  --game-images-modal-width: min(92vw, 960px);
+  --game-port-achievements-modal-width: min(92vw, 960px);
+  --requests-queue-width: 440px;
+  --game-link-form-width: 420px;
+  --list-sort-width: 280px;
+  --field-control-height: 40px;
+  --gauntlet-mode-cards-width: 300px;
+  --gauntlet-winner-cover-width: 200px;
+  --gauntlet-winner-cover-width-mobile: 220px;
+  --gauntlet-wheel-max-width: 50vw;
+  --gauntlet-fact-label-width: 110px;
+  --object-field-min-width: 160px;
+  --requests-panel-min-height: 240px;
+  --page-skeleton-crumbs-width: 160px;
+  --page-skeleton-title-width: 240px;
+  --search-modal-width: 900px;
+  --search-tab-height: 36px;
+  --news-sidebar-width: 300px;
+  --article-row-thumb-width: 176px;
+  --article-row-thumb-width-sm: 96px;
+  --article-row-game-cover-width: 14px;
+  --article-game-cover-width: 92px;
+  --article-game-cover-width-sm: 64px;
+  --article-text-gap: 16px;
+  --article-box-padding: var(--padding-x6);
+  --game-stats-bar-height: 8px;
+  --game-stats-dot-size: 7px;
+  --reaction-active-color: var(--color-accent);
+  --tabs-muted-opacity: 0.55;
+  --burger-animation-duration: 600ms;
+  --status-menu-width: 248px;
+  --status-menu-row-height: 24px;
+  --status-menu-dot-size: 6px;
+  --status-menu-active-bg: color-mix(
+    in srgb,
+    var(--color-accent) 16%,
+    transparent
+  );
+  --status-pending-color: color-mix(
+    in srgb,
+    var(--color-positive) 38%,
+    var(--color-bg-primary)
+  );
+  --status-map-cell: 9px;
+  --status-card-width: min(380px, 100%);
+  --status-edit-modal-width: min(560px, calc(100vw - var(--padding-x8)));
+}
+/* mooncellar-tokens:end */
+
+  :root {
+    --mock-ui: "Hanken Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mock-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --mock-ground: var(--color-neutral-10);
+    --mock-hairline: var(--color-neutral-30);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--mock-ground);
+    color: var(--color-text-primary);
+    font-family: var(--mock-ui);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .shell {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding-inline: var(--padding-x6);
+    padding-block: var(--padding-x14) var(--padding-x20);
+  }
+
+  @media (max-width: 520px) {
+    .shell {
+      padding-inline: var(--padding-x4);
+      padding-block: var(--padding-x9) var(--padding-x14);
+    }
+  }
+
+  h1, h2 { margin: 0; text-wrap: balance; }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-gray);
+    margin: 0;
+  }
+
+  .masthead { display: flex; flex-direction: column; gap: var(--gap-x4); }
+  .masthead h1 { font-size: 34px; line-height: 1.15; font-weight: 700; letter-spacing: -0.5px; }
+  .lede { color: var(--color-text-secondary); max-width: 62ch; margin: 0; }
+
+  .box {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-x5);
+    padding: var(--padding-x5);
+  }
+
+  .box + .box { margin-top: var(--padding-x5); }
+
+  .note {
+    margin-top: var(--padding-x6);
+    font-size: 13px;
+    color: var(--color-gray);
+    border-left: 2px solid var(--color-border-primary);
+    padding-left: var(--padding-x3);
+  }
+
+  code.t { font-family: var(--mock-mono); font-size: 12px; color: var(--color-yellow); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: var(--duration-instant) !important; }
+  }
+
+  /* --- mockup: MoonStream viewer entry ------------------------------------ */
+
+  .variant { margin-top: var(--padding-x14); }
+
+  .variant__head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-x3);
+    max-width: 72ch;
+    margin-bottom: var(--padding-x6);
+  }
+
+  .variant__head h2 { font-size: 22px; font-weight: 600; line-height: 1.25; }
+
+  .variant__head ul {
+    margin: 0;
+    padding-left: var(--padding-x5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-x1);
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+
+  .frame {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-x5);
+    padding: var(--padding-x5);
+  }
+
+  .frame--narrow { max-width: 420px; }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-x3);
+    max-width: 500px;
+    padding: var(--padding-x3);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-x2);
+    background: var(--color-bg-primary);
+  }
+
+  .panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap-x2);
+  }
+
+  .panel__label {
+    color: var(--color-text-muted);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-x2);
+    padding: var(--padding-x2) var(--padding-x4);
+    border: 1px solid transparent;
+    border-radius: var(--radius-button);
+    background: var(--color-bg-tertiary);
+    color: var(--color-neutral-100);
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .btn:hover { filter: brightness(0.8); }
+
+  .btn--plain { background: transparent; border-color: transparent; }
+  .btn--plain:hover { background: var(--color-bg-hover); filter: none; }
+  .btn--red { background: var(--color-negative); }
+
+  .btn--icon {
+    padding: var(--padding-x2);
+    aspect-ratio: 1;
+    justify-content: center;
+  }
+
+  .btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+  .icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .code {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--gap-x2);
+    padding: var(--padding-x3);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-control);
+    background:
+      radial-gradient(
+        circle at 50% 0,
+        color-mix(in srgb, var(--color-accent) 16%, transparent),
+        transparent 70%
+      ),
+      var(--color-bg-primary);
+  }
+
+  .code span {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    font-size: clamp(22px, 4vw, 34px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .link { display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap-x2); min-width: 0; }
+  .link__actions { display: flex; align-items: center; gap: var(--gap-x2); }
+
+  .link__value {
+    flex: 1 1 320px;
+    min-width: 0;
+    padding: var(--padding-x2) var(--padding-x3);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-control);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-family: var(--mock-ui);
+    font-size: 12px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .link__value--link {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-x2);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: border-color var(--duration-fast) var(--easing-out);
+  }
+
+  .link__value--link:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text-primary);
+  }
+
+  .link__value--link .icon { margin-left: auto; color: var(--color-text-muted); }
+
+  .row { display: flex; flex-wrap: wrap; gap: var(--gap-x2); }
+  .row .btn { flex: 1 1 auto; }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gap-x2);
+  }
+
+  .hint { color: var(--color-text-muted); font-size: 12px; line-height: 1.5; margin: 0; }
+
+  .panel__state {
+    display: flex;
+    gap: var(--gap-x4);
+    flex-wrap: wrap;
+    padding-top: var(--padding-x3);
+    border-top: 1px solid var(--color-border-primary);
+    font-size: 13px;
+    color: var(--color-text-muted);
+  }
+
+  .panel__state b { color: var(--color-text-primary); font-weight: 500; }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--padding-x05) var(--padding-x2);
+    border-radius: var(--radius-x2);
+    background: var(--color-bg-accent);
+    color: var(--color-neutral-100);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .tag--quiet { background: var(--color-bg-tertiary); color: var(--color-text-muted); }
+
+  .facts {
+    display: grid;
+    gap: var(--gap-x3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+
+  .facts li { display: flex; gap: var(--gap-x3); }
+  .facts b { color: var(--color-text-primary); font-weight: 500; min-width: 132px; }
+</style>
+
+<div class="shell">
+  <header class="masthead">
+    <p class="eyebrow">MoonCellar · MoonStream host page</p>
+    <h1>Getting to the viewer page</h1>
+    <p class="lede">
+      The host page owns the viewer link but nothing opens it. Checking what the other admin
+      sees — a wrong surface, a stream that arrived silent — means copying the URL into a new
+      tab. Four places to put that way out, each drawn at the sidebar's real width, next to the
+      link that already exists.
+    </p>
+  </header>
+
+  <section class="variant">
+    <div class="variant__head">
+      <p class="eyebrow">Current</p>
+      <h2>Copy, and nothing else</h2>
+      <p>The invite panel as it ships today: the code, the link with one action, and the note
+        that the code lives as long as the tab. There is no way to see the page a viewer gets.</p>
+    </div>
+    <div class="frame">
+      
+      <div class="panel">
+        <div class="panel__head">
+          <span class="panel__label">Stream code</span>
+          <button class="btn" type="button">Copy</button>
+        </div>
+        <div class="code" aria-label="Stream code: J S D Z G P">
+          <span>J</span><span>S</span><span>D</span><span>Z</span><span>G</span><span>P</span>
+        </div>
+        <div class="link">
+          <code class="link__value">https://mooncellar.space/admin/stream/watch/JSDZGP</code>
+          <button class="btn" type="button">Copy link</button>
+        </div>
+        <p class="hint">
+          Anyone with this code and an admin account can watch. The code works while this tab
+          stays open.
+        </p>
+        
+        <div class="panel__state">
+          <span>Viewer: <b>Waiting</b></span>
+          
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="variant">
+    <div class="variant__head">
+      <p class="eyebrow">Option A · shipped</p>
+      <h2>Open in the same row, as an icon</h2>
+      <p>A square icon button next to the field, in front of "Copy link", carrying the
+        open-window glyph that already exists as <code class="t">SvgOpenWindow</code>. The sidebar
+        was widened from 1.65fr to 1.5fr of the page so the 51-character link still fits on one
+        line; below roughly 1300 px the two actions move to a second line together instead of
+        breaking the URL.</p>
+      <ul>
+        <li>One click from the place the URL already lives, no new line in a dense panel.</li>
+        <li>Costs the preview about 30 px of width, and the field about 40 px — which is why the
+          sidebar had to grow.</li>
+        <li>An icon alone has to be learned; the tooltip carries the meaning.</li>
+      </ul>
+    </div>
+    <div class="frame">
+      
+      <div class="panel">
+        <div class="panel__head">
+          <span class="panel__label">Stream code</span>
+          <button class="btn" type="button">Copy</button>
+        </div>
+        <div class="code" aria-label="Stream code: J S D Z G P">
+          <span>J</span><span>S</span><span>D</span><span>Z</span><span>G</span><span>P</span>
+        </div>
+        <div class="link">
+          <code class="link__value">https://mooncellar.space/admin/stream/watch/JSDZGP</code>
+          <div class="link__actions">
+            <button class="btn btn--icon" type="button" title="Open the viewer page in a new tab"><svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h6a1 1 0 1 1 0 2H5v14h14v-6a1 1 0 1 1 2 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M14 3h7v7a1 1 0 1 1-2 0V6.41l-8.29 8.3a1 1 0 0 1-1.42-1.42L17.59 5H14a1 1 0 1 1 0-2z"/></svg></button>
+            <button class="btn" type="button">Copy link</button>
+          </div>
+        </div>
+        <p class="hint">
+          Anyone with this code and an admin account can watch. The code works while this tab
+          stays open.
+        </p>
+        
+        <div class="panel__state">
+          <span>Viewer: <b>Waiting</b></span>
+          
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="variant">
+    <div class="variant__head">
+      <p class="eyebrow">Option B</p>
+      <h2>The link is the link</h2>
+      <p>The field itself becomes an anchor opening the viewer page in a new tab, with the
+        open-window glyph at its right edge and an accent border on hover. No new control at
+        all — the panel stays exactly as tall as it is.</p>
+      <ul>
+        <li>Zero extra weight; the URL is where the eye already goes.</li>
+        <li>A read-only looking field is suddenly clickable, and selecting the text to copy it
+          by hand navigates away instead.</li>
+        <li>Needs the glyph and a hover state to be believable — a bare underline is easy to
+          miss.</li>
+      </ul>
+    </div>
+    <div class="frame">
+      
+      <div class="panel">
+        <div class="panel__head">
+          <span class="panel__label">Stream code</span>
+          <button class="btn" type="button">Copy</button>
+        </div>
+        <div class="code" aria-label="Stream code: J S D Z G P">
+          <span>J</span><span>S</span><span>D</span><span>Z</span><span>G</span><span>P</span>
+        </div>
+        <div class="link">
+          <a class="link__value link__value--link" href="/admin/stream/watch/JSDZGP" target="_blank" rel="noreferrer">
+            <span>https://mooncellar.space/admin/stream/watch/JSDZGP</span><svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h6a1 1 0 1 1 0 2H5v14h14v-6a1 1 0 1 1 2 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M14 3h7v7a1 1 0 1 1-2 0V6.41l-8.29 8.3a1 1 0 0 1-1.42-1.42L17.59 5H14a1 1 0 1 1 0-2z"/></svg>
+          </a>
+          <button class="btn" type="button">Copy link</button>
+        </div>
+        <p class="hint">
+          Anyone with this code and an admin account can watch. The code works while this tab
+          stays open.
+        </p>
+        
+        <div class="panel__state">
+          <span>Viewer: <b>Waiting</b></span>
+          
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="variant">
+    <div class="variant__head">
+      <p class="eyebrow">Option C</p>
+      <h2>Two buttons under the field</h2>
+      <p>The field keeps the full width of the panel, and the two things the host can do with it
+        sit on a row of their own: copy it, or open it. Both are the same weight, both are
+        text, both are 40 px tall — no icon to decode.</p>
+      <ul>
+        <li>Reads without instructions, and the link stops wrapping against the buttons.</li>
+        <li>Costs one row in the sidebar, which scrolls anyway.</li>
+        <li>At phone width the two buttons stay side by side and stay tappable.</li>
+      </ul>
+    </div>
+    <div class="frame">
+      
+      <div class="panel">
+        <div class="panel__head">
+          <span class="panel__label">Stream code</span>
+          <button class="btn" type="button">Copy</button>
+        </div>
+        <div class="code" aria-label="Stream code: J S D Z G P">
+          <span>J</span><span>S</span><span>D</span><span>Z</span><span>G</span><span>P</span>
+        </div>
+        <div class="link">
+          <code class="link__value">https://mooncellar.space/admin/stream/watch/JSDZGP</code>
+        </div>
+        <div class="row">
+          <button class="btn" type="button">Copy link</button>
+          <button class="btn" type="button"><svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h6a1 1 0 1 1 0 2H5v14h14v-6a1 1 0 1 1 2 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M14 3h7v7a1 1 0 1 1-2 0V6.41l-8.29 8.3a1 1 0 0 1-1.42-1.42L17.59 5H14a1 1 0 1 1 0-2z"/></svg>Open viewer</button>
+        </div>
+        <p class="hint">
+          Anyone with this code and an admin account can watch. The code works while this tab
+          stays open.
+        </p>
+        
+        <div class="panel__state">
+          <span>Viewer: <b>Waiting</b></span>
+          
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="variant">
+    <div class="variant__head">
+      <p class="eyebrow">Option D</p>
+      <h2>Down with the session actions</h2>
+      <p>"Open viewer" joins the row under the stage, next to "Share another screen", "Stop
+        stream" and "Remove viewer" — the actions that belong to the running session rather than
+        to the invite.</p>
+      <ul>
+        <li>Uses a row that already wraps and has space.</li>
+        <li>Two steps away from the link, and the row sits under the preview, not beside the
+          invite where the host looks first.</li>
+      </ul>
+    </div>
+    <div class="frame">
+      <div class="actions">
+        <button class="btn" type="button">Share another screen</button>
+        <button class="btn btn--red" type="button">Stop stream</button>
+        <button class="btn btn--plain" type="button">Remove viewer</button>
+        <button class="btn btn--plain" type="button"><svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h6a1 1 0 1 1 0 2H5v14h14v-6a1 1 0 1 1 2 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M14 3h7v7a1 1 0 1 1-2 0V6.41l-8.29 8.3a1 1 0 0 1-1.42-1.42L17.59 5H14a1 1 0 1 1 0-2z"/></svg>Open viewer</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="box" style="margin-top: var(--padding-x14)">
+    <h2 style="font-size: 20px; margin-bottom: var(--gap-x4)">What the control does in every option</h2>
+    <ul class="facts">
+      <li><b>Opens</b><span><code class="t">/admin/stream/watch/&lt;code&gt;</code> in a new tab, because leaving the host page ends the room. The page only prefills the code — joining is still a click of "Watch stream" there, so opening it does not disturb the room.</span></li>
+      <li><b>One viewer, one room</b><span>If the host joins their own stream they take the room's only viewer slot, and a real viewer then gets "Someone is already watching this stream." The button stays enabled: that refusal comes from the room, not from the control.</span></li>
+      <li><b>No code, no link</b><span>Until the room exists the button is disabled, exactly like "Copy link" today; its href falls back to the watch page, where a code can be typed.</span></li>
+      <li><b>Sound before the screen</b><span>The audio input is a separate control: it can be chosen before anything is shared, waits for the capture, and survives "Share another screen". Its mute toggle only appears while a stream is live.</span></li>
+    </ul>
+  </section>
+
+  <section class="variant">
+    <div class="variant__head">
+      <p class="eyebrow">Option A at 390 px</p>
+      <h2>The same row on a phone</h2>
+      <p>The sidebar collapses to the page width. The field takes a line of its own and the two
+        actions sit under it, together; the icon keeps its 34 px square, and only on the narrowest
+        phones does the 51-character URL wrap onto a second line.</p>
+    </div>
+    <div class="frame frame--narrow" style="max-width: 390px">
+      <div class="panel">
+        <div class="panel__head">
+          <span class="panel__label">Stream code</span>
+          <button class="btn" type="button">Copy</button>
+        </div>
+        <div class="code" aria-label="Stream code: J S D Z G P">
+          <span>J</span><span>S</span><span>D</span><span>Z</span><span>G</span><span>P</span>
+        </div>
+        <div class="link">
+          <code class="link__value">https://mooncellar.space/admin/stream/watch/JSDZGP</code>
+          <div class="link__actions">
+            <button class="btn btn--icon" type="button" title="Open the viewer page in a new tab"><svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 3h6a1 1 0 1 1 0 2H5v14h14v-6a1 1 0 1 1 2 0v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M14 3h7v7a1 1 0 1 1-2 0V6.41l-8.29 8.3a1 1 0 0 1-1.42-1.42L17.59 5H14a1 1 0 1 1 0-2z"/></svg></button>
+            <button class="btn" type="button">Copy link</button>
+          </div>
+        </div>
+        <p class="hint">
+          Anyone with this code and an admin account can watch. The code works while this tab
+          stays open.
+        </p>
+        <div class="panel__state">
+          <span>Viewer: <b>Waiting</b></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">
+    Colours, spacing and radii are the project's own tokens: the <code class="t">:root</code>
+    block above is generated from <code class="t">apps/web/src/lib/app/styles/vars</code> by
+    <code class="t">bun --filter web sync:tokens</code>. The panel is the real invite panel of
+    <code class="t">StreamHost</code>; the typeface is substituted — Hanken Grotesk stands in for
+    ApercuPro. No new tokens are introduced by any option.
+  </p>
+</div>

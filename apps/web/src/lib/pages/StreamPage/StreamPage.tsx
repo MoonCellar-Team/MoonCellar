@@ -3,6 +3,7 @@
 import { Badge } from "@/src/lib/shared/ui/Badge";
 import { Box } from "@/src/lib/shared/ui/Box";
 import { Breadcrumbs } from "@/src/lib/shared/ui/Breadcrumbs";
+import { Button, ButtonColor } from "@/src/lib/shared/ui/Button";
 import { StreamHost } from "@/src/lib/widgets/stream/StreamHost";
 import styles from "./StreamPage.module.scss";
 
@@ -26,7 +27,17 @@ export const StreamPage = () => (
           watches in the browser. No install, no plugin.
         </p>
       </div>
-      <Badge tone="accent">Admins only</Badge>
+      <div className={styles.head__aside}>
+        <Badge tone="accent">Admins only</Badge>
+        <Button
+          color={ButtonColor.DEFAULT}
+          href="/admin/stream/watch"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Watch a stream
+        </Button>
+      </div>
     </header>
 
     <StreamHost />

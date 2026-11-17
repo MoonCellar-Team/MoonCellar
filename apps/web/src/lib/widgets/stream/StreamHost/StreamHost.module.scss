@@ -6,7 +6,7 @@
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr);
+  grid-template-columns: minmax(0, 1.5fr) minmax(340px, 1fr);
   gap: var(--gap-x4);
   align-items: start;
 
@@ -201,12 +201,13 @@
 
 .link {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--gap-x2);
   min-width: 0;
 
   &__value {
-    flex: 1;
+    flex: 1 1 320px;
     min-width: 0;
     padding: var(--padding-x2) var(--padding-x3);
     border: 1px solid var(--color-border-primary);
@@ -218,6 +219,16 @@
     line-height: 1.4;
     overflow-wrap: anywhere;
   }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-x2);
+  }
+}
+
+.docsLink {
+  align-self: flex-start;
 }
 
 .hint {
@@ -257,23 +268,29 @@
   }
 }
 
+.label {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .quality {
   display: flex;
   flex-direction: column;
   gap: var(--gap-x2);
-
-  &__label {
-    color: var(--color-text-muted);
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
 
   &__hint {
     color: var(--color-text-muted);
     font-size: 12px;
     line-height: 1.4;
   }
+}
+
+.sound {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-x2);
 }
 
 .toggle {
