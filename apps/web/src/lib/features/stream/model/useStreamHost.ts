@@ -14,6 +14,7 @@ import {
   type IStreamSocket,
 } from "@/src/lib/shared/socket/stream.socket";
 import {
+  captureAudioInput,
   captureScreen,
   hasAudio,
   StreamCaptureError,
@@ -40,6 +41,9 @@ export type StreamHostSession = {
   stream: MediaStream | null;
   audioShared: boolean;
   audioEnabled: boolean;
+  audioSilent: boolean;
+  screenAudio: boolean;
+  audioDevice: string | null;
   relayAvailable: boolean;
   quality: StreamQualityId;
   pc: RTCPeerConnection | null;
@@ -48,6 +52,9 @@ export type StreamHostSession = {
   stop: () => void;
   kickViewer: () => void;
   toggleAudio: () => void;
+  addAudioDevice: (deviceId: string) => Promise<void>;
+  selectScreenAudio: () => Promise<void>;
+  silenceAudio: () => Promise<void>;
   setQuality: (quality: StreamQualityId) => void;
 };
 
@@ -70,6 +77,9 @@ export const useStreamHost = (): StreamHostSession & {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [audioShared, setAudioShared] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const [audioSilent, setAudioSilent] = useState(false);
+  const [screenAudio, setScreenAudio] = useState(false);
+  const [audioDevice, setAudioDevice] = useState<string | null>(null);
   const [quality, setQualityState] = useState<StreamQualityId>(
     DEFAULT_STREAM_QUALITY
   );
@@ -84,12 +94,23 @@ export const useStreamHost = (): StreamHostSession & {
   const pendingIceRef = useRef<RTCIceCandidateInit[]>([]);
   const screenTrackRef = useRef<MediaStreamTrack | null>(null);
   const screenEndedRef = useRef<(() => void) | null>(null);
+  const audioTrackRef = useRef<MediaStreamTrack | null>(null);
+  const deviceAudioRef = useRef<MediaStreamTrack | null>(null);
   const endSessionRef = useRef<(message?: string) => void>(() => undefined);
   const needsRoomRef = useRef(true);
   const refreshedRef = useRef(false);
   const closedRef = useRef(false);
 
   const stats = useStreamStats(pc, "host");
+
+  const getAudioSender = useCallback(
+    () =>
+      pcRef.current
+        ?.getTransceivers()
+        .find((transceiver) => transceiver.receiver.track.kind === "audio")
+        ?.sender ?? null,
+    []
+  );
 
   const finishPeer = useCallback(() => {
     const current = pcRef.current;
@@ -177,8 +198,14 @@ export const useStreamHost = (): StreamHostSession & {
     finishPeer();
     stopMediaStream(streamRef.current);
     streamRef.current = null;
+    audioTrackRef.current = null;
+    deviceAudioRef.current?.stop();
+    deviceAudioRef.current = null;
     setStream(null);
     setAudioShared(false);
+    setAudioSilent(false);
+    setScreenAudio(false);
+    setAudioDevice(null);
     viewerRef.current = false;
     setViewerPresent(false);
     networkRef.current = null;
@@ -228,7 +255,7 @@ export const useStreamHost = (): StreamHostSession & {
       direction: "sendonly",
       streams: [currentStream],
     });
-    await audio.sender.replaceTrack(currentStream.getAudioTracks()[0] ?? null);
+    await audio.sender.replaceTrack(audioTrackRef.current);
     await applyStreamQuality(video.sender, qualityRef.current);
     applyContentHint(currentStream, qualityRef.current);
 
@@ -299,11 +326,22 @@ export const useStreamHost = (): StreamHostSession & {
       setError(null);
       try {
         const nextStream = await captureScreen(includeAudio);
+        const deviceTrack = deviceAudioRef.current;
+        if (deviceTrack) streamRef.current?.removeTrack(deviceTrack);
         unbindScreenEnd();
         stopMediaStream(streamRef.current);
         streamRef.current = nextStream;
         setStream(nextStream);
-        setAudioShared(hasAudio(nextStream));
+        const screenHasAudio = hasAudio(nextStream);
+        setScreenAudio(screenHasAudio);
+        if (deviceTrack) {
+          nextStream.addTrack(deviceTrack);
+        } else {
+          audioTrackRef.current = nextStream.getAudioTracks()[0] ?? null;
+        }
+        const audioTrack = audioTrackRef.current;
+        setAudioShared(!!audioTrack);
+        setAudioSilent(false);
         setAudioEnabled(true);
         applyContentHint(nextStream, qualityRef.current);
 
@@ -316,13 +354,8 @@ export const useStreamHost = (): StreamHostSession & {
           const videoSender = transceivers.find(
             (transceiver) => transceiver.receiver.track.kind === "video"
           )?.sender;
-          const audioSender = transceivers.find(
-            (transceiver) => transceiver.receiver.track.kind === "audio"
-          )?.sender;
           await videoSender?.replaceTrack(videoTrack ?? null);
-          await audioSender?.replaceTrack(
-            nextStream.getAudioTracks()[0] ?? null
-          );
+          await getAudioSender()?.replaceTrack(audioTrack);
           await applyStreamQuality(videoSender ?? null, qualityRef.current);
         } else if (viewerRef.current) {
           await negotiate();
@@ -331,7 +364,57 @@ export const useStreamHost = (): StreamHostSession & {
         setError(errorMessage(captureError));
       }
     },
-    [bindScreenEnd, negotiate, unbindScreenEnd]
+    [bindScreenEnd, getAudioSender, negotiate, unbindScreenEnd]
+  );
+
+  const selectScreenAudio = useCallback(async () => {
+    const deviceTrack = deviceAudioRef.current;
+    if (deviceTrack) {
+      deviceAudioRef.current = null;
+      streamRef.current?.removeTrack(deviceTrack);
+      deviceTrack.stop();
+    }
+
+    const screenTrack = streamRef.current?.getAudioTracks()[0] ?? null;
+    if (!screenTrack) return;
+
+    audioTrackRef.current = screenTrack;
+    setAudioDevice(null);
+    setAudioShared(true);
+    setAudioSilent(false);
+    await getAudioSender()?.replaceTrack(screenTrack);
+  }, [getAudioSender]);
+
+  const silenceAudio = useCallback(async () => {
+    const deviceTrack = deviceAudioRef.current;
+    if (deviceTrack) {
+      deviceAudioRef.current = null;
+      streamRef.current?.removeTrack(deviceTrack);
+      deviceTrack.stop();
+    }
+
+    audioTrackRef.current = null;
+    setAudioDevice(null);
+    setAudioShared(false);
+    setAudioSilent(true);
+    await getAudioSender()?.replaceTrack(null);
+  }, [getAudioSender]);
+
+  const addAudioDevice = useCallback(
+    async (deviceId: string) => {
+      const track = await captureAudioInput(deviceId);
+
+      await selectScreenAudio();
+      streamRef.current?.addTrack(track);
+      deviceAudioRef.current = track;
+      audioTrackRef.current = track;
+      setAudioDevice(deviceId);
+      setAudioShared(true);
+      setAudioSilent(false);
+      setAudioEnabled(true);
+      await getAudioSender()?.replaceTrack(track);
+    },
+    [getAudioSender, selectScreenAudio]
   );
 
   const stop = useCallback(() => {
@@ -345,7 +428,7 @@ export const useStreamHost = (): StreamHostSession & {
   }, []);
 
   const toggleAudio = useCallback(() => {
-    const track = streamRef.current?.getAudioTracks()[0];
+    const track = audioTrackRef.current;
     if (!track) return;
     const enabled = !track.enabled;
     track.enabled = enabled;
@@ -481,6 +564,9 @@ export const useStreamHost = (): StreamHostSession & {
     stream,
     audioShared,
     audioEnabled,
+    audioSilent,
+    screenAudio,
+    audioDevice,
     relayAvailable: network?.relay ?? false,
     quality,
     pc,
@@ -490,6 +576,9 @@ export const useStreamHost = (): StreamHostSession & {
     stop,
     kickViewer,
     toggleAudio,
+    addAudioDevice,
+    selectScreenAudio,
+    silenceAudio,
     setQuality,
   };
 };

@@ -4,6 +4,19 @@ MoonStream shares one admin's screen with another admin's browser. The host open
 `/admin/stream`, gets a six-character code, and picks a screen, a window or a tab. The viewer opens
 `/admin/stream/watch/<code>` (or `/admin/stream/watch` and types the code), enters it and watches.
 
+The invite panel carries both ways to use the link: **Copy link** copies the absolute
+`FRONT_URL` URL to send to the other admin, and **Open viewer** opens the same page in a **new
+tab** at `/admin/stream/watch/<code>`. The new tab is not cosmetic — leaving the host page ends
+the room (`stream:leave`), so a same-tab navigation would close the stream the host is about to
+watch. Opening the page only prefills the code; joining is still a click of "Watch stream" there,
+and that click takes the room's single viewer slot. The design alternatives are recorded in
+[`docs/mockups/stream-viewer-entry.html`](mockups/stream-viewer-entry.html).
+
+An admin who was given a code rather than a link reaches the form through **Watch a stream** in the
+host page header. It opens `/admin/stream/watch` with no code in a new tab: the invite panel's link
+only exists once this host has a room, and a same-tab navigation away from `/admin/stream` would end
+that room.
+
 There is no agent to install and no media server in the middle: the browsers exchange SDP and ICE
 over the API's `/stream` Socket.IO namespace, then send RTP directly. When a direct path is
 impossible, the existing MoonCellar coturn relay carries the session.
@@ -97,16 +110,134 @@ click. The browser shows the operating system's picker; MoonStream never enumera
 | macOS          | ScreenCaptureKit through the system screen-recording permission                     |
 
 `getDisplayMedia` requires a secure context: `https://mooncellar.space` in production and
-`http://localhost` in development. An `http://192.168.x.x` origin cannot capture. Audio is
-requested with `audio: true`; whether the picker offers system audio, a tab's audio or nothing is
-the platform's decision, so the host page reports `audioShared` and disables the mute control when
+`http://localhost` in development. An `http://192.168.x.x` origin cannot capture.
+
+### Audio
+
+Sound is the platform's decision, not MoonStream's. The capture always asks for it, and the picker
+decides what it can deliver:
+
+| Platform          | What the capture can carry                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| Windows, ChromeOS | The whole system's audio when a screen is shared                                           |
+| Linux, macOS      | Only a browser tab's audio: share the tab and turn on "Also share tab audio" in the picker |
+| Firefox, Safari   | Nothing; their `getDisplayMedia` never returns an audio track                              |
+
+The Linux rule belongs to Chromium, not to a brand: Helium, Chrome, Edge and Brave all capture the
+screen through PipeWire (Wayland) or X11 without desktop audio, because Chromium implements
+system-audio capture only on Windows and ChromeOS ([compat note](https://github.com/mdn/browser-compat-data/blob/main/api/MediaDevices.json)).
+Sharing a screen or a window on Linux therefore always ends with `audioShared === false`: the
+"Audio off" toggle stays disabled and the panel explains how to include sound instead.
+
+`capturePlatformNote()` (`features/stream/model/capture.ts`) owns that copy. `audioLabel` is the
+checkbox label — it says "system audio" only where there is system audio — and `audioNote` explains
+the tab workaround where there is none. Keep the platform promises there, not in the widget. The
+host page still reports `audioShared` from the returned stream and disables the mute control when
 there is no audio track.
 
-The capture is capped at 1920×1080 and 60 fps in the media constraints. Quality presets then set
-`maxBitrate`, `maxFramerate`, `contentHint` and `degradationPreference` on the video sender:
-Sharp (8 Mbit/s, resolution first), Balanced (3 Mbit/s, the default), Smooth (6 Mbit/s, frame rate
-first) and Relay safe (1.6 Mbit/s). Changing the preset is live; changing the source replaces the
-tracks on the existing senders, so no renegotiation is needed.
+### Sound from an input
+
+Where the capture carries no audio — every screen share on Linux and macOS — the host can attach an
+input instead. **Sound** is a plain list of the `audioinput` devices — no extra button — and the
+chosen one is sent through the same audio transceiver; **Shared screen audio** switches back when
+the capture has its own. The page asks for microphone access the first time the list is opened,
+and fills the list on load when the permission is already granted.
+
+The input can be chosen before anything is shared: the track waits on its own, `capture()` moves it
+into the new stream, and a re-share keeps it — the track is taken out of the old stream before that
+stream is stopped, so the same microphone is not closed and reopened. `stopLocal()` stops it
+explicitly, because it may not belong to any stream yet; the mute toggle stays disabled until a
+stream is live. `audioTrackRef` in `useStreamHost` decides which track is sent, since one stream can
+hold both the screen's audio and a device's.
+
+The input can also be switched **while a viewer is watching**: the new track is `replaceTrack`d onto
+the existing audio sender, so nothing renegotiates and the viewer keeps the same audio track — only
+its content changes. That is why the list stays enabled during a stream.
+
+**No sound**, the first item of the list, is how the host stops sharing sound: it drops the device
+track, sends `replaceTrack(null)` and leaves the stream video-only. It is not the same as the mute
+toggle, which keeps the track and only disables it.
+
+#### Linux: a virtual input
+
+Chromium deliberately hides PulseAudio/PipeWire **monitor** sources from that list
+(`media/audio/pulse/audio_manager_pulse.cc` skips every source whose `monitor_of_sink` is set), so
+"Monitor of …" never appears as a microphone. Route the output through a virtual source instead —
+everything that plays into the speakers then goes out with the stream:
+
+```bash
+pactl load-module module-remap-source \
+  master="$(pactl get-default-sink).monitor" \
+  source_name=desktop_audio \
+  source_properties=device.description=DesktopAudio
+```
+
+Only **sources** reach the picker: a sink — an output such as `easyeffects_sink`, a game, the
+speakers — cannot be captured directly, only its `.monitor` can, and Chromium hides every monitor.
+EasyEffects publishes a real source of its own, `easyeffects_source` ("Easy Effects Source"), so it
+is listed; it carries what plays into `easyeffects_sink`, and only while EasyEffects runs. A monitor
+that is not published as a source can be given a normal name the same way:
+
+```bash
+pactl load-module module-remap-source master=easyeffects_sink.monitor \
+  source_name=ee_desktop source_properties=device.description=EE-Desktop
+```
+
+The module does not survive a logout. Make it a PipeWire drop-in instead of a startup script —
+`~/.config/pipewire/pipewire-pulse.conf.d/10-moonstream-audio.conf`:
+
+```conf
+pulse.cmd = [
+  {
+    cmd = "load-module"
+    args = "module-remap-source master=easyeffects_sink.monitor source_name=ee_desktop source_properties=device.description=EE-Desktop"
+  }
+]
+```
+
+It applies on `systemctl --user restart pipewire-pulse` or the next login. The source is created
+even before `easyeffects_sink` exists and links itself once EasyEffects starts, so nothing depends
+on which of the two comes up first.
+
+To remove a source again: `pactl unload-module <id>` with the id from
+`pactl list short modules | grep remap` (`pactl unload-module module-remap-source` drops every
+remap at once). A drop-in is removed by deleting its file and restarting `pipewire-pulse`; a module
+loaded twice under the same `source_name` shows up as `EE-Desktop` and `EE-Desktop-2`, and both
+have to be unloaded.
+
+That source carries **everything**, including a Discord call and every notification:
+
+- a viewer who is himself in the call hears his own voice back with the stream's delay;
+- a third viewer in the same call hears every voice twice — once from Discord, once from the stream;
+- whatever else plays, a private call or a notification sound, reaches the viewer;
+- the host's own viewer tab ("Open viewer"), once it plays the stream with sound, is captured too
+  and the stream feeds itself — mute that tab while the monitor is the input.
+
+To share only what should be heard, give MoonStream its own output and move just that application
+into it, leaving the call on the normal output:
+
+```bash
+# a second output nothing plays into by default
+pactl load-module module-null-sink sink_name=moonstream_mix \
+  sink_properties=device.description=MoonStreamMix
+
+# so the host still hears what it carries
+pactl load-module module-loopback source=moonstream_mix.monitor \
+  sink=@DEFAULT_SINK@ latency_msec=1
+
+# the input MoonStream lists — a remap, not a monitor
+pactl load-module module-remap-source master=moonstream_mix.monitor \
+  source_name=moonstream_audio \
+  source_properties=device.description=MoonStreamAudio
+
+# the game or the player goes there; the index comes from `pactl list short sink-inputs`
+pactl move-sink-input <INDEX> moonstream_mix
+```
+
+Discord stays on the default output and never reaches the stream; `pavucontrol` does the same move
+with the mouse. `move-sink-input` is not persistent — an application that reopens its audio stream
+(a restart, a new call) starts on the default output again. The panel's "How to create a virtual
+input" link points here.
 
 ## Limits
 

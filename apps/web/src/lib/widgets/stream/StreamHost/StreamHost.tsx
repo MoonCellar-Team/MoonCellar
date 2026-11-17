@@ -4,20 +4,30 @@ import { FC, useEffect, useRef, useState } from "react";
 import { Badge, type BadgeTone } from "@/src/lib/shared/ui/Badge";
 import { Button, ButtonColor } from "@/src/lib/shared/ui/Button";
 import { Checkbox } from "@/src/lib/shared/ui/Checkbox";
+import { Dropdown } from "@/src/lib/shared/ui/Dropdown";
 import { Tabs } from "@/src/lib/shared/ui/Tabs";
-import { SvgVideoPlay } from "@/src/lib/shared/ui/svg";
+import { SvgOpenWindow, SvgVideoPlay } from "@/src/lib/shared/ui/svg";
 import { FRONT_URL } from "@/src/lib/shared/constants";
+import { PAGE_SCROLL_ID } from "@/src/lib/shared/utils/common.utils";
 import { toast } from "@/src/lib/shared/utils/toast.utils";
 import {
   capturePlatformNote,
+  listAudioInputs,
   screenCaptureSupported,
   STREAM_QUALITIES,
+  StreamCaptureError,
   StreamCode,
   StreamStats,
   useStreamHost,
+  type AudioInputDevice,
+  type CapturePlatformNote,
   type StreamQualityId,
 } from "@/src/lib/features/stream";
 import styles from "./StreamHost.module.scss";
+
+const NO_AUDIO = "none";
+const SCREEN_AUDIO = "screen";
+const WATCH_PATH = "/admin/stream/watch";
 
 const statusOf = (
   status: ReturnType<typeof useStreamHost>["status"],
@@ -54,6 +64,9 @@ export const StreamHost: FC = () => {
     stream,
     audioShared,
     audioEnabled,
+    audioSilent,
+    screenAudio,
+    audioDevice,
     relayAvailable,
     quality,
     stats,
@@ -62,15 +75,22 @@ export const StreamHost: FC = () => {
     stop,
     kickViewer,
     toggleAudio,
+    addAudioDevice,
+    selectScreenAudio,
+    silenceAudio,
     setQuality,
   } = session;
 
   const [includeAudio, setIncludeAudio] = useState(true);
   const [isStarting, setIsStarting] = useState(false);
   const [supported, setSupported] = useState(true);
-  const [platform, setPlatform] = useState(() => ({
+  const [audioInputs, setAudioInputs] = useState<AudioInputDevice[]>([]);
+  const [platform, setPlatform] = useState<CapturePlatformNote>(() => ({
     title: "this browser",
     body: "The browser shows the operating system's own picker for screens, windows and tabs.",
+    audioLabel: "Include audio",
+    audioNote: null,
+    audioHint: null,
   }));
   const videoRef = useRef<HTMLVideoElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -80,11 +100,51 @@ export const StreamHost: FC = () => {
     setPlatform(capturePlatformNote());
   }, []);
 
-  const link = code ? `${FRONT_URL}/admin/stream/watch/${code}` : "";
+  useEffect(() => {
+    let disposed = false;
+
+    void (async () => {
+      const permission = await navigator.permissions
+        ?.query({ name: "microphone" })
+        .catch(() => null);
+      if (permission?.state !== "granted") return;
+
+      try {
+        const inputs = await listAudioInputs();
+        if (!disposed) setAudioInputs(inputs);
+      } catch {
+        // The dropdown asks for the list again when it is first opened.
+      }
+    })();
+
+    return () => {
+      disposed = true;
+    };
+  }, []);
+
+  const link = code ? `${FRONT_URL}${WATCH_PATH}/${code}` : "";
+  const watchHref = code ? `${WATCH_PATH}/${code}` : WATCH_PATH;
   const badge = statusOf(status, viewerPresent, stream, connection);
   const selectedQuality =
     STREAM_QUALITIES.find((option) => option.id === quality) ??
     STREAM_QUALITIES[1];
+  const audioSources = [
+    { value: NO_AUDIO, label: "No sound" },
+    ...(screenAudio
+      ? [{ value: SCREEN_AUDIO, label: "Shared screen audio" }]
+      : []),
+    ...audioInputs.map((input) => ({
+      value: input.deviceId,
+      label: input.label,
+    })),
+  ];
+  const activeAudioSource = audioSources.find((source) => {
+    if (audioSilent) return source.value === NO_AUDIO;
+    if (audioDevice) return source.value === audioDevice;
+    if (screenAudio) return source.value === SCREEN_AUDIO;
+    return source.value === NO_AUDIO;
+  });
+  const isAudioLive = !!stream && audioShared;
 
   useEffect(() => {
     const video = videoRef.current;
@@ -118,6 +178,49 @@ export const StreamHost: FC = () => {
 
   const enterFullscreen = () => {
     stageRef.current?.requestFullscreen?.().catch(() => undefined);
+  };
+
+  const loadAudioInputs = async () => {
+    try {
+      const inputs = await listAudioInputs();
+      setAudioInputs(inputs);
+      if (!inputs.length) {
+        toast.error({
+          description: "No audio inputs were found on this computer.",
+        });
+      }
+    } catch (listError) {
+      toast.error({
+        description:
+          listError instanceof StreamCaptureError
+            ? listError.message
+            : "Audio inputs could not be listed.",
+      });
+    }
+  };
+
+  const selectAudioSource = async (index: number) => {
+    const source = audioSources[index];
+    if (!source) return;
+    if (source.value === NO_AUDIO) {
+      await silenceAudio();
+      return;
+    }
+    if (source.value === SCREEN_AUDIO) {
+      await selectScreenAudio();
+      return;
+    }
+
+    try {
+      await addAudioDevice(source.value);
+    } catch (deviceError) {
+      toast.error({
+        description:
+          deviceError instanceof StreamCaptureError
+            ? deviceError.message
+            : "The audio input could not be opened.",
+      });
+    }
   };
 
   return (
@@ -174,7 +277,6 @@ export const StreamHost: FC = () => {
               {stream && (
                 <Button
                   color={ButtonColor.TRANSPARENT}
-                  compact
                   onClick={enterFullscreen}
                 >
                   Fullscreen
@@ -238,7 +340,7 @@ export const StreamHost: FC = () => {
                     checked={includeAudio}
                     onChange={(event) => setIncludeAudio(event.target.checked)}
                   />
-                  Include system audio
+                  {platform.audioLabel}
                 </label>
               </>
             )}
@@ -283,14 +385,26 @@ export const StreamHost: FC = () => {
               <code className={styles.link__value} title={link}>
                 {link || "The link appears with the code."}
               </code>
-              <Button
-                color={ButtonColor.DEFAULT}
-                onClick={copyLink}
-                disabled={!link}
-                compact
-              >
-                Copy link
-              </Button>
+              <div className={styles.link__actions}>
+                <Button
+                  color={ButtonColor.DEFAULT}
+                  href={watchHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  disabled={!link}
+                  isOnlyIcon
+                  tooltip="Open the viewer page in a new tab"
+                >
+                  <SvgOpenWindow size="16" />
+                </Button>
+                <Button
+                  color={ButtonColor.DEFAULT}
+                  onClick={copyLink}
+                  disabled={!link}
+                >
+                  Copy link
+                </Button>
+              </div>
             </div>
 
             <p className={styles.hint}>
@@ -327,8 +441,21 @@ export const StreamHost: FC = () => {
               </div>
             </dl>
 
+            <div className={styles.sound}>
+              <span className={styles.label}>Sound</span>
+              <Dropdown
+                overflowRootId={PAGE_SCROLL_ID}
+                placeholder="No input selected"
+                isWithSearch={audioInputs.length === 0 ? true : undefined}
+                list={audioSources.map((source) => source.label)}
+                overwriteValue={activeAudioSource?.label ?? ""}
+                getIndex={selectAudioSource}
+                onLoad={audioInputs.length ? undefined : loadAudioInputs}
+              />
+            </div>
+
             <div className={styles.quality}>
-              <span className={styles.quality__label}>Quality</span>
+              <span className={styles.label}>Quality</span>
               <Tabs
                 theme="segmented"
                 ariaLabel="Stream quality"
@@ -349,18 +476,35 @@ export const StreamHost: FC = () => {
             <div className={styles.toggle}>
               <Button
                 color={ButtonColor.DEFAULT}
-                active={audioEnabled && audioShared}
+                active={audioEnabled && isAudioLive}
                 onClick={toggleAudio}
-                disabled={!stream || !audioShared}
+                disabled={!isAudioLive}
                 tooltip={
                   audioShared
-                    ? "Mute or unmute the shared system audio"
-                    : "No system audio was shared"
+                    ? "Mute or unmute the shared audio"
+                    : "No audio was included in this share"
                 }
               >
-                {audioEnabled && audioShared ? "Audio on" : "Audio off"}
+                {audioEnabled && isAudioLive ? "Audio on" : "Audio off"}
               </Button>
             </div>
+
+            {!audioShared && platform.audioNote && (
+              <p className={styles.hint}>{platform.audioNote}</p>
+            )}
+
+            {!audioShared && platform.audioHint && (
+              <Button
+                color={ButtonColor.GHOST}
+                isAccentText
+                href={platform.audioHint.href}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.docsLink}
+              >
+                {platform.audioHint.label}
+              </Button>
+            )}
 
             {relayAvailable && (
               <p className={styles.hint}>

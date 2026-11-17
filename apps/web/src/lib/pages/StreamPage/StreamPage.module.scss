@@ -6,6 +6,7 @@
 
 .head {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--gap-x3);
@@ -15,6 +16,13 @@
     flex-direction: column;
     gap: var(--gap-x2);
     max-width: var(--text-measure);
+  }
+
+  &__aside {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gap-x2);
   }
 }
 
