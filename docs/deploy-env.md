@@ -21,7 +21,7 @@ Repository settings → Secrets and variables → Actions → *Repository secret
 | `SSH_HOST` | both workflows | Production host the image is copied to and deployed on |
 | `SSH_USER` | both workflows | SSH user on the production host. It must reach the root Docker daemon — `root` itself, or a user in the `docker` group |
 | `SSH_PRIVATE_KEY` | both workflows | Private key for that user, no passphrase |
-| `TURN_SECRET` | ci.yml deploy | Optional. coturn's REST `static-auth-secret` (random, `openssl rand -hex 32`). The deploy appends it to `infra/.env` and to `apps/game/.env` together with `TURN_URLS=game.mooncellar.space:3478`, so it stays one value; without it the relay is off ([game-service.md](game-service.md#turn-relay)). Create it with `gh secret set TURN_SECRET --body "$(openssl rand -hex 32)"`, then deploy infra and game (`gh workflow run ci.yml --ref main`) |
+| `TURN_SECRET` | ci.yml deploy | Optional. coturn's REST `static-auth-secret` (random, `openssl rand -hex 32`). The deploy appends it to `infra/.env`, `apps/game/.env` and `apps/api/.env` together with `TURN_URLS=game.mooncellar.space:3478`, so it stays one value; without it the relay is off ([game-service.md](game-service.md#turn-relay), [stream.md](stream.md#turn)). Create it with `gh secret set TURN_SECRET --body "$(openssl rand -hex 32)"`, then deploy infra, game and the API (`gh workflow run ci.yml --ref main`) |
 
 If the API and the site ever move to different hosts, these split the same way as everything
 below (`SSH_HOST_WEB` / `SSH_HOST_API`).
@@ -298,6 +298,8 @@ pins the internal API address, so it stays a secret on both counts.
 | `FARO_COLLECTOR_URL` | no | Grafana Alloy endpoint the `faro` module forwards browser telemetry to — `http://alloy:12347/collect`. The browser never reaches Alloy itself; it posts to the API's `/faro`, which is why Alloy needs no published port. Keep the `/collect` path. Unset, the API drops the telemetry instead of forwarding it — there is no default, so local development without Alloy logs no "Failed to reach Faro collector" errors |
 | `PROMETHEUS_ENABLED` | no | `true` / `false` — switches the `/metrics` endpoint off entirely |
 | `METRICS_TOKEN` | **yes** | Bearer token guarding `/metrics`. Prometheus must be configured with the same value |
+| `TURN_SECRET`, `TURN_URLS` | **yes** | Not here: the deploy appends both from the `TURN_SECRET` repository secret (`TURN_URLS=game.mooncellar.space:3478`). MoonStream issues time-limited relay credentials from them ([stream.md](stream.md#turn)); without them an admin stream still works on a direct path, and relayed sessions are impossible. |
+| `STUN_URLS` | no | Optional comma-separated STUN URLs. Empty derives `stun:game.mooncellar.space:3478` from `TURN_URLS`; the API needs it only when the relay is not configured |
 | `INDEXNOW_KEY` | **yes** | IndexNow key used to submit new game pages to search engines |
 | `SEARXNG_URL` | no | SearXNG the admin "Fill with AI" draft searches through — `http://searxng:8080`, the `searxng` service of `infra/docker-compose.prod.yml`. The default, `http://localhost:8891`, is empty inside the container: every search step then fails |
 | `DEEPSEEK_API_KEY` | **yes** | DeepSeek API key for the admin AI: game and character drafts, their web-search fallback, AI conflict reviews and image element extraction. Without it `POST /games/ai-drafts` and `POST /conflicts/:source/ai` answer 503 |
@@ -558,6 +560,11 @@ ADMIN_PASSWORD=
 LEGACY_S3_ID=
 LEGACY_S3_KEY=
 LEGACY_S3_ENDPOINT=https://s3.regru.cloud
+
+# MoonStream — the deploy appends TURN_SECRET and TURN_URLS from the TURN_SECRET secret
+TURN_SECRET=
+TURN_URLS=
+STUN_URLS=
 ```
 
 </details>

@@ -32,7 +32,7 @@ whose account is an admin ever see it — everyone else gets a 404.
 ## Composition
 
 1. `Box` → `Breadcrumbs` (Home / Admin / tab label).
-2. `Tabs` — the eight main tabs with badge counts; `mobileMenuTitle="Admin"`.
+2. `Tabs` — the eight main tabs with badge counts and the MoonStream link tab; `mobileMenuTitle="Admin"`.
 3. The active tab:
    - Users → `widgets/admin/UserList`.
    - Games → segmented `Tabs` List / Requests: `GameList` or `RequestsReview kind="game"`.
@@ -49,13 +49,13 @@ whose account is an admin ever see it — everyone else gets a 404.
 ## Loading state
 
 - `AdminSkeleton` (`AdminSkeleton.tsx`, its own `"use client"` module sharing `Admin.module.scss`)
-  is the frame of every admin screen before the data: the eight route files use it as their
+  is the frame of every admin screen before the data: the eight tab route files use it as their
   `Suspense` fallback and `Admin` returns it while `isAdmin` is false, so the route fallback and
   the auth gate paint the same thing and nothing moves when the gate opens.
-- It draws the screen's own structure: the crumbs line, the eight-tab row as eight equal pills
-  with an 8px badge placeholder on the four tabs that carry a count (Games, Comments, Conflicts,
-  Characters — `COUNTED_TABS`, the same order as `ADMIN_TABS`), then a body per tab from
-  `TAB_BODIES`. Below `$screenMd` the pills collapse into the single menu bar `Tabs
+- It draws the screen's own structure: the crumbs line, the nine-pill row (eight tabs plus the
+  MoonStream link) with an 8px badge placeholder on the four tabs that carry a count (Games,
+  Comments, Conflicts, Characters — `COUNTED_TABS`, the same order as `ADMIN_TABS`), then a body
+  per tab from `TAB_BODIES`. Below `$screenMd` the pills collapse into the single menu bar `Tabs
 mobileMenuTitle="Admin"` renders.
 - The bodies repeat each widget's own frame, not a generic panel: Users is the table alone; Games
   is List / Requests, the search toolbar with its button, the table and the pager; Comments is
@@ -90,8 +90,10 @@ mobileMenuTitle="Admin"` renders.
   requests that fail with toasts. Returning nothing left a blank page whenever the auth check
   stalled, and a generic `PageSkeleton` changed the screen's shape when the tab arrived.
 - **Add a tab in `admin-url.utils.ts` (`ADMIN_TABS`, `ADMIN_TAB_LABELS`), add its route file, and
-  keep `mainTabs` in the same order.** `tabIndex` is the index into `ADMIN_TABS`, and `selectTab`
-  maps the clicked index back through it; a tab out of order opens the wrong section.
+  keep `mainTabs` in the same order.** The MoonStream entry is the exception: it is a `tabLink`
+  to `/admin/stream`, not a `TAB_BODIES` section, so it has no index in `ADMIN_TABS`.
+  `tabIndex` is the index into `ADMIN_TABS`, and `selectTab` maps the clicked index back through
+  it; a tab out of order opens the wrong section.
 - **Sub-views use `setAdminQuery`, not `router.push`.** A `router.push` re-runs the server layout
   (including the `/admin/access` fetch) for what is only a client toggle.
 - **An admin mutation that changes a game page must call `revalidateGamePage` before

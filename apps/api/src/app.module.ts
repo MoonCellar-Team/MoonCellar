@@ -32,6 +32,7 @@ import { MetricsModule } from "./module/metrics/metrics.module";
 import { HttpMetricsInterceptor } from "./module/metrics/http-metrics.interceptor";
 import { HttpModule } from "@nestjs/axios";
 import { CacheModule } from "@nestjs/cache-manager";
+import { StreamModule } from "./module/stream/stream.module";
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { CacheModule } from "@nestjs/cache-manager";
     SteamModule,
     ProjectsModule,
     MailModule,
+    StreamModule,
     ServeStaticModule.forRoot({
       rootPath: `/var/www/uploads/photos`,
       serveRoot: "/photos",

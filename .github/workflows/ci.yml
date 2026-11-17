@@ -153,6 +153,9 @@ jobs:
             if ! grep -q '^SMTP_HOST=' apps/api/.env; then
               printf 'SMTP_HOST=mail\nSMTP_PORT=587\nSMTP_SECURE=false\nSMTP_FROM="MoonCellar <noreply@mooncellar.space>"\n' >> apps/api/.env;
             fi
+            if [ -n "$TURN_SECRET" ]; then
+              printf 'TURN_SECRET=%s\nTURN_URLS=game.mooncellar.space:3478\n' "$TURN_SECRET" >> apps/api/.env
+            fi
             docker build \
               -f apps/api/Dockerfile \
               -t mooncellar-backend:latest \

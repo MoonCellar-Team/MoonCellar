@@ -109,6 +109,7 @@ export const Admin = ({ tab }: IAdminProps) => {
     { tabName: "Images", onTabClick: () => selectTab(5) },
     { tabName: "Sites", onTabClick: () => selectTab(6) },
     { tabName: "News", onTabClick: () => selectTab(7) },
+    { tabName: "MoonStream", tabLink: "/admin/stream" },
   ];
 
   return (

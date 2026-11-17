@@ -31,6 +31,7 @@ export * from "./role.schema";
 export * from "./gauntlet-history.schema";
 export * from "./royal-games.schema";
 export * from "./steam.schema";
+export * from "./stream.schema";
 export * from "./user-logs.schema";
 export * from "./user-ratings.schema";
 export * from "./user.schema";

@@ -1,0 +1,40 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-x3);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--gap-x3);
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-x2);
+    max-width: var(--text-measure);
+  }
+}
+
+.eyebrow {
+  color: var(--color-accent);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.title {
+  color: var(--color-text-primary);
+  font-family: var(--font-pentagra);
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.text {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
