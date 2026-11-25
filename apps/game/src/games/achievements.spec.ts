@@ -3,6 +3,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadAchievements } from "./achievements";
+import { narutosp } from "./narutosp/narutosp.game";
 import { rooftops } from "./rooftops/rooftops.game";
 
 const ICON =
@@ -35,6 +36,13 @@ describe("loadAchievements", () => {
     expect(loaded.list.length).toBe(28);
     expect(new Set(loaded.list.map((a) => a.key)).size).toBe(28);
     expect(loaded.icons.size).toBe(28);
+  });
+
+  it("loads the narutosp catalog with its icons", () => {
+    const loaded = narutosp.achievements!;
+    expect(loaded.list.length).toBe(25);
+    expect(new Set(loaded.list.map((a) => a.key)).size).toBe(25);
+    expect(loaded.icons.size).toBe(25);
   });
 
   it("loads a catalog of another game", () => {

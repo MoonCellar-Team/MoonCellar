@@ -1,0 +1,478 @@
+{
+  "format": 1,
+  "game": "narutosp",
+  "achievements": [
+    {
+      "key": "first-profile",
+      "icon": "headband.svg",
+      "title": {
+        "en": "Ninja Registration",
+        "ru": "Регистрация ниндзя"
+      },
+      "description": {
+        "en": "Create your first profile.",
+        "ru": "Создайте первый профиль."
+      },
+      "trigger": {
+        "kind": "event",
+        "name": "profile-created"
+      }
+    },
+    {
+      "key": "first-battle",
+      "icon": "shuriken.svg",
+      "title": {
+        "en": "First Sortie",
+        "ru": "Первый выход"
+      },
+      "description": {
+        "en": "Enter a battle for the first time.",
+        "ru": "Впервые вступите в бой."
+      },
+      "trigger": {
+        "kind": "event",
+        "name": "battle-started"
+      }
+    },
+    {
+      "key": "first-win",
+      "icon": "medal.svg",
+      "title": {
+        "en": "First Victory",
+        "ru": "Первая победа"
+      },
+      "description": {
+        "en": "Win your first battle.",
+        "ru": "Одержите первую победу."
+      },
+      "trigger": {
+        "kind": "event",
+        "name": "battle-won"
+      }
+    },
+    {
+      "key": "wins-50",
+      "icon": "fist.svg",
+      "title": {
+        "en": "Genin's Pace",
+        "ru": "Шаг гэнина"
+      },
+      "description": {
+        "en": "Win 50 battles.",
+        "ru": "Одержите 50 побед."
+      },
+      "progress": {
+        "target": 50,
+        "unit": "count"
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "wins",
+        "at": 50
+      }
+    },
+    {
+      "key": "wins-250",
+      "icon": "crown.svg",
+      "title": {
+        "en": "Jonin's Legend",
+        "ru": "Легенда дзёнина"
+      },
+      "description": {
+        "en": "Win 250 battles.",
+        "ru": "Одержите 250 побед."
+      },
+      "progress": {
+        "target": 250,
+        "unit": "count"
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "wins",
+        "at": 250
+      }
+    },
+    {
+      "key": "battles-100",
+      "icon": "target.svg",
+      "title": {
+        "en": "Battle-Hardened",
+        "ru": "Закалка в боях"
+      },
+      "description": {
+        "en": "Finish 100 battles.",
+        "ru": "Проведите 100 боёв."
+      },
+      "progress": {
+        "target": 100,
+        "unit": "count"
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "battles",
+        "at": 100
+      }
+    },
+    {
+      "key": "battles-500",
+      "icon": "shield.svg",
+      "title": {
+        "en": "Veteran of Five Hundred",
+        "ru": "Ветеран пятисот"
+      },
+      "description": {
+        "en": "Finish 500 battles.",
+        "ru": "Проведите 500 боёв."
+      },
+      "progress": {
+        "target": 500,
+        "unit": "count"
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "battles",
+        "at": 500
+      }
+    },
+    {
+      "key": "perfect-win",
+      "icon": "sparkles.svg",
+      "title": {
+        "en": "Untouchable",
+        "ru": "Неприкосновенный"
+      },
+      "description": {
+        "en": "Win a battle without losing a round.",
+        "ru": "Победите, не проиграв ни одного раунда."
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "perfectWins",
+        "at": 1
+      }
+    },
+    {
+      "key": "perfect-10",
+      "icon": "shield-star.svg",
+      "title": {
+        "en": "Flawless Ten",
+        "ru": "Десять без изъяна"
+      },
+      "description": {
+        "en": "Win ten battles without losing a round.",
+        "ru": "Победите десять раз, не проиграв ни одного раунда."
+      },
+      "progress": {
+        "target": 10,
+        "unit": "count"
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "perfectWins",
+        "at": 10
+      }
+    },
+    {
+      "key": "combo-50",
+      "icon": "chain.svg",
+      "title": {
+        "en": "Chain of Fifty",
+        "ru": "Цепь из пятидесяти"
+      },
+      "description": {
+        "en": "Land a 50-hit combo.",
+        "ru": "Проведите серию из 50 ударов."
+      },
+      "progress": {
+        "target": 50,
+        "unit": "count"
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "bestCombo",
+        "at": 50
+      }
+    },
+    {
+      "key": "combo-100",
+      "icon": "flame.svg",
+      "title": {
+        "en": "Hundred-Hit Storm",
+        "ru": "Шторм ста ударов"
+      },
+      "description": {
+        "en": "Land a 100-hit combo.",
+        "ru": "Проведите серию из 100 ударов."
+      },
+      "progress": {
+        "target": 100,
+        "unit": "count"
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "bestCombo",
+        "at": 100
+      }
+    },
+    {
+      "key": "thousand-1000",
+      "icon": "stars.svg",
+      "title": {
+        "en": "Thousand-Man Wall",
+        "ru": "Стена тысячи"
+      },
+      "description": {
+        "en": "Defeat 1,000 opponents in Thousand-Man Battle.",
+        "ru": "Победите 1000 противников в «Битве тысячи»."
+      },
+      "progress": {
+        "target": 1000,
+        "unit": "count"
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "thousandDefeated",
+        "at": 1000
+      }
+    },
+    {
+      "key": "story-first",
+      "icon": "map.svg",
+      "title": {
+        "en": "The Road Begins",
+        "ru": "Начало пути"
+      },
+      "description": {
+        "en": "Clear the first mission of the story.",
+        "ru": "Пройдите первую миссию сюжета."
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "storyEvents",
+        "at": 1
+      }
+    },
+    {
+      "key": "story-half",
+      "icon": "flag.svg",
+      "title": {
+        "en": "Halfway There",
+        "ru": "Половина пути"
+      },
+      "description": {
+        "en": "Clear 22 story events.",
+        "ru": "Пройдите 22 события сюжета."
+      },
+      "progress": {
+        "target": 22,
+        "unit": "count"
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "storyEvents",
+        "at": 22
+      }
+    },
+    {
+      "key": "story-all",
+      "icon": "scroll.svg",
+      "title": {
+        "en": "Road's End",
+        "ru": "Конец пути"
+      },
+      "description": {
+        "en": "Clear every story event.",
+        "ru": "Пройдите все события сюжета."
+      },
+      "progress": {
+        "target": 44,
+        "unit": "count"
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "storyEvents",
+        "at": 44
+      }
+    },
+    {
+      "key": "first-record",
+      "icon": "sunrise.svg",
+      "title": {
+        "en": "On the Board",
+        "ru": "В таблице"
+      },
+      "description": {
+        "en": "Set your first record in any mode.",
+        "ru": "Установите первый рекорд в любом режиме."
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "records",
+        "at": 1
+      }
+    },
+    {
+      "key": "top-ten",
+      "icon": "bolt.svg",
+      "title": {
+        "en": "Top Ten",
+        "ru": "Десятка лучших"
+      },
+      "description": {
+        "en": "Reach the top ten of any mode's record table.",
+        "ru": "Войдите в десятку лучших в таблице любого режима."
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "topTen",
+        "at": 1
+      }
+    },
+    {
+      "key": "first-place",
+      "icon": "trophy.svg",
+      "title": {
+        "en": "Number One",
+        "ru": "Первый номер"
+      },
+      "description": {
+        "en": "Take first place in any mode's record table.",
+        "ru": "Займите первое место в таблице любого режима."
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "firstPlaces",
+        "at": 1
+      }
+    },
+    {
+      "key": "full-top-ten",
+      "icon": "hourglass.svg",
+      "title": {
+        "en": "Perfect Ten",
+        "ru": "Идеальная десятка"
+      },
+      "description": {
+        "en": "Fill every place of one mode's top ten.",
+        "ru": "Заполните все десять мест в таблице одного режима."
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "fullTables",
+        "at": 1
+      }
+    },
+    {
+      "key": "record-every-mode",
+      "icon": "globe.svg",
+      "title": {
+        "en": "All-Rounder",
+        "ru": "Мастер на все режимы"
+      },
+      "description": {
+        "en": "Set a record in every mode that keeps one.",
+        "ru": "Установите рекорд в каждом режиме, где он ведётся."
+      },
+      "progress": {
+        "target": 9,
+        "unit": "count"
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "recordModes",
+        "at": 9
+      }
+    },
+    {
+      "key": "modes-5",
+      "icon": "four-dots.svg",
+      "title": {
+        "en": "Mode Explorer",
+        "ru": "Исследователь режимов"
+      },
+      "description": {
+        "en": "Play five different modes.",
+        "ru": "Попробуйте пять разных режимов."
+      },
+      "progress": {
+        "target": 5,
+        "unit": "count"
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "modesPlayed",
+        "at": 5
+      }
+    },
+    {
+      "key": "roster-20",
+      "icon": "duo.svg",
+      "title": {
+        "en": "Growing Roster",
+        "ru": "Растущий отряд"
+      },
+      "description": {
+        "en": "Unlock 20 playable characters.",
+        "ru": "Откройте 20 игровых персонажей."
+      },
+      "progress": {
+        "target": 20,
+        "unit": "count"
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "roster",
+        "at": 20
+      }
+    },
+    {
+      "key": "roster-all",
+      "icon": "fan.svg",
+      "title": {
+        "en": "Full Roster",
+        "ru": "Полный отряд"
+      },
+      "description": {
+        "en": "Unlock every playable character.",
+        "ru": "Откройте всех игровых персонажей."
+      },
+      "trigger": {
+        "kind": "event",
+        "name": "roster-complete"
+      }
+    },
+    {
+      "key": "character-record",
+      "icon": "spiral.svg",
+      "title": {
+        "en": "Personal Best",
+        "ru": "Личный рекорд"
+      },
+      "description": {
+        "en": "Set a personal record with any character.",
+        "ru": "Установите личный рекорд любым персонажем."
+      },
+      "trigger": {
+        "kind": "metric",
+        "name": "characterRecords",
+        "at": 1
+      }
+    },
+    {
+      "key": "online-first",
+      "icon": "wifi.svg",
+      "title": {
+        "en": "Beyond the Village",
+        "ru": "За пределами деревни"
+      },
+      "description": {
+        "en": "Play your first online battle.",
+        "ru": "Проведите первый онлайн-бой."
+      },
+      "trigger": {
+        "kind": "event",
+        "name": "online-battle"
+      }
+    }
+  ]
+}
