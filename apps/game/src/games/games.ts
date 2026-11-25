@@ -1,9 +1,10 @@
 import { NotFoundException } from "@nestjs/common";
 import type { IGameDefinitionInfo } from "@mooncellar/schemas";
 import type { IGameDefinition } from "./game-definition";
+import { narutosp } from "./narutosp/narutosp.game";
 import { rooftops } from "./rooftops/rooftops.game";
 
-export const GAMES: readonly IGameDefinition[] = [rooftops];
+export const GAMES: readonly IGameDefinition[] = [rooftops, narutosp];
 
 export const findGame = (slug: string, board?: string): IGameDefinition => {
   const game = GAMES.find((candidate) => candidate.slug === slug);
